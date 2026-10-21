@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/sync-ack.schema.json",
+  "type": "object",
+  "properties": {
+    "request_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "recommendation_ids": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/id"
+      },
+      "minItems": 1,
+      "maxItems": 100,
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "request_id",
+    "recommendation_ids"
+  ],
+  "additionalProperties": false
+}

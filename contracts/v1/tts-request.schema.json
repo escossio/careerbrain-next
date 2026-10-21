@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/tts-request.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.tts.v1"
+    },
+    "notification_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "template": {
+      "enum": [
+        "NEW_MATCHES",
+        "HIGH_AFFINITY"
+      ]
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9999
+    },
+    "language": {
+      "const": "pt-BR"
+    }
+  },
+  "required": [
+    "schema_version",
+    "notification_id",
+    "template",
+    "count",
+    "language"
+  ],
+  "additionalProperties": false
+}

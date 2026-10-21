@@ -1,0 +1,25 @@
+{
+  "schema_version": "careerbrain.profile.v1",
+  "tenant_id": "synthetic-tenant-A",
+  "profile_version": 1,
+  "generation": 1,
+  "status": "READY",
+  "attributes": [
+    {
+      "name": "skill",
+      "value": "instalações elétricas",
+      "basis": "explicit",
+      "confidence": 1,
+      "evidence": [
+        {
+          "field": "resume",
+          "quote": "instalações elétricas",
+          "start": 16,
+          "end": 37
+        }
+      ]
+    }
+  ],
+  "extractor_version": "fake-v1",
+  "taxonomy_version": "professional-v1"
+}

@@ -1,0 +1,7 @@
+{
+  "schema_version": "careerbrain.application.v1",
+  "request_id": "application-1",
+  "publication_event_id": "event-1",
+  "expected_version": 0,
+  "state": "SAVED"
+}

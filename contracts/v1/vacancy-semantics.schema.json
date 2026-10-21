@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/vacancy-semantics.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.semantics.v1"
+    },
+    "vacancy_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "content_version": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "taxonomy_version": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "model_version": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "prompt_version": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "status": {
+      "enum": [
+        "READY",
+        "UNCERTAIN"
+      ]
+    },
+    "attributes": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/attribute"
+      },
+      "minItems": 1,
+      "maxItems": 200
+    }
+  },
+  "required": [
+    "schema_version",
+    "vacancy_id",
+    "content_version",
+    "taxonomy_version",
+    "model_version",
+    "prompt_version",
+    "status",
+    "attributes"
+  ],
+  "additionalProperties": false
+}

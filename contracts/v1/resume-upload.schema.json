@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/resume-upload.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.resume-upload.v1"
+    },
+    "request_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "content_type": {
+      "const": "application/pdf"
+    },
+    "content_length": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5242880
+    },
+    "consent_version": {
+      "$ref": "common.schema.json#/$defs/id"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "content_type",
+    "content_length",
+    "consent_version"
+  ],
+  "additionalProperties": false
+}

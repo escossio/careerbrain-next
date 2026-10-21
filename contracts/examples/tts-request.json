@@ -1,0 +1,7 @@
+{
+  "schema_version": "careerbrain.tts.v1",
+  "notification_id": "notification-1",
+  "template": "NEW_MATCHES",
+  "count": 2,
+  "language": "pt-BR"
+}

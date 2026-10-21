@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/match.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.match.v1"
+    },
+    "tenant_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "vacancy_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "publication_event_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "profile_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "policy_version": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "eligible": {
+      "type": "boolean"
+    },
+    "affinity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "TEMPORAL_CUTOFF",
+          "REQUIREMENT_UNMET",
+          "REQUIREMENT_UNKNOWN",
+          "EVIDENCED_AFFINITY",
+          "SOURCE_WITHDRAWN",
+          "VACANCY_CLOSED"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 20
+    }
+  },
+  "required": [
+    "schema_version",
+    "tenant_id",
+    "vacancy_id",
+    "publication_event_id",
+    "profile_version",
+    "policy_version",
+    "eligible",
+    "affinity",
+    "confidence",
+    "reasons"
+  ],
+  "additionalProperties": false
+}

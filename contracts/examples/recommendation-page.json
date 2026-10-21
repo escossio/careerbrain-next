@@ -1,0 +1,29 @@
+{
+  "schema_version": "careerbrain.recommendation-page.v1",
+  "profile_version": 1,
+  "items": [
+    {
+      "recommendation_id": "rec-1",
+      "match": {
+        "schema_version": "careerbrain.match.v1",
+        "tenant_id": "synthetic-tenant-A",
+        "vacancy_id": "vacancy-1",
+        "publication_event_id": "event-1",
+        "profile_version": 1,
+        "policy_version": "matching-v1",
+        "eligible": true,
+        "affinity": 0.8,
+        "confidence": 0.9,
+        "reasons": [
+          "EVIDENCED_AFFINITY"
+        ]
+      },
+      "title": "Técnica de manutenção elétrica",
+      "access": {
+        "kind": "https",
+        "value": "https://example.org/jobs/maintenance-1"
+      }
+    }
+  ],
+  "next_cursor": null
+}

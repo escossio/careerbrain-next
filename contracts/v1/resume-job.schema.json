@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/resume-job.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.resume-job.v1"
+    },
+    "job_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "tenant_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "deletion_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "temporary_handle": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "expires_at": {
+      "$ref": "common.schema.json#/$defs/instant"
+    },
+    "state": {
+      "enum": [
+        "RECEIVED",
+        "PROCESSING",
+        "PROFILE_SAVED",
+        "TEMP_REMOVED",
+        "FAILED",
+        "CANCELLED",
+        "EXPIRED"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "job_id",
+    "tenant_id",
+    "generation",
+    "deletion_epoch",
+    "temporary_handle",
+    "expires_at",
+    "state"
+  ],
+  "additionalProperties": false
+}

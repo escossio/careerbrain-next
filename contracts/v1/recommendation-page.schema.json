@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/recommendation-page.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.recommendation-page.v1"
+    },
+    "profile_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "items": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "properties": {
+          "recommendation_id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "match": {
+            "$ref": "match.schema.json"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          },
+          "access": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "https"
+                  },
+                  "value": {
+                    "$ref": "common.schema.json#/$defs/https"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "email"
+                  },
+                  "value": {
+                    "type": "string",
+                    "format": "official-email"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "required": [
+          "recommendation_id",
+          "match",
+          "title",
+          "access"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 4096
+    }
+  },
+  "required": [
+    "schema_version",
+    "profile_version",
+    "items",
+    "next_cursor"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "careerbrain.sync.v1",
+  "snapshot_high_watermark": 7,
+  "items": [
+    {
+      "sequence": 7,
+      "recommendation_id": "rec-1",
+      "publication_event_id": "event-1",
+      "profile_version": 1,
+      "kind": "AVAILABLE",
+      "available_at": "2026-10-21T13:00:00Z"
+    }
+  ],
+  "next_cursor": "synthetic-opaque-cursor-7",
+  "has_more": false
+}

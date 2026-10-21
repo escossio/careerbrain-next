@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/batch-status.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.batch-status.v1"
+    },
+    "batch_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "status": {
+      "enum": [
+        "PENDING",
+        "PROCESSING",
+        "READY",
+        "PARTIAL_FAILURE",
+        "FAILED"
+      ]
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "completed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "failed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    }
+  },
+  "required": [
+    "schema_version",
+    "batch_id",
+    "status",
+    "total",
+    "completed",
+    "failed"
+  ],
+  "additionalProperties": false
+}

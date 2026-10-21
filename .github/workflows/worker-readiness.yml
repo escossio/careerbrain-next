@@ -1,0 +1,31 @@
+name: worker-readiness
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: next-worker-readiness
+  cancel-in-progress: false
+
+jobs:
+  authorization:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Require separately certified Next worker pool
+        env:
+          APPROVED: ${{ vars.NEXT_WORKERS_APPROVED }}
+        run: test "$APPROVED" = true
+  probe:
+    needs: authorization
+    runs-on: [self-hosted, linux, x64, careerbrain-next]
+    timeout-minutes: 2
+    steps:
+      - name: Inspect capability only
+        run: |
+          test "$(uname -s)" = Linux
+          python3 --version
+          test -z "${OPENAI_API_KEY:-}"

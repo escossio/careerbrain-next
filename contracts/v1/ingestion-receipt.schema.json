@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/ingestion-receipt.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.ingestion-receipt.v1"
+    },
+    "batch_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "correlation_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "accepted_at": {
+      "$ref": "common.schema.json#/$defs/instant"
+    },
+    "status": {
+      "const": "ACCEPTED"
+    },
+    "accepted": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "duplicates": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "processing": {
+      "const": "PENDING"
+    }
+  },
+  "required": [
+    "schema_version",
+    "batch_id",
+    "correlation_id",
+    "accepted_at",
+    "status",
+    "accepted",
+    "duplicates",
+    "processing"
+  ],
+  "additionalProperties": false
+}
