@@ -2,9 +2,8 @@
 
 ## Checkpoint da passada 04
 
-**Após CI verde e merge protegido deste PR: 4/10 validadas.** Na branch,
-integração isolada e validações offline passaram; CI no SHA final e merge
-protegido ainda são condições de aceite.
+**4/10 certificadas e incorporadas à main.** A implementação e a correção
+contratual da 04 passaram em CI e foram incorporadas por PRs protegidos.
 
 - 01 certificada e merged; fundação, contratos V1 e CI offline aprovados.
 - 02: PostgreSQL 16, papéis mínimos/RLS, fila/outbox, migrações/checksums e índices.
@@ -16,8 +15,7 @@ protegido ainda são condições de aceite.
   ingestão, 18 SQL, 12 identidade e restauração passaram no worker isolado.
   Direitos de fontes reais permanecem gate externo.
 - Ajuste da 04 testado em worker: mesma evidência aprovada por produtores
-  distintos resulta em duplicata, sem publicação ou trabalho novo. PR corretivo
-  aguarda checks e merge antes do fechamento definitivo.
+  distintos resulta em duplicata, sem publicação ou trabalho novo.
 - 05–10 não iniciadas nesta execução.
 
 Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md e
