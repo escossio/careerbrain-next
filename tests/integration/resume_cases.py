@@ -168,6 +168,16 @@ class ResumeTests(unittest.TestCase):
         self.assertEqual(self.row(job)[0], 'FAILED')
         self.assertEqual(self.admin.execute('SELECT count(*) FROM private.profiles WHERE tenant_id=%s',(self.tenant[1],)).fetchone()[0], 0)
 
+    def test_invalid_structured_result_is_not_persisted(self):
+        class Invalid(DeterministicPdfExtractor):
+            def profile(self, document):
+                return 'READY', [{'name':'skill','value':'invented','basis':'explicit','confidence':1,'evidence':[]}]
+        service = ResumeService(self.api_pool, self.worker_pool, self.store, Invalid())
+        job = self.upload(pdf('Python'))
+        self.assertEqual(service.process_once(), 'FAILED')
+        self.assertNotIn(self.row(job)[3], self.store)
+        self.assertEqual(self.admin.execute('SELECT count(*) FROM private.profiles WHERE tenant_id=%s',(self.tenant[1],)).fetchone()[0], 0)
+
     def test_cross_user_job_status_and_cancel_are_isolated(self):
         job = self.upload(pdf('Python'))
         self.assertIsNone(self.service.status(str(self.other[1]), job['job_id']))

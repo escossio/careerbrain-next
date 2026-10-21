@@ -185,9 +185,14 @@ class ResumeService:
             return 'EXPIRED' if result else 'FENCED'
         try:
             status, attributes = self.extractor.profile(document)
+            validate('private-profile-v2', {'schema_version': 'careerbrain.profile.v2',
+                     'tenant_id': str(claim.tenant_id), 'profile_version': 1,
+                     'generation': claim.generation, 'status': status, 'attributes': attributes,
+                     'extractor_version': self.extractor_version,
+                     'taxonomy_version': self.taxonomy_version})
             result = self._call('private.complete_resume_job', claim, status, Jsonb(attributes),
                                 self.extractor_version, self.taxonomy_version)
-        except ResumeRejected:
+        except (ResumeRejected, ContractError):
             result = self._call('private.fail_resume_job', claim, False)
         except Exception:
             result = self._call('private.fail_resume_job', claim, True)
