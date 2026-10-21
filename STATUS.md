@@ -15,6 +15,8 @@ protegido ainda são condições de aceite.
 - 04: ingestão contratual autenticada com fixtures sintéticas; 11 testes de
   ingestão, 18 SQL, 12 identidade e restauração passaram no worker isolado.
   Direitos de fontes reais permanecem gate externo.
+- Ajuste da 04 em validação: mesma evidência aprovada por produtores distintos
+  deve resultar em duplicata do evento, sem publicação ou trabalho novo.
 - 05–10 não iniciadas nesta execução.
 
 Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md e

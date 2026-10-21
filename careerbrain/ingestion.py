@@ -168,9 +168,10 @@ class IngestionService:
             (authorization, source, producer)).fetchone()
         if not authority:
             raise IngestionFailure(403, 'SOURCE_NOT_AUTHORIZED', index=index, field='provenance')
-        trusted = conn.execute('''SELECT digest,kind,url,observed_at,published_at,
-            source_event_id,extractor_version FROM catalog.evidence
-            WHERE id=%s AND source_id=%s AND authorization_id=%s''',
+        trusted = conn.execute('''SELECT e.digest,e.kind,e.url,e.observed_at,e.published_at,
+            e.source_event_id,e.extractor_version FROM catalog.evidence e
+            JOIN catalog.evidence_approvals a ON a.evidence_id=e.id AND a.source_id=e.source_id
+            WHERE e.id=%s AND e.source_id=%s AND a.authorization_id=%s''',
             (evidence, source, authorization)).fetchone()
         if not trusted or trusted[0] != proof['evidence_sha256'] or trusted[1] != proof['evidence_kind'] \
                 or trusted[2] != proof['evidence_url'] or trusted[3] != instant(proof['observed_at']) \
@@ -180,7 +181,7 @@ class IngestionService:
         if observed > now:
             raise IngestionFailure(422, 'INVALID_PUBLICATION', index=index, field='observed_at')
         existing = conn.execute('''SELECT e.id,e.vacancy_id,e.published_at,e.evidence_id,e.state,
-            v.source_vacancy_id,i.record_digest FROM catalog.publication_events e
+            v.source_vacancy_id,i.record_digest,e.kind,i.content_digest FROM catalog.publication_events e
             JOIN catalog.vacancies v ON v.id=e.vacancy_id
             LEFT JOIN catalog.ingestion_events i ON i.event_id=e.id
             WHERE e.source_id=%s AND e.source_event_id=%s''',
@@ -191,8 +192,13 @@ class IngestionService:
                 raise IngestionFailure(422, 'INVALID_PUBLICATION', index=index, field='published_at')
             self._contact(conn, authorization, vacancy['access'], index)
             record_hash = digest(record)
+            content = {key: vacancy[key] for key in ('title','organization','description','requirements',
+                                                      'modality','location','employment_type','access')}
+            content_hash = digest(content)
             if existing:
-                if existing[5] == external and existing[6] == record_hash:
+                if (existing[5] == external and existing[3] == evidence
+                        and existing[2] == published and existing[7] == event['kind']
+                        and (existing[8] == content_hash or existing[8] is None and existing[6] == record_hash)):
                     return False
                 raise IngestionFailure(409, 'EVENT_CONFLICT', index=index, field='source_event_id')
             prior = None
@@ -205,8 +211,6 @@ class IngestionService:
                     raise IngestionFailure(422, 'INVALID_PUBLICATION', index=index, field='previous_source_event_id')
             row = conn.execute('''SELECT id,content,content_version FROM catalog.vacancies
                 WHERE source_id=%s AND source_vacancy_id=%s''', (source, external)).fetchone()
-            content = {key: vacancy[key] for key in ('title','organization','description','requirements',
-                                                      'modality','location','employment_type','access')}
             if row is None:
                 if event['kind'] != 'original':
                     raise IngestionFailure(409, 'EVENT_CONFLICT', index=index)
@@ -223,7 +227,8 @@ class IngestionService:
                 VALUES(%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id''',
                 (vacancy_id, source, event['source_event_id'], event['kind'], prior[0] if prior else None,
                  published, observed, evidence)).fetchone()[0]
-            conn.execute('INSERT INTO catalog.ingestion_events VALUES(%s,%s)', (event_id, record_hash))
+            conn.execute('''INSERT INTO catalog.ingestion_events(event_id,record_digest,content_digest)
+                VALUES(%s,%s,%s)''', (event_id, record_hash, content_hash))
             self._outbox(conn, event_id, 'publish', 'PUBLISHED', job=True)
             return True
         if not existing or existing[5] != external:
