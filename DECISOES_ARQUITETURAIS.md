@@ -28,3 +28,5 @@ PostgreSQL 16 e Psycopg 3.3.6/pool 3.3.3; migrações SQL numeradas, checksum e 
 ## Implementação da passada 03
 
 API WSGI explícita e PyJWT/cryptography para RS256 com chave pública Google em URL fixa. Audiência e presenters exigidos na construção da aplicação, sem valor real presumido. Challenge de uso único, tokens opacos com digest no PostgreSQL, refresh rotativo com revogação da família em replay, papéis SQL distintos e revogação transacional na exclusão. Migração 003 é aditiva e não admite downgrade destrutivo. Testes com RSA e usuários sintéticos no worker isolado; Google/Android reais seguem os gates dependentes.
+
+Os dois client IDs públicos da configuração OAuth foram informados pelo proprietário e validados em teste sintético sem rede. Permanecem fora do Git; não houve alteração da decisão de produto nem uso de client secret.

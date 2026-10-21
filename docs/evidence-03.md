@@ -13,7 +13,9 @@ Em job isolado, PostgreSQL descartável sem TCP/rede e papéis SQL de runtime re
 
 A revisão de publicação e os 49 testes offline passaram. O PR exige os checks
 `contracts` e `repository-policy` no SHA final. O teste usa chave RSA inventada;
-não houve sessão Google real nem uso de client IDs reais. Os IDs públicos OAuth
-aprovados continuam necessários para certificar a configuração real da 03.
-Por isso a 03 permanece BLOQUEADA para merge, apesar do aceite técnico offline.
+não houve sessão Google real. Os IDs públicos OAuth
+aprovados foram fornecidos pelo proprietário e testados em worker isolado com
+assinatura RSA sintética, audiência correta e rejeição de outro `aud`/`azp`.
+Os valores e o registro da verificação ficam fora do Git. Isso certifica a
+configuração pública exigida na 03, sem afirmar teste de conta Google real.
 Não houve deploy, banco de produção ou chamada faturável.

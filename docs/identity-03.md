@@ -28,6 +28,7 @@ vem de sessão válida, nunca de campo da requisição. A função de resoluçã
 novamente estado da conta e expiração no banco. Todas as respostas de auth usam
 `Cache-Control: no-store`; o serviço não registra tokens brutos.
 
-G-OIDC para configuração real requer comprovar os IDs de audiência e presenter
-aprovados. G-DEPLOY, Google real em APK e HTTPS público continuam nas passadas
-dependentes. A execução isolada usa somente PostgreSQL descartável no worker.
+G-OIDC de configuração pública foi satisfeito com os dois IDs aprovados pelo
+proprietário e verificação sintética isolada. Os valores ficam fora do Git.
+G-DEPLOY, Google real em APK e HTTPS público continuam nas passadas dependentes.
+A execução isolada usa somente PostgreSQL descartável no worker.
