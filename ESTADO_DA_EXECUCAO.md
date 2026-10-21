@@ -10,7 +10,7 @@ na main; a 06 passou nos testes isolados e aguarda checks e merge protegido.
 | 03 | CERTIFICADA E MERGED; 12 testes de autenticação e IDs públicos aprovados validados sinteticamente |
 | 04 | CERTIFICADA E MERGED; 12 testes de ingestão e gates SQL aprovados no worker |
 | 05 | CERTIFICADA E MERGED; PR #7, 11 testes novos, regressões e dois checks aprovados |
-| 06 | EM_EXECUÇÃO; 10 testes novos e regressões aprovados no worker; PR e CI pendentes |
+| 06 | EM_EXECUÇÃO; 11 testes novos e regressões aprovados no worker; PR e CI pendentes |
 | 07–10 | NÃO_INICIADAS nesta execução |
 
 **5/10 validadas.** Evidências públicas em docs/evidence-02.md,

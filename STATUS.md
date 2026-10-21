@@ -21,7 +21,7 @@ PR #7, após testes isolados e os checks obrigatórios.
   isolado aprovou 11 testes novos e as suítes anteriores; `contracts` e
   `repository-policy` passaram no PR #7.
 - 06 implementada em branch: PDF transitório, handle opaco, limpeza, CAS de
-  geração/epoch e perfil V2. CI03 aprovou 10 testes novos e regressões; PR,
+  geração/epoch e perfil V2. CI03 aprovou 11 testes novos e regressões; PR,
   checks e merge ainda são gates. A prova de ambiente produtivo continua externa.
 - 07–10 não iniciadas nesta execução.
 
