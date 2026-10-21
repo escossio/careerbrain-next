@@ -51,9 +51,15 @@ saúde, manutenção, serviços e TI. Ele devolve atributos explícitos com trec
 exatos e offsets Unicode do campo original. Conteúdo sem suporte vira
 `UNCERTAIN`, com atributo `unknown`, confiança zero e sem evidência. O resultado
 passa pelo JSON Schema V1 e por verificação de envelope, campo, trecho, offset
-e base. Texto de vaga é dado, mesmo quando contém instruções hostis.
+e base. Nesta execução, a validação aceita apenas valores explícitos iguais
+ao trecho comprovado; inferências e qualificações sem prova são rejeitadas.
+`UNCERTAIN` contém somente `unknown`, confiança zero e nenhuma evidência.
+Texto de vaga é dado, mesmo quando contém instruções hostis.
 
 A interface do adaptador exige timeout e usa exceções distintas para falha
 transitória e gate de quota/credencial. Integração real, escolha de modelo,
 benchmark, custos e tráfego pago permanecem sujeitos ao G-AI. O corpus fake
 prova segurança e fluxo, não qualidade de inferência em vagas reais.
+Um adaptador de rede futuro deverá impor o timeout na própria chamada de I/O;
+o limite de tempo do worker rejeita respostas tardias, mas não interrompe
+uma chamada externa bloqueada.

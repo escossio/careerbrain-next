@@ -89,10 +89,12 @@ def validate_result(content: dict, result: dict, envelope: dict) -> None:
     for attribute in result['attributes']:
         basis, proofs = attribute['basis'], attribute['evidence']
         if basis == 'unknown':
-            if proofs or attribute['confidence'] != 0:
+            if proofs or attribute['confidence'] != 0 or attribute['value'] != 'unknown':
                 raise ContractError('INSUFFICIENT_CONTENT')
             continue
-        if not proofs:
+        # V1 permits inference, but this offline execution has no approved
+        # model or quality evidence for inferred qualifications.
+        if basis != 'explicit' or not proofs:
             raise ContractError('INSUFFICIENT_CONTENT')
         for proof in proofs:
             field = proof['field']
@@ -107,10 +109,14 @@ def validate_result(content: dict, result: dict, envelope: dict) -> None:
                 raise ContractError('INSUFFICIENT_CONTENT')
             if proof['end'] <= proof['start'] or source[proof['start']:proof['end']] != proof['quote']:
                 raise ContractError('INSUFFICIENT_CONTENT')
+        if not any(attribute['value'].casefold() == proof['quote'].casefold()
+                   for proof in proofs):
+            raise ContractError('INSUFFICIENT_CONTENT')
         supported += 1
-    if result['status'] == 'READY' and not supported:
+    if result['status'] == 'READY' and (not supported or
+                                       any(a['basis'] == 'unknown' for a in result['attributes'])):
         raise ContractError('INSUFFICIENT_CONTENT')
-    if result['status'] == 'UNCERTAIN' and any(a['basis'] == 'inferred' for a in result['attributes']):
+    if result['status'] == 'UNCERTAIN' and supported:
         raise ContractError('INSUFFICIENT_CONTENT')
 
 

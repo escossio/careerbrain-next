@@ -197,6 +197,27 @@ class ClassifierTests(unittest.TestCase):
         self.assertEqual(self.count('queue.classification_outbox'),0)
         self.assertEqual(self.count('queue.catalog_jobs',"state='FAILED'"),1)
 
+    def test_unproven_values_and_inference_are_rejected(self):
+        self.event('enfermagem')
+        claim = self.service.claim()
+        envelope = dict(vacancy_id=str(claim.vacancy_id),
+                        content_version=f'content-v{claim.content_version}',
+                        taxonomy_version=CONFIG.taxonomy_version,
+                        model_version=CONFIG.model_version,
+                        prompt_version=CONFIG.prompt_version)
+        for basis, value in (('explicit', 'medical license'),
+                             ('inferred', 'enfermagem')):
+            result = DeterministicClassifier().classify(
+                claim.content, envelope, timeout_seconds=10)
+            result['attributes'][0].update(basis=basis, value=value)
+            with self.assertRaises(ContractError):
+                validate_result(claim.content, result, envelope)
+        result = DeterministicClassifier().classify(
+            claim.content, envelope, timeout_seconds=10)
+        result['status'] = 'UNCERTAIN'
+        with self.assertRaises(ContractError):
+            validate_result(claim.content, result, envelope)
+
     def test_quota_gate_timeout_and_recovery(self):
         self.event('atendimento ao cliente')
         class Gate:
