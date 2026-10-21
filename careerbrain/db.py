@@ -12,7 +12,7 @@ from psycopg.pq import TransactionStatus
 from psycopg_pool import ConnectionPool
 
 ROOT = Path(__file__).resolve().parents[1]
-ROLES = ('cb_migrator', 'cb_auth', 'cb_api', 'cb_global_worker', 'cb_private_worker', 'cb_privacy')
+ROLES = ('cb_migrator', 'cb_auth', 'cb_api', 'cb_ingest', 'cb_global_worker', 'cb_private_worker', 'cb_privacy')
 
 
 class MigrationError(RuntimeError):
