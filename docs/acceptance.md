@@ -9,6 +9,13 @@ Na 02: banco descartável nos workers; papel de runtime real; negação leitura/
 cross-tenant e sem contexto, reset de pool, constraints temporais e unicidade,
 rollback compatível, backup/restore e reaplicação de exclusões. Sem dados reais.
 
+Na 03: token RS256 assinado com chave sintética; rejeição de assinatura/issuer/
+audience/presenter/nonce/tempo inválidos; desafio único e expirado; conta/tenant
+estáveis sob login repetido e concorrente; papéis SQL reais; rotação, replay,
+logout e exclusão revogam sessões; API nega token e escopo inválidos. PostgreSQL
+descartável e jobs sem rede provam o caminho offline. Configuração OAuth real exige
+os IDs públicos aprovados; jornada Google verdadeira permanece no aceite da 10.
+
 Na 04: atomicidade SQL, retries concorrentes, conflito de chave, crash antes/depois
 do commit e outbox transacional; produtor não pode escolher outro produtor/source.
 

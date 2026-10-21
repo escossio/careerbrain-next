@@ -1,14 +1,13 @@
 # CareerBrain Next — estado da execução
 
-Este checkpoint assume efeito de conclusão na main somente depois dos checks
-obrigatórios verdes e merge protegido do PR da passada 02. Na branch de trabalho,
-o aceite SQL está comprovado; CI/merge continuam sendo condições explícitas.
+Checkpoint da branch de trabalho da passada 03. A conclusão da 02 está certificada
+na main; implementação da 03 ainda não equivale a aceite ou merge.
 
 | Passada | Estado resultante do merge |
 | --- | --- |
 | 01 | CERTIFICADA E MERGED; 49 testes e dois checks aprovados |
 | 02 | CERTIFICADA E MERGED; 18 testes SQL e restore/ledger aprovados |
-| 03 | AUTORIZADA a iniciar após a 02; exige seus próprios gates |
+| 03 | EM EXECUÇÃO; exige testes isolados, CI e merge protegido |
 | 04–10 | NÃO_AUTORIZADAS nesta sequência |
 
 **Após merge: 2/10 validadas.** Não confundir a implementação da branch com a
