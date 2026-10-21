@@ -1,12 +1,5 @@
 # STATUS — CareerBrain Next
 
-Candidato saneado preparado para revisão humana, sem publicação ou histórico Git.
-**Passada 01 BLOQUEADA até autorização de publicação e proteção efetiva de main.**
-1 passada iniciada; 0/10 validadas. Passadas 02–10 NÃO_INICIADAS.
+01 certificada e merged. **1/10 validadas. 02 EM IMPLEMENTAÇÃO**, 03 autorizada após certificação da 02. Passadas 04–10 não autorizadas nesta sequência.
 
-- Fundação: contratos V1, schemas, exemplos sintéticos e testes offline.
-- Nenhuma alegação de CI remoto, implantação, autenticação real ou isolamento SQL certificado neste candidato.
-- Gates externos descritos sem identificadores de conta, topologia ou dados de operação.
-- Evidências locais do candidato em docs/evidence-01.md; execução remota futura deve produzir evidências novas.
-
-Marco de preparação: 49 testes offline e política do candidato aprovados; 81 arquivos admitidos, com revisão editorial e verificação contextual. A revisão humana final do proprietário e a configuração remota continuam pendentes. Nenhum CI remoto herdado ou executado nesta preparação.
+Fundação pública aprovada, contratos V1 e checks obrigatórios verdes na 01. A 02 adiciona persistência descartável, migrações e testes de isolamento SQL em workers; ainda não declarar certificação sem resultados. Auditoria geral de GitHub Apps permanece atividade independente, sem mudança de permissões. Nenhum banco produtivo ou deploy público.

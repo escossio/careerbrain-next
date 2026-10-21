@@ -1,0 +1,23 @@
+# Reference CI service only. No production credentials, volumes or TCP listeners.
+services:
+  postgres:
+    image: postgres:16-alpine@sha256:3c5c8892d184f738f4fe282d14ddaa613a38f00f4189d2d94725ebe6f2909ddb
+    user: '70:70'
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 256m
+    cpus: 1
+    environment:
+      POSTGRES_DB: cbn_test_reference
+      POSTGRES_HOST_AUTH_METHOD: trust
+    tmpfs:
+      - /var/lib/postgresql/data:rw,nosuid,nodev,noexec,size=134217728,uid=70,gid=70,mode=0700
+      - /tmp:rw,nosuid,nodev,noexec,size=33554432,mode=1777
+    volumes:
+      - type: bind
+        source: ${NEXT_CI_SOCKET_DIR:?isolated disposable socket directory required}
+        target: /run/postgresql
+    command: [postgres, '-c', "listen_addresses=", '-c', unix_socket_directories=/run/postgresql, '-c', max_connections=20, '-c', shared_buffers=32MB]
