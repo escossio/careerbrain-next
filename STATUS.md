@@ -1,5 +1,16 @@
 # STATUS — CareerBrain Next
 
-01 certificada e merged. **1/10 validadas. 02 EM IMPLEMENTAÇÃO**, 03 autorizada após certificação da 02. Passadas 04–10 não autorizadas nesta sequência.
+## Checkpoint da passada 02
 
-Fundação pública aprovada, contratos V1 e checks obrigatórios verdes na 01. A 02 adiciona persistência descartável, migrações e testes de isolamento SQL em workers; ainda não declarar certificação sem resultados. Auditoria geral de GitHub Apps permanece atividade independente, sem mudança de permissões. Nenhum banco produtivo ou deploy público.
+**Estado aplicado na main após checks verdes e merge deste PR: 2/10 validadas.**
+Antes do merge, este checkpoint representa o aceite SQL concluído e a conclusão
+condicionada ao CI obrigatório e merge protegido.
+
+- 01 certificada e merged; fundação, contratos V1 e CI offline aprovados.
+- 02: PostgreSQL 16, papéis mínimos/RLS, fila/outbox, migrações/checksums e índices.
+  18 testes SQL e restore/ledger aprovados em worker isolado, com dados sintéticos.
+- 03 autorizada após certificação/merge da 02. 04–10 não autorizadas nesta sequência.
+
+Ver docs/database.md e docs/evidence-02.md. Nenhum banco produtivo, deploy público,
+chamada de IA ou mudança de credenciais/permissões de integrações.
+Auditoria geral de GitHub Apps permanece atividade de segurança independente.

@@ -377,6 +377,10 @@
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
     },
     {
+      "path": "docs/evidence-02.md",
+      "reason": "Evidência técnica saneada dos testes reais da passada 02; sem inventário operacional."
+    },
+    {
       "path": "docs/gates.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
