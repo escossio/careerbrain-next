@@ -110,6 +110,19 @@ class SchemaTests(unittest.TestCase):
             with self.assertRaises(ContractError):
                 validate("resume-upload", value)
 
+    def test_profile_v2_represents_uncertainty_without_a_fictitious_attribute(self):
+        uncertain = example("private-profile-v2")
+        validate("private-profile-v2", uncertain)
+        for status, attributes in [("READY", []), ("UNCERTAIN", [example("private-profile")["attributes"][0]])]:
+            with self.subTest(status=status), self.assertRaises(ContractError):
+                value = copy.deepcopy(uncertain)
+                value["status"], value["attributes"] = status, attributes
+                validate("private-profile-v2", value)
+        legacy = example("private-profile")
+        legacy["status"], legacy["attributes"] = "UNCERTAIN", []
+        with self.assertRaises(ContractError):
+            validate("private-profile", legacy)
+
 
 class TimeTests(unittest.TestCase):
     def test_before_equal_after_and_utc_equivalence(self):
