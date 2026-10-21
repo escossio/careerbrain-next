@@ -2,7 +2,7 @@
 DO $$
 DECLARE r text;
 BEGIN
-  FOREACH r IN ARRAY ARRAY['cb_owner','cb_migrator','cb_auth','cb_api','cb_global_worker','cb_private_worker','cb_privacy'] LOOP
+  FOREACH r IN ARRAY ARRAY['cb_owner','cb_migrator','cb_auth','cb_api','cb_ingest','cb_global_worker','cb_private_worker','cb_privacy'] LOOP
     IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = r) THEN
       EXECUTE format('CREATE ROLE %I NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT', r);
     END IF;
@@ -14,6 +14,7 @@ END $$;
 ALTER ROLE cb_migrator LOGIN;
 ALTER ROLE cb_auth LOGIN;
 ALTER ROLE cb_api LOGIN;
+ALTER ROLE cb_ingest LOGIN;
 ALTER ROLE cb_global_worker LOGIN;
 ALTER ROLE cb_private_worker LOGIN;
 ALTER ROLE cb_privacy LOGIN;

@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 import json
+import re
 from uuid import uuid4
 
 import psycopg
 
 from .auth import Denied
+from .ingestion import IngestionFailure
 
 
 class PayloadTooLarge(ValueError):
@@ -104,3 +106,76 @@ class IdentityAPI:
         return status, {'schema_version': 'careerbrain.error.v1',
                         'correlation_id': str(uuid4()), 'code': code,
                         'retryable': False, 'items': []}
+
+
+class CareerBrainAPI:
+    """Route producer traffic separately from user identity traffic."""
+
+    def __init__(self, identity: IdentityAPI, ingestion):
+        self.identity, self.ingestion = identity, ingestion
+
+    def close(self):
+        self.ingestion.pool.close()
+        self.identity.close()
+
+    def __call__(self, environ, start_response):
+        method, path = environ.get('REQUEST_METHOD'), environ.get('PATH_INFO', '')
+        if path != '/v1/ingestion/batches' and not path.startswith('/v1/ingestion/batches/'):
+            return self.identity(environ, start_response)
+        headers = [('Content-Type', 'application/json'), ('Cache-Control', 'no-store')]
+        correlation = str(uuid4())
+        try:
+            token = IdentityAPI._bearer(environ)
+            producer = self.ingestion.authenticate(token)
+            if method == 'POST' and path == '/v1/ingestion/batches':
+                if environ.get('HTTP_CONTENT_ENCODING') or environ.get('CONTENT_ENCODING'):
+                    raise IngestionFailure(400, 'SCHEMA_INVALID')
+                key = environ.get('HTTP_IDEMPOTENCY_KEY', '')
+                if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}', key):
+                    raise IngestionFailure(400, 'SCHEMA_INVALID')
+                if environ.get('CONTENT_TYPE', '').split(';')[0] != 'application/json':
+                    raise IngestionFailure(400, 'SCHEMA_INVALID')
+                size = environ.get('CONTENT_LENGTH', '')
+                if not size.isdecimal():
+                    raise IngestionFailure(400, 'SCHEMA_INVALID')
+                if int(size) > 1_048_576:
+                    raise IngestionFailure(413, 'PAYLOAD_TOO_LARGE')
+                raw = environ['wsgi.input'].read(int(size))
+                if len(raw) != int(size):
+                    raise IngestionFailure(400, 'SCHEMA_INVALID')
+                value = self.ingestion.decode(raw, key)
+                output, replay = self.ingestion.submit(producer, value)
+                if output['schema_version'] == 'careerbrain.error.v1':
+                    status = '422 Unprocessable Content' if output['code'] != 'SOURCE_NOT_AUTHORIZED' else '403 Forbidden'
+                else:
+                    status = '202 Accepted'
+                    if replay:
+                        headers.append(('Idempotent-Replay', 'true'))
+            elif method == 'GET' and path.startswith('/v1/ingestion/batches/'):
+                batch_id = path.removeprefix('/v1/ingestion/batches/')
+                if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}', batch_id):
+                    raise IngestionFailure(400, 'SCHEMA_INVALID')
+                output = self.ingestion.status(producer, batch_id)
+                if output is None:
+                    raise IngestionFailure(410, 'RESOURCE_GONE')
+                status = '200 OK'
+            else:
+                raise IngestionFailure(404, 'RESOURCE_GONE')
+        except Denied:
+            failure = IngestionFailure(401, 'UNAUTHENTICATED')
+            status, output = '401 Unauthorized', failure.response(correlation)
+        except IngestionFailure as failure:
+            reason = {400: 'Bad Request', 401: 'Unauthorized', 403: 'Forbidden',
+                      404: 'Not Found', 409: 'Conflict', 410: 'Gone',
+                      413: 'Content Too Large', 422: 'Unprocessable Content',
+                      429: 'Too Many Requests', 503: 'Service Unavailable'}[failure.status]
+            status, output = f'{failure.status} {reason}', failure.response(correlation)
+            if failure.code == 'BATCH_IN_PROGRESS':
+                headers.append(('Retry-After', '1'))
+        except psycopg.Error:
+            status = '503 Service Unavailable'
+            output = IngestionFailure(503, 'UNAVAILABLE', retryable=True).response(correlation)
+        body = json.dumps(output, separators=(',', ':')).encode()
+        headers.append(('Content-Length', str(len(body))))
+        start_response(status, headers)
+        return [body]

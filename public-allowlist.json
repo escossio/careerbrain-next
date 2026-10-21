@@ -84,6 +84,10 @@
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
     },
     {
+      "path": "careerbrain/ingestion.py",
+      "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
+    },
+    {
       "path": "careerbrain/server.py",
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
@@ -369,6 +373,10 @@
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
     {
+      "path": "db/migrations/004_ingestion.sql",
+      "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
+    },
+    {
       "path": "docs/acceptance.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -401,6 +409,10 @@
       "reason": "Evidência pública sintética da passada 03; logs e inventários operacionais excluídos."
     },
     {
+      "path": "docs/evidence-04.md",
+      "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
+    },
+    {
       "path": "docs/gates.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -408,6 +420,10 @@
     {
       "path": "docs/identity-03.md",
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
+    },
+    {
+      "path": "docs/ingestion-04.md",
+      "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
     },
     {
       "path": "docs/operations.md",
@@ -440,6 +456,10 @@
     {
       "path": "tests/integration/database_cases.py",
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "tests/integration/ingestion_cases.py",
+      "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
     },
     {
       "path": "tests/synthetic-source.txt",

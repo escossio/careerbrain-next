@@ -1,6 +1,7 @@
 FROM python:3.13-slim@sha256:cf50a4f6ac4f026458b08d5222023d700ac806410dff5e9ca8728fa44f2b850f
 COPY requirements-db.txt /requirements-db.txt
-RUN python -m pip --isolated install --no-cache-dir --only-binary=:all: --require-hashes -r /requirements-db.txt
+COPY requirements-ci.txt /requirements-ci.txt
+RUN python -m pip --isolated install --no-cache-dir --only-binary=:all: --require-hashes -r /requirements-db.txt -r /requirements-ci.txt
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/workspace
 WORKDIR /workspace
 USER 65534:65534

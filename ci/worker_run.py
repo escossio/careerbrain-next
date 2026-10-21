@@ -104,6 +104,11 @@ def main():
         if authentication.returncode:raise RuntimeError('Identity integration tests failed; see authentication.log')
         assert b'\nOK\n' in authentication.stderr
         report['results']['authentication']='PASS'
+        ingestion=client(['python','-m','unittest','discover','-s','tests/integration','-p','ingestion_cases.py','-v'])
+        (results/'ingestion.log').write_bytes(ingestion.stdout+ingestion.stderr)
+        if ingestion.returncode:raise RuntimeError('Ingestion integration tests failed; see ingestion.log')
+        assert b'\nOK\n' in ingestion.stderr
+        report['results']['ingestion']='PASS'
         report['backup_sha256']=hashlib.sha256(dump).hexdigest()
         report['status']='PASS'
     except Exception as error:
