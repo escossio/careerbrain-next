@@ -1,0 +1,10 @@
+{
+  "schema_version": "careerbrain.profile.v2",
+  "tenant_id": "synthetic-tenant-A",
+  "profile_version": 1,
+  "generation": 1,
+  "status": "UNCERTAIN",
+  "attributes": [],
+  "extractor_version": "deterministic-pdf-v1",
+  "taxonomy_version": "professional-v1"
+}

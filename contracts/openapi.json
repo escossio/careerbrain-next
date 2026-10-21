@@ -2151,6 +2151,9 @@
       "private-profile": {
         "$ref": "v1/private-profile.schema.json"
       },
+      "private-profile-v2": {
+        "$ref": "v1/private-profile-v2.schema.json"
+      },
       "resume-job": {
         "$ref": "v1/resume-job.schema.json"
       },

@@ -3,11 +3,13 @@
 from .api import CareerBrainAPI, IdentityAPI
 from .auth import AuthService, GoogleVerifier
 from .ingestion import IngestionService
+from .resume import EphemeralResumeStore, ResumeService
 from .db import tenant_pool
 
 
 def create_app(*, auth_conninfo: str, api_conninfo: str, web_client_id: str,
-               presenter_client_ids: tuple[str, ...], ingest_conninfo: str) -> CareerBrainAPI:
+               presenter_client_ids: tuple[str, ...], ingest_conninfo: str,
+               private_worker_conninfo: str) -> CareerBrainAPI:
     verifier = GoogleVerifier(web_client_id, presenter_client_ids)
     auth_pool = tenant_pool(auth_conninfo)
     try:
@@ -17,7 +19,13 @@ def create_app(*, auth_conninfo: str, api_conninfo: str, web_client_id: str,
             ingest_pool = tenant_pool(ingest_conninfo)
             try:
                 ingestion = IngestionService(ingest_pool)
-                return CareerBrainAPI(IdentityAPI(service), ingestion)
+                worker_pool = tenant_pool(private_worker_conninfo)
+                try:
+                    resume = ResumeService(api_pool, worker_pool, EphemeralResumeStore())
+                    return CareerBrainAPI(IdentityAPI(service), ingestion, resume)
+                except BaseException:
+                    worker_pool.close()
+                    raise
             except BaseException:
                 ingest_pool.close()
                 raise

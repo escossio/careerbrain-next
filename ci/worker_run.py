@@ -50,7 +50,8 @@ def main():
         started=True
         run('docker','run','--detach','--name',name,'--label','careerbrain-next.disposable=1',
             '--network','none','--read-only','--cap-drop','ALL','--security-opt','no-new-privileges',
-            '--pids-limit','128','--memory','256m','--cpus','1','--user','70:70',
+            '--pids-limit','128','--memory','256m','--memory-swap','256m','--ulimit','core=0',
+            '--cpus','1','--user','70:70',
             '--tmpfs','/var/lib/postgresql/data:rw,nosuid,nodev,noexec,size=134217728,uid=70,gid=70,mode=0700',
             '--tmpfs','/tmp:rw,nosuid,nodev,noexec,size=33554432,mode=1777',
             '--mount',f'type=bind,src={socket},dst=/run/postgresql',
@@ -75,7 +76,8 @@ def main():
         else:raise RuntimeError('Disposable PostgreSQL did not become ready')
         def client(command,database='cbn_test_suite'):
             p=run('docker','run','--rm','--network','none','--read-only','--cap-drop','ALL',
-              '--security-opt','no-new-privileges','--pids-limit','128','--memory','256m','--cpus','1',
+              '--security-opt','no-new-privileges','--pids-limit','128','--memory','256m','--memory-swap','256m',
+              '--ulimit','core=0','--cpus','1',
               '--tmpfs','/tmp:rw,nosuid,nodev,noexec,size=33554432,mode=1777',
               '--mount',f'type=bind,src={code},dst=/workspace,readonly',
               '--mount',f'type=bind,src={socket},dst=/run/postgresql,readonly',
@@ -115,6 +117,12 @@ def main():
         if classification.returncode:raise RuntimeError('Classification integration tests failed; see classification.log')
         assert b'\nOK\n' in classification.stderr
         report['results']['classification']='PASS'
+        resume=client(['python','-m','unittest','discover','-s','tests/integration',
+                       '-p','resume_cases.py','-v'])
+        (results/'resume.log').write_bytes(resume.stdout+resume.stderr)
+        if resume.returncode:raise RuntimeError('Resume integration tests failed; see resume.log')
+        assert b'\nOK\n' in resume.stderr
+        report['results']['resume']='PASS'
         report['backup_sha256']=hashlib.sha256(dump).hexdigest()
         report['status']='PASS'
     except Exception as error:

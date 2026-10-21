@@ -1,6 +1,7 @@
 # Contratos V1
 
-Status: especificados e testáveis na passada 01; nenhuma implementação de API/DB.
+Status: V1 preservada; perfil V2 adiciona a representação explícita de incerteza
+sem atributo fictício na passada 06.
 Schemas JSON Schema 2020-12 em `v1/`; OpenAPI 3.1 em `openapi.json`. Referências
 `careerbrain.invalid` são identificadores offline, nunca destinos de rede.
 

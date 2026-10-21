@@ -92,6 +92,10 @@
       "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
     },
     {
+      "path": "careerbrain/resume.py",
+      "reason": "Passada 06 autorizada: currículo efêmero, perfil privado e testes sintéticos em worker isolado."
+    },
+    {
       "path": "careerbrain/server.py",
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
@@ -180,6 +184,11 @@
       "path": "contracts/examples/private-profile.json",
       "category": "synthetic-example",
       "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
+    },
+    {
+      "path": "contracts/examples/private-profile-v2.json",
+      "category": "synthetic-example",
+      "review_basis": "Exemplo inventado de incerteza; nenhum dado de usuário real."
     },
     {
       "path": "contracts/examples/recommendation-page.json",
@@ -317,6 +326,11 @@
       "review_basis": "Contrato estrutural V1; sem valores de ambiente."
     },
     {
+      "path": "contracts/v1/private-profile-v2.schema.json",
+      "category": "schema",
+      "review_basis": "Contrato de perfil V2, versionado e sem valores de ambiente."
+    },
+    {
       "path": "contracts/v1/recommendation-page.schema.json",
       "category": "schema",
       "review_basis": "Contrato estrutural V1; sem valores de ambiente."
@@ -389,6 +403,10 @@
       "reason": "Passada 05 autorizada: classificação global sintética, fila segura, cache versionado e teste isolado."
     },
     {
+      "path": "db/migrations/007_resume_private.sql",
+      "reason": "Passada 06 autorizada: fila por handle opaco e perfil privado em banco descartável."
+    },
+    {
       "path": "docs/acceptance.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -433,6 +451,10 @@
       "reason": "Passada 05 autorizada: classificação global sintética, fila segura, cache versionado e teste isolado."
     },
     {
+      "path": "docs/evidence-06.md",
+      "reason": "Passada 06 autorizada: evidência pública sintética, sem logs operacionais."
+    },
+    {
       "path": "docs/gates.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -449,6 +471,10 @@
       "path": "docs/operations.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
+    },
+    {
+      "path": "docs/resume-06.md",
+      "reason": "Passada 06 autorizada: limites de currículo efêmero e gates de privacidade."
     },
     {
       "path": "docs/publication.md",
@@ -484,6 +510,10 @@
     {
       "path": "tests/integration/ingestion_cases.py",
       "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
+    },
+    {
+      "path": "tests/integration/resume_cases.py",
+      "reason": "Passada 06 autorizada: testes de currículo sintético e isolamento de perfil."
     },
     {
       "path": "tests/synthetic-source.txt",

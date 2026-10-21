@@ -9,6 +9,8 @@ import psycopg
 
 from .auth import Denied
 from .ingestion import IngestionFailure
+from .resume import MAX_BYTES, ResumeRejected
+from tools.contracts import strict_load
 
 
 class PayloadTooLarge(ValueError):
@@ -108,18 +110,103 @@ class IdentityAPI:
                         'retryable': False, 'items': []}
 
 
+class ResumeAPI:
+    """Authenticated multipart boundary; document bytes never enter request logs or SQL."""
+    def __init__(self, identity: IdentityAPI, service):
+        self.identity, self.service = identity, service
+
+    def __call__(self, environ, start_response):
+        method, path = environ.get('REQUEST_METHOD'), environ.get('PATH_INFO', '')
+        try:
+            token = IdentityAPI._bearer(environ)
+            principal = self.identity.service.identity(token)
+            if method == 'POST' and path == '/v1/me/resume':
+                metadata, document = self._multipart(environ)
+                key = environ.get('HTTP_IDEMPOTENCY_KEY', '')
+                if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}', key):
+                    raise ResumeRejected('invalid idempotency key')
+                output = self.service.upload(principal['tenant_id'], metadata, document, key)
+                status = '202 Accepted'
+            elif method == 'GET' and path.startswith('/v1/me/jobs/'):
+                output = self.service.status(principal['tenant_id'], path.removeprefix('/v1/me/jobs/'))
+                if output is None:
+                    return self._respond(start_response, '410 Gone', IdentityAPI._error('410 Gone', 'RESOURCE_GONE')[1])
+                status = '200 OK'
+            elif method == 'DELETE' and path.startswith('/v1/me/jobs/'):
+                output = {'cancelled': self.service.cancel(principal['tenant_id'], path.removeprefix('/v1/me/jobs/'))}
+                status = '200 OK' if output['cancelled'] else '410 Gone'
+            else:
+                return self._respond(start_response, '404 Not Found', IdentityAPI._error('404 Not Found', 'RESOURCE_GONE')[1])
+        except Denied:
+            return self._respond(start_response, '401 Unauthorized', IdentityAPI._error('401 Unauthorized', 'UNAUTHENTICATED')[1])
+        except PayloadTooLarge:
+            return self._respond(start_response, '413 Content Too Large', IdentityAPI._error('413 Content Too Large', 'PAYLOAD_TOO_LARGE')[1])
+        except (ResumeRejected, ContractError, ValueError, KeyError, TypeError):
+            return self._respond(start_response, '422 Unprocessable Content', IdentityAPI._error('422 Unprocessable Content', 'SCHEMA_INVALID')[1])
+        except psycopg.Error:
+            return self._respond(start_response, '503 Service Unavailable', IdentityAPI._error('503 Service Unavailable', 'UNAVAILABLE')[1])
+        return self._respond(start_response, status, output)
+
+    @staticmethod
+    def _respond(start_response, status, output):
+        body = json.dumps(output, separators=(',', ':')).encode()
+        start_response(status, [('Content-Type', 'application/json'), ('Content-Length', str(len(body))),
+                                ('Cache-Control', 'no-store')])
+        return [body]
+
+    @staticmethod
+    def _multipart(request):
+        length = request.get('CONTENT_LENGTH', '')
+        if not length.isdecimal():
+            raise ResumeRejected('invalid body length')
+        if int(length) > MAX_BYTES + 20_000:
+            raise PayloadTooLarge()
+        content_type = request.get('CONTENT_TYPE', '')
+        match = re.fullmatch(r'multipart/form-data;\s*boundary=([A-Za-z0-9._-]{1,70})', content_type)
+        if not match:
+            raise ResumeRejected('invalid multipart type')
+        raw = request['wsgi.input'].read(int(length))
+        if len(raw) != int(length):
+            raise ResumeRejected('short body')
+        boundary = b'--' + match.group(1).encode('ascii')
+        fields = {}
+        for section in raw.split(boundary)[1:-1]:
+            if not section.startswith(b'\r\n') or not section.endswith(b'\r\n'):
+                raise ResumeRejected('malformed multipart')
+            headers, separator, value = section[2:-2].partition(b'\r\n\r\n')
+            if not separator:
+                raise ResumeRejected('malformed part')
+            line = headers.decode('ascii', 'strict').split('\r\n')
+            if len(line) not in (1, 2) or not line[0].startswith('Content-Disposition: form-data; name="'):
+                raise ResumeRejected('invalid part headers')
+            name = line[0].removeprefix('Content-Disposition: form-data; name="').split('"', 1)[0]
+            if name not in {'metadata', 'file'} or name in fields:
+                raise ResumeRejected('invalid fields')
+            fields[name] = value
+        if set(fields) != {'metadata', 'file'}:
+            raise ResumeRejected('missing multipart fields')
+        return strict_load(fields['metadata']), fields['file']
+
+
 class CareerBrainAPI:
     """Route producer traffic separately from user identity traffic."""
 
-    def __init__(self, identity: IdentityAPI, ingestion):
+    def __init__(self, identity: IdentityAPI, ingestion, resume=None):
         self.identity, self.ingestion = identity, ingestion
+        self.resume = None if resume is None else ResumeAPI(identity, resume)
 
     def close(self):
         self.ingestion.pool.close()
+        if self.resume is not None:
+            self.resume.service.worker_pool.close()
         self.identity.close()
 
     def __call__(self, environ, start_response):
         method, path = environ.get('REQUEST_METHOD'), environ.get('PATH_INFO', '')
+        if path == '/v1/me/resume' or path.startswith('/v1/me/jobs/'):
+            if self.resume is None:
+                return self.identity(environ, start_response)
+            return self.resume(environ, start_response)
         if path != '/v1/ingestion/batches' and not path.startswith('/v1/ingestion/batches/'):
             return self.identity(environ, start_response)
         headers = [('Content-Type', 'application/json'), ('Cache-Control', 'no-store')]

@@ -27,6 +27,8 @@ commit é compare-and-set. Extração atrasada não sobrescreve versão mais nov
 Saída inválida preserva último perfil válido e informa falha. Perfil guarda só
 atributos profissionais, evidências curtas necessárias e incerteza; não texto integral,
 nome/telefone/endereço/documentos pessoais irrelevantes. Novo currículo mantém marco.
+`careerbrain.profile.v2` representa `UNCERTAIN` com atributos vazios; `READY`
+exige atributos comprovados. O V1 permanece imutável para consumidores existentes.
 
 ## Exclusão
 
