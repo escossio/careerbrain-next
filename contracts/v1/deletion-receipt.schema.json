@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/deletion-receipt.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.deletion.v1"
+    },
+    "request_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "state": {
+      "enum": [
+        "DELETING",
+        "ACTIVE_DATA_REMOVED",
+        "BACKUP_EXPIRY_PENDING",
+        "COMPLETE"
+      ]
+    },
+    "active_data_deadline": {
+      "$ref": "common.schema.json#/$defs/instant"
+    },
+    "backup_expiry_deadline": {
+      "$ref": "common.schema.json#/$defs/instant"
+    },
+    "receipt_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "state",
+    "active_data_deadline",
+    "backup_expiry_deadline",
+    "receipt_id"
+  ],
+  "additionalProperties": false
+}

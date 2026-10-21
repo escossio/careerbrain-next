@@ -1,0 +1,10 @@
+{
+  "schema_version": "careerbrain.resume-job.v1",
+  "job_id": "job-1",
+  "tenant_id": "synthetic-tenant-A",
+  "generation": 1,
+  "deletion_epoch": 0,
+  "temporary_handle": "tmp-handle-1",
+  "expires_at": "2026-10-21T13:15:00Z",
+  "state": "RECEIVED"
+}

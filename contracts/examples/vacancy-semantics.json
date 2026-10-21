@@ -1,0 +1,25 @@
+{
+  "schema_version": "careerbrain.semantics.v1",
+  "vacancy_id": "vacancy-1",
+  "content_version": "content-v1",
+  "taxonomy_version": "professional-v1",
+  "model_version": "offline-fake-v1",
+  "prompt_version": "prompt-v1",
+  "status": "READY",
+  "attributes": [
+    {
+      "name": "activity",
+      "value": "manutenção elétrica",
+      "basis": "explicit",
+      "confidence": 1,
+      "evidence": [
+        {
+          "field": "description",
+          "quote": "manutenção de instalações elétricas",
+          "start": 9,
+          "end": 44
+        }
+      ]
+    }
+  ]
+}

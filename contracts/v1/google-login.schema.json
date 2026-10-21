@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/google-login.schema.json",
+  "type": "object",
+  "properties": {
+    "id_token": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 16384
+    },
+    "challenge_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    }
+  },
+  "required": [
+    "id_token",
+    "challenge_id"
+  ],
+  "additionalProperties": false
+}

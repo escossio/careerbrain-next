@@ -1,0 +1,8 @@
+{
+  "schema_version": "careerbrain.batch-status.v1",
+  "batch_id": "batch-synthetic-1",
+  "status": "PENDING",
+  "total": 1,
+  "completed": 0,
+  "failed": 0
+}

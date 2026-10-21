@@ -1,0 +1,8 @@
+{
+  "schema_version": "careerbrain.deletion.v1",
+  "request_id": "delete-1",
+  "state": "DELETING",
+  "active_data_deadline": "2026-10-22T13:00:00Z",
+  "backup_expiry_deadline": "2026-11-20T13:00:00Z",
+  "receipt_id": "receipt-1"
+}

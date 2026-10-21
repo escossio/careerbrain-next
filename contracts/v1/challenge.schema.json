@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/challenge.schema.json",
+  "type": "object",
+  "properties": {
+    "challenge_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 128
+    },
+    "expires_in": {
+      "const": 300
+    }
+  },
+  "required": [
+    "challenge_id",
+    "nonce",
+    "expires_in"
+  ],
+  "additionalProperties": false
+}

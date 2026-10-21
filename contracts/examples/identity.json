@@ -1,0 +1,10 @@
+{
+  "schema_version": "careerbrain.identity.v1",
+  "user_id": "synthetic-user-A",
+  "tenant_id": "synthetic-tenant-A",
+  "issuer": "https://accounts.google.com",
+  "subject": "synthetic-google-subject-A",
+  "account_created_at": "2026-10-21T11:00:00Z",
+  "state": "ACTIVE",
+  "profile_status": "MISSING"
+}

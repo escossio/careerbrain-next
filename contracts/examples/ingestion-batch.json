@@ -1,0 +1,40 @@
+{
+  "schema_version": "careerbrain.ingestion.v1",
+  "batch_id": "batch-synthetic-1",
+  "records": [
+    {
+      "operation": "publish",
+      "vacancy": {
+        "source_id": "synthetic-source",
+        "source_vacancy_id": "maintenance-1",
+        "title": "Técnica de manutenção elétrica",
+        "organization": "Empresa Sintética",
+        "description": "Realizar manutenção de instalações elétricas, inspecionar quadros e documentar as atividades. A vaga informa os requisitos no anúncio original.",
+        "requirements": [
+          "Experiência com instalações elétricas"
+        ],
+        "modality": "onsite",
+        "location": "Cidade Exemplo/BR",
+        "employment_type": "employee",
+        "access": {
+          "kind": "https",
+          "value": "https://example.org/jobs/maintenance-1"
+        },
+        "event": {
+          "source_event_id": "publication-new",
+          "kind": "original",
+          "published_at": "2026-10-21T12:00:00Z",
+          "provenance": {
+            "authorization_id": "synthetic-license-v1",
+            "evidence_id": "evidence-new",
+            "evidence_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "evidence_kind": "source_api",
+            "evidence_url": "https://example.org/jobs/maintenance-1",
+            "observed_at": "2026-10-21T13:00:00Z",
+            "extractor_version": "synthetic-v1"
+          }
+        }
+      }
+    }
+  ]
+}

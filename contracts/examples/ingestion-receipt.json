@@ -1,0 +1,10 @@
+{
+  "schema_version": "careerbrain.ingestion-receipt.v1",
+  "batch_id": "batch-synthetic-1",
+  "correlation_id": "correlation-1",
+  "accepted_at": "2026-10-21T13:00:00Z",
+  "status": "ACCEPTED",
+  "accepted": 1,
+  "duplicates": 0,
+  "processing": "PENDING"
+}

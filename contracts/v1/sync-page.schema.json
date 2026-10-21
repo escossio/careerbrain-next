@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/sync-page.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.sync.v1"
+    },
+    "snapshot_high_watermark": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "recommendation_id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "publication_event_id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "profile_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "kind": {
+            "enum": [
+              "AVAILABLE",
+              "UPDATED",
+              "REMOVED"
+            ]
+          },
+          "available_at": {
+            "$ref": "common.schema.json#/$defs/instant"
+          }
+        },
+        "required": [
+          "sequence",
+          "recommendation_id",
+          "publication_event_id",
+          "profile_version",
+          "kind",
+          "available_at"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "maxItems": 100
+    },
+    "next_cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "has_more": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schema_version",
+    "snapshot_high_watermark",
+    "items",
+    "next_cursor",
+    "has_more"
+  ],
+  "additionalProperties": false
+}

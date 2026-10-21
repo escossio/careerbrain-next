@@ -1,0 +1,13 @@
+{
+  "schema_version": "careerbrain.error.v1",
+  "correlation_id": "correlation-1",
+  "code": "INVALID_PUBLICATION",
+  "retryable": false,
+  "items": [
+    {
+      "index": 0,
+      "field": "event/published_at",
+      "code": "INVALID_PUBLICATION"
+    }
+  ]
+}

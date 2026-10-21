@@ -1,0 +1,14 @@
+{
+  "schema_version": "careerbrain.match.v1",
+  "tenant_id": "synthetic-tenant-A",
+  "vacancy_id": "vacancy-1",
+  "publication_event_id": "event-1",
+  "profile_version": 1,
+  "policy_version": "matching-v1",
+  "eligible": true,
+  "affinity": 0.8,
+  "confidence": 0.9,
+  "reasons": [
+    "EVIDENCED_AFFINITY"
+  ]
+}

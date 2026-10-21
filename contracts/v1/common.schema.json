@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/common.schema.json",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,127}$"
+    },
+    "instant": {
+      "type": "string",
+      "format": "careerbrain-instant",
+      "maxLength": 32
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "https": {
+      "type": "string",
+      "maxLength": 2048,
+      "format": "public-https"
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "field",
+        "quote",
+        "start",
+        "end"
+      ],
+      "additionalProperties": false
+    },
+    "attribute": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "enum": [
+            "skill",
+            "activity",
+            "experience",
+            "education",
+            "license",
+            "modality",
+            "location",
+            "employment_type"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "basis": {
+          "enum": [
+            "explicit",
+            "inferred",
+            "unknown"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/evidence"
+          },
+          "minItems": 0,
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "basis",
+        "confidence",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "error-code": {
+      "enum": [
+        "SCHEMA_INVALID",
+        "INSUFFICIENT_CONTENT",
+        "SOURCE_NOT_AUTHORIZED",
+        "INVALID_PUBLICATION",
+        "INVALID_CONTACT",
+        "EVENT_CONFLICT",
+        "IDEMPOTENCY_CONFLICT",
+        "BATCH_IN_PROGRESS",
+        "RESOURCE_GONE",
+        "CURSOR_INVALID",
+        "CURSOR_EXPIRED",
+        "UPLOAD_EXPIRED",
+        "UNAUTHENTICATED",
+        "FORBIDDEN",
+        "PAYLOAD_TOO_LARGE",
+        "RATE_LIMITED",
+        "UNAVAILABLE"
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/job-status.schema.json",
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "status": {
+      "enum": [
+        "PENDING",
+        "PROCESSING",
+        "READY",
+        "UNCERTAIN",
+        "FAILED",
+        "EXPIRED",
+        "CANCELLED"
+      ]
+    }
+  },
+  "required": [
+    "job_id",
+    "status"
+  ],
+  "additionalProperties": false
+}

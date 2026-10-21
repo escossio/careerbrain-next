@@ -1,0 +1,7 @@
+{
+  "schema_version": "careerbrain.resume-upload.v1",
+  "request_id": "upload-1",
+  "content_type": "application/pdf",
+  "content_length": 1024,
+  "consent_version": "privacy-v1"
+}

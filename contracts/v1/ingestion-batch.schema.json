@@ -1,0 +1,437 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/ingestion-batch.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.ingestion.v1"
+    },
+    "batch_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "const": "publish"
+              },
+              "vacancy": {
+                "type": "object",
+                "properties": {
+                  "source_id": {
+                    "$ref": "common.schema.json#/$defs/id"
+                  },
+                  "source_vacancy_id": {
+                    "$ref": "common.schema.json#/$defs/id"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 240
+                  },
+                  "organization": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 240
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 80,
+                    "maxLength": 30000
+                  },
+                  "requirements": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    },
+                    "minItems": 0,
+                    "maxItems": 100
+                  },
+                  "modality": {
+                    "enum": [
+                      "remote",
+                      "hybrid",
+                      "onsite",
+                      "unknown"
+                    ]
+                  },
+                  "location": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  },
+                  "employment_type": {
+                    "enum": [
+                      "employee",
+                      "internship",
+                      "contractor",
+                      "temporary",
+                      "apprentice",
+                      "other",
+                      "unknown"
+                    ]
+                  },
+                  "access": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "https"
+                          },
+                          "value": {
+                            "$ref": "common.schema.json#/$defs/https"
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "email"
+                          },
+                          "value": {
+                            "type": "string",
+                            "format": "official-email",
+                            "maxLength": 254
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "event": {
+                    "type": "object",
+                    "properties": {
+                      "source_event_id": {
+                        "$ref": "common.schema.json#/$defs/id"
+                      },
+                      "kind": {
+                        "enum": [
+                          "original",
+                          "republication"
+                        ]
+                      },
+                      "published_at": {
+                        "$ref": "common.schema.json#/$defs/instant"
+                      },
+                      "previous_source_event_id": {
+                        "$ref": "common.schema.json#/$defs/id"
+                      },
+                      "provenance": {
+                        "type": "object",
+                        "properties": {
+                          "authorization_id": {
+                            "$ref": "common.schema.json#/$defs/id"
+                          },
+                          "evidence_id": {
+                            "$ref": "common.schema.json#/$defs/id"
+                          },
+                          "evidence_sha256": {
+                            "$ref": "common.schema.json#/$defs/digest"
+                          },
+                          "evidence_kind": {
+                            "enum": [
+                              "source_api",
+                              "source_statement",
+                              "source_signed_record"
+                            ]
+                          },
+                          "evidence_url": {
+                            "$ref": "common.schema.json#/$defs/https"
+                          },
+                          "observed_at": {
+                            "$ref": "common.schema.json#/$defs/instant"
+                          },
+                          "extractor_version": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          }
+                        },
+                        "required": [
+                          "authorization_id",
+                          "evidence_id",
+                          "evidence_sha256",
+                          "evidence_kind",
+                          "evidence_url",
+                          "observed_at",
+                          "extractor_version"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "source_event_id",
+                      "kind",
+                      "published_at",
+                      "provenance"
+                    ],
+                    "additionalProperties": false,
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "kind": {
+                              "const": "republication"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "previous_source_event_id"
+                          ]
+                        },
+                        "else": {
+                          "not": {
+                            "required": [
+                              "previous_source_event_id"
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "source_id",
+                  "source_vacancy_id",
+                  "title",
+                  "organization",
+                  "description",
+                  "requirements",
+                  "modality",
+                  "location",
+                  "employment_type",
+                  "access",
+                  "event"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "operation",
+              "vacancy"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "enum": [
+                  "correct",
+                  "close",
+                  "withdraw"
+                ]
+              },
+              "source_id": {
+                "$ref": "common.schema.json#/$defs/id"
+              },
+              "source_vacancy_id": {
+                "$ref": "common.schema.json#/$defs/id"
+              },
+              "source_event_id": {
+                "$ref": "common.schema.json#/$defs/id"
+              },
+              "source_revision": {
+                "$ref": "common.schema.json#/$defs/id"
+              },
+              "provenance": {
+                "type": "object",
+                "properties": {
+                  "authorization_id": {
+                    "$ref": "common.schema.json#/$defs/id"
+                  },
+                  "evidence_id": {
+                    "$ref": "common.schema.json#/$defs/id"
+                  },
+                  "evidence_sha256": {
+                    "$ref": "common.schema.json#/$defs/digest"
+                  },
+                  "evidence_kind": {
+                    "enum": [
+                      "source_api",
+                      "source_statement",
+                      "source_signed_record"
+                    ]
+                  },
+                  "evidence_url": {
+                    "$ref": "common.schema.json#/$defs/https"
+                  },
+                  "observed_at": {
+                    "$ref": "common.schema.json#/$defs/instant"
+                  },
+                  "extractor_version": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  }
+                },
+                "required": [
+                  "authorization_id",
+                  "evidence_id",
+                  "evidence_sha256",
+                  "evidence_kind",
+                  "evidence_url",
+                  "observed_at",
+                  "extractor_version"
+                ],
+                "additionalProperties": false
+              },
+              "correction": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 240
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 80,
+                    "maxLength": 30000
+                  },
+                  "requirements": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2000
+                    },
+                    "minItems": 0,
+                    "maxItems": 100
+                  },
+                  "modality": {
+                    "enum": [
+                      "remote",
+                      "hybrid",
+                      "onsite",
+                      "unknown"
+                    ]
+                  },
+                  "location": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  },
+                  "employment_type": {
+                    "enum": [
+                      "employee",
+                      "internship",
+                      "contractor",
+                      "temporary",
+                      "apprentice",
+                      "other",
+                      "unknown"
+                    ]
+                  },
+                  "access": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "https"
+                          },
+                          "value": {
+                            "$ref": "common.schema.json#/$defs/https"
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "kind": {
+                            "const": "email"
+                          },
+                          "value": {
+                            "type": "string",
+                            "format": "official-email",
+                            "maxLength": 254
+                          }
+                        },
+                        "required": [
+                          "kind",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "operation",
+              "source_id",
+              "source_vacancy_id",
+              "source_event_id",
+              "source_revision",
+              "provenance"
+            ],
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "operation": {
+                      "const": "correct"
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "correction"
+                  ],
+                  "properties": {
+                    "correction": {
+                      "minProperties": 1
+                    }
+                  }
+                },
+                "else": {
+                  "not": {
+                    "required": [
+                      "correction"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 100
+    }
+  },
+  "required": [
+    "schema_version",
+    "batch_id",
+    "records"
+  ],
+  "additionalProperties": false
+}

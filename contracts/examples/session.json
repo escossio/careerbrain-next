@@ -1,0 +1,7 @@
+{
+  "schema_version": "careerbrain.session.v1",
+  "access_token": "synthetic-not-a-session",
+  "refresh_token": "synthetic-not-a-refresh",
+  "token_type": "Bearer",
+  "expires_in": 900
+}

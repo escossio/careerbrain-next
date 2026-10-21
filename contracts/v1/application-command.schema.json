@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/application-command.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.application.v1"
+    },
+    "request_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "publication_event_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "expected_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "state": {
+      "enum": [
+        "SAVED",
+        "APPLIED",
+        "INTERVIEW",
+        "OFFER",
+        "REJECTED",
+        "WITHDRAWN"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "publication_event_id",
+    "expected_version",
+    "state"
+  ],
+  "additionalProperties": false
+}

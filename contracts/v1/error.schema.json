@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v1/error.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "careerbrain.error.v1"
+    },
+    "correlation_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "code": {
+      "$ref": "common.schema.json#/$defs/error-code"
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "field": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "code": {
+            "$ref": "common.schema.json#/$defs/error-code"
+          }
+        },
+        "required": [
+          "index",
+          "field",
+          "code"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "maxItems": 100
+    }
+  },
+  "required": [
+    "schema_version",
+    "correlation_id",
+    "code",
+    "retryable",
+    "items"
+  ],
+  "additionalProperties": false
+}
