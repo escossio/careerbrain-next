@@ -1,5 +1,7 @@
 """Resume privacy tests. Run only in the networkless disposable PostgreSQL worker."""
 import os
+import io
+import json
 import unittest
 from uuid import uuid4
 
@@ -8,6 +10,8 @@ from psycopg.conninfo import make_conninfo
 from psycopg.types.json import Jsonb
 
 from careerbrain.db import migrate, tenant_pool
+from careerbrain.api import ResumeAPI
+from careerbrain.auth import Denied
 from careerbrain.resume import (DeterministicPdfExtractor, EphemeralResumeStore, ResumeRejected,
                                 ResumeService, assert_ephemeral_runtime)
 from tools.contracts import ContractError, validate, validate_evidence
@@ -169,6 +173,32 @@ class ResumeTests(unittest.TestCase):
         self.assertIsNone(self.service.status(str(self.other[1]), job['job_id']))
         self.assertFalse(self.service.cancel(str(self.other[1]), job['job_id']))
         self.assertEqual(self.row(job)[0], 'READY')
+
+    def test_authenticated_wsgi_upload_accepts_only_bounded_multipart(self):
+        class Auth:
+            def identity(_, token):
+                if token != 'synthetic-access': raise Denied()
+                return {'tenant_id': str(self.tenant[1])}
+        class Identity: service = Auth()
+        api = ResumeAPI(Identity(), self.service)
+        document = pdf('Python')
+        metadata = self.metadata('http-' + uuid4().hex, document)
+        boundary = b'synthetic-boundary'
+        raw = (b'--' + boundary + b'\r\nContent-Disposition: form-data; name="metadata"\r\n\r\n' +
+               json.dumps(metadata).encode() + b'\r\n--' + boundary +
+               b'\r\nContent-Disposition: form-data; name="file"; filename="resume.pdf"\r\nContent-Type: application/pdf\r\n\r\n' +
+               document + b'\r\n--' + boundary + b'--\r\n')
+        def request(token):
+            received=[]
+            body=b''.join(api({'REQUEST_METHOD':'POST','PATH_INFO':'/v1/me/resume',
+                               'HTTP_AUTHORIZATION':'Bearer '+token,
+                               'HTTP_IDEMPOTENCY_KEY':metadata['request_id'],
+                               'CONTENT_TYPE':'multipart/form-data; boundary=synthetic-boundary',
+                               'CONTENT_LENGTH':str(len(raw)),'wsgi.input':io.BytesIO(raw)},
+                              lambda status, headers: received.append(status)))
+            return received[0], json.loads(body)
+        self.assertEqual(request('wrong')[0], '401 Unauthorized')
+        self.assertEqual(request('synthetic-access')[0], '202 Accepted')
 
 
 if __name__ == '__main__':
