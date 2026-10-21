@@ -74,3 +74,6 @@ GRANT USAGE ON SEQUENCE queue.classification_outbox_id_seq TO cb_global_worker;
 GRANT USAGE ON SCHEMA ops TO cb_global_worker;
 GRANT SELECT,INSERT,UPDATE ON ops.classifier_gate TO cb_global_worker;
 GRANT SELECT,INSERT ON ops.classifier_policy TO cb_global_worker;
+-- Row locks used for version fencing require UPDATE privilege; the worker may
+-- touch only the immutable singleton key, never the active model versions.
+GRANT UPDATE(singleton) ON ops.classifier_policy TO cb_global_worker;
