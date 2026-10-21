@@ -80,6 +80,10 @@
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
     {
+      "path": "careerbrain/classification.py",
+      "reason": "Passada 05 autorizada: classificação global sintética, fila segura, cache versionado e teste isolado."
+    },
+    {
       "path": "careerbrain/db.py",
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
     },
@@ -381,6 +385,10 @@
       "reason": "Correção da passada 04: prova compartilhada por produtores autorizados em migração compatível."
     },
     {
+      "path": "db/migrations/006_classification.sql",
+      "reason": "Passada 05 autorizada: classificação global sintética, fila segura, cache versionado e teste isolado."
+    },
+    {
       "path": "docs/acceptance.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -394,6 +402,10 @@
       "path": "docs/ci.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
+    },
+    {
+      "path": "docs/classification-05.md",
+      "reason": "Passada 05 autorizada: classificação global sintética, fila segura, cache versionado e teste isolado."
     },
     {
       "path": "docs/database.md",
@@ -415,6 +427,10 @@
     {
       "path": "docs/evidence-04.md",
       "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
+    },
+    {
+      "path": "docs/evidence-05.md",
+      "reason": "Passada 05 autorizada: classificação global sintética, fila segura, cache versionado e teste isolado."
     },
     {
       "path": "docs/gates.md",
@@ -456,6 +472,10 @@
     {
       "path": "tests/integration/auth_cases.py",
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
+    },
+    {
+      "path": "tests/integration/classification_cases.py",
+      "reason": "Passada 05 autorizada: classificação global sintética, fila segura, cache versionado e teste isolado."
     },
     {
       "path": "tests/integration/database_cases.py",

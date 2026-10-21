@@ -109,6 +109,12 @@ def main():
         if ingestion.returncode:raise RuntimeError('Ingestion integration tests failed; see ingestion.log')
         assert b'\nOK\n' in ingestion.stderr
         report['results']['ingestion']='PASS'
+        classification=client(['python','-m','unittest','discover','-s','tests/integration',
+                               '-p','classification_cases.py','-v'])
+        (results/'classification.log').write_bytes(classification.stdout+classification.stderr)
+        if classification.returncode:raise RuntimeError('Classification integration tests failed; see classification.log')
+        assert b'\nOK\n' in classification.stderr
+        report['results']['classification']='PASS'
         report['backup_sha256']=hashlib.sha256(dump).hexdigest()
         report['status']='PASS'
     except Exception as error:

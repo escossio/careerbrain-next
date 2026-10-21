@@ -1,7 +1,7 @@
 # CareerBrain Next — estado da execução
 
-Checkpoint final da passada 04. As passadas 01–04 estão certificadas na main,
-incluindo a correção de evidência compartilhada por produtores autorizados.
+Checkpoint de trabalho da passada 05. As passadas 01–04 estão certificadas
+na main; a 05 aguarda testes isolados, checks e merge protegido.
 
 | Passada | Estado |
 | --- | --- |
@@ -9,7 +9,8 @@ incluindo a correção de evidência compartilhada por produtores autorizados.
 | 02 | CERTIFICADA E MERGED; 18 testes SQL e restore/ledger aprovados |
 | 03 | CERTIFICADA E MERGED; 12 testes de autenticação e IDs públicos aprovados validados sinteticamente |
 | 04 | CERTIFICADA E MERGED; 12 testes de ingestão e gates SQL aprovados no worker |
-| 05–10 | NÃO_INICIADAS nesta execução |
+| 05 | EM_EXECUÇÃO; classificação global sintética e fila segura em validação |
+| 06–10 | NÃO_INICIADAS nesta execução |
 
 **4/10 validadas.** Evidências públicas em docs/evidence-02.md,
 docs/evidence-03.md e docs/evidence-04.md; inventários e logs operacionais
