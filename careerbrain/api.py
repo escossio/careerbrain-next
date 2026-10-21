@@ -4,7 +4,13 @@ from __future__ import annotations
 import json
 from uuid import uuid4
 
+import psycopg
+
 from .auth import Denied
+
+
+class PayloadTooLarge(ValueError):
+    pass
 
 
 class IdentityAPI:
@@ -48,8 +54,12 @@ class IdentityAPI:
             return '200 OK', self.service.identity(access)
         except Denied:
             return self._error('401 Unauthorized', 'UNAUTHENTICATED')
+        except PayloadTooLarge:
+            return self._error('413 Content Too Large', 'PAYLOAD_TOO_LARGE')
         except (ValueError, KeyError, TypeError):
             return self._error('400 Bad Request', 'SCHEMA_INVALID')
+        except psycopg.Error:
+            return self._error('503 Service Unavailable', 'UNAVAILABLE')
 
     @staticmethod
     def _bearer(request):
@@ -66,8 +76,10 @@ class IdentityAPI:
         raw_length = request.get('CONTENT_LENGTH', '')
         if raw_length == '':
             raw_length = '0'
-        if not raw_length.isdecimal() or int(raw_length) > 20000:
+        if not raw_length.isdecimal():
             raise ValueError('Invalid request size')
+        if int(raw_length) > 20000:
+            raise PayloadTooLarge()
         length = int(raw_length)
         if length and request.get('CONTENT_TYPE', '').split(';')[0] != 'application/json':
             raise ValueError('Invalid content type')

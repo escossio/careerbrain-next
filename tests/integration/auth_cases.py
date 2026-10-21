@@ -14,7 +14,7 @@ from psycopg.conninfo import make_conninfo
 
 from careerbrain.api import IdentityAPI
 from careerbrain.auth import AuthService, Denied, GoogleVerifier, digest
-from careerbrain.db import migrate, tenant_pool, tenant_transaction
+from careerbrain.db import MigrationError, migrate, tenant_pool, tenant_transaction
 
 DB = os.environ['NEXT_TEST_DATABASE']
 SOCKET = os.environ['NEXT_TEST_SOCKET']
@@ -83,6 +83,16 @@ class AuthTests(unittest.TestCase):
             self.proof(challenge, nonce='other-nonce-with-enough-characters-0001'),
             self.proof(challenge, azp='wrong.apps.googleusercontent.com'),
             self.proof(challenge, sub=''),
+            jwt.encode({'iss':'https://accounts.google.com','aud':AUDIENCE,
+                        'azp':PRESENTER,'sub':'synthetic-other-key',
+                        'iat':now,'exp':now+3600,'nonce':challenge['nonce']},
+                       rsa.generate_private_key(public_exponent=65537,key_size=2048),
+                       algorithm='RS256',headers={'kid':'synthetic-kid'}),
+            jwt.encode({'iss':'https://accounts.google.com','aud':AUDIENCE,
+                        'azp':PRESENTER,'sub':'synthetic-untrusted-header',
+                        'iat':now,'exp':now+3600,'nonce':challenge['nonce']},
+                       KEY,algorithm='RS256',headers={'kid':'synthetic-kid',
+                                                     'jku':'https://example.org/keys'}),
             jwt.encode({'iss':'https://accounts.google.com','aud':AUDIENCE,'sub':'synthetic',
                         'iat':now,'exp':now+60,'nonce':challenge['nonce']},
                        'synthetic-key',algorithm='HS256',headers={'kid':'synthetic-kid'}),
@@ -115,6 +125,35 @@ class AuthTests(unittest.TestCase):
         with tenant_transaction(self.api_pool, a['tenant_id']) as conn:
             self.assertEqual(conn.execute('SELECT id FROM private.tenants').fetchall(),
                              [(UUID(a['tenant_id']),)])
+
+    def test_parallel_logins_preserve_one_identity(self):
+        subject = 'synthetic-parallel-' + str(uuid4())
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+            sessions = list(pool.map(lambda _: self.login(subject),range(8)))
+        identities = [self.service.identity(s['access_token']) for s in sessions]
+        self.assertEqual(len({(x['user_id'],x['tenant_id'],x['account_created_at'])
+                              for x in identities}),1)
+        with connect() as conn:
+            self.assertEqual(conn.execute('SELECT count(*) FROM identity.external_identities WHERE subject=%s',(subject,)).fetchone()[0],1)
+
+    def test_access_and_idle_expiration_are_enforced_by_database(self):
+        expired_access = self.login()
+        with connect() as conn:
+            conn.execute("UPDATE auth.sessions SET access_expires_at=transaction_timestamp()-interval '1 second' WHERE access_digest=%s",(digest(expired_access['access_token']),))
+        with self.assertRaises(Denied):self.service.identity(expired_access['access_token'])
+        idle = self.login()
+        with connect() as conn:
+            conn.execute("UPDATE auth.sessions SET last_used_at=transaction_timestamp()-interval '8 days',access_expires_at=transaction_timestamp()-interval '8 days' WHERE refresh_digest=%s",(digest(idle['refresh_token']),))
+        with self.assertRaises(Denied):self.service.refresh(idle['refresh_token'])
+        absolute = self.login()
+        with connect() as conn:
+            conn.execute("UPDATE auth.sessions SET absolute_expires_at=transaction_timestamp()-interval '1 second' WHERE refresh_digest=%s",(digest(absolute['refresh_token']),))
+        with self.assertRaises(Denied):self.service.refresh(absolute['refresh_token'])
+
+    def test_missing_oauth_configuration_or_wrong_role_fails_at_startup(self):
+        with self.assertRaises(ValueError):GoogleVerifier('',(PRESENTER,))
+        with self.assertRaises(ValueError):GoogleVerifier(AUDIENCE,())
+        with self.assertRaises(ValueError):AuthService(self.api_pool,self.auth_pool,self.service.verifier)
 
     def test_refresh_rotation_replay_revokes_family_and_logout(self):
         original = self.login()
@@ -159,6 +198,12 @@ class AuthTests(unittest.TestCase):
                                   'SELECT * FROM auth.used_refresh'):
                     with self.assertRaises(psycopg.errors.InsufficientPrivilege):conn.execute(statement)
 
+    def test_identity_migration_refuses_destructive_downgrade(self):
+        with connect('cb_migrator') as conn,self.assertRaises(MigrationError):
+            migrate(conn,target=2)
+        with connect() as conn:
+            self.assertEqual(conn.execute('SELECT max(version) FROM ops.schema_migrations').fetchone()[0],3)
+
     def test_http_boundary_rejects_cross_user_and_bad_tokens(self):
         status, challenge = self.request('POST','/v1/auth/challenges')
         self.assertEqual(status,'200 OK')
@@ -169,6 +214,7 @@ class AuthTests(unittest.TestCase):
         self.assertEqual(self.request('GET','/v1/me',access='invalid')[0],'401 Unauthorized')
         self.assertEqual(self.request('GET','/v1/me',access=session['access_token'])[0],'200 OK')
         self.assertEqual(self.request('POST','/v1/auth/google',{'id_token':'x','challenge_id':challenge['challenge_id'],'tenant_id':'other'})[0],'400 Bad Request')
+        self.assertEqual(self.request('POST','/v1/auth/google',{'id_token':'x'*20001,'challenge_id':challenge['challenge_id']})[0],'413 Content Too Large')
         self.assertEqual(self.request('POST','/v1/auth/logout',access=session['access_token'])[0],'204 No Content')
         self.assertEqual(self.request('GET','/v1/me',access=session['access_token'])[0],'401 Unauthorized')
 
