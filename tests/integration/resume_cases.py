@@ -142,7 +142,7 @@ class ResumeTests(unittest.TestCase):
         self.store.delete(self.row(lost)[3])
         self.assertEqual(self.service.process_once(), 'EXPIRED')
         expired = self.upload(pdf('Python'))
-        self.admin.execute("UPDATE queue.private_jobs SET created_at=transaction_timestamp()-interval '16 minutes', expires_at=transaction_timestamp()-interval '1 second' WHERE id=%s",(expired['job_id'],))
+        self.admin.execute("UPDATE queue.private_jobs SET created_at=transaction_timestamp()-interval '15 minutes', expires_at=transaction_timestamp()-interval '1 second' WHERE id=%s",(expired['job_id'],))
         self.assertGreaterEqual(self.service.sweep(), 1)
         self.assertEqual(self.row(expired)[0], 'EXPIRED')
         restarted = self.upload(pdf('Python'))
