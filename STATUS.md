@@ -2,8 +2,9 @@
 
 ## Checkpoint da passada 04
 
-**Estado atual da main: 3/10 validadas.** A passada 04 está em branch própria;
-integração isolada, CI no SHA final e merge protegido são condições de aceite.
+**Após CI verde e merge protegido deste PR: 4/10 validadas.** Na branch,
+integração isolada e validações offline passaram; CI no SHA final e merge
+protegido ainda são condições de aceite.
 
 - 01 certificada e merged; fundação, contratos V1 e CI offline aprovados.
 - 02: PostgreSQL 16, papéis mínimos/RLS, fila/outbox, migrações/checksums e índices.
@@ -11,8 +12,9 @@ integração isolada, CI no SHA final e merge protegido são condições de acei
 - 03: API base, OIDC e sessão revogável; 12 testes de autenticação aprovados
   com identidades sintéticas. Os dois IDs OAuth públicos aprovados foram testados
   com assinatura sintética fora do Git. Login Google real pertence à 10.
-- 04 autorizada: ingestão contratual autenticada com fixtures sintéticas em
-  implementação e testes. Direitos de fontes reais permanecem gate externo.
+- 04: ingestão contratual autenticada com fixtures sintéticas; 11 testes de
+  ingestão, 18 SQL, 12 identidade e restauração passaram no worker isolado.
+  Direitos de fontes reais permanecem gate externo.
 - 05–10 não iniciadas nesta execução.
 
 Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md e
