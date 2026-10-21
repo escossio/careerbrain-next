@@ -82,7 +82,8 @@ def assert_ephemeral_runtime() -> None:
     if soft != 0 or hard != 0:
         raise RuntimeError('core dumps are not disabled')
     try:
-        swaps = open('/proc/swaps', encoding='ascii').read().splitlines()
+        with open('/proc/swaps', encoding='ascii') as source:
+            swaps = source.read().splitlines()
     except OSError as error:
         raise RuntimeError('swap state unavailable') from error
     if len(swaps) > 1:

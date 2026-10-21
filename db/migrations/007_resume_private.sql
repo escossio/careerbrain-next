@@ -57,13 +57,13 @@ RETURNS TABLE(job_id uuid,tenant_id uuid,temporary_handle uuid,generation bigint
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
 BEGIN
   IF owner IS NULL OR session_user<>'cb_private_worker' THEN RAISE EXCEPTION 'worker denied' USING ERRCODE='42501'; END IF;
-  UPDATE queue.private_jobs SET state='EXPIRED',lease_owner=NULL,lease_until=NULL
-    WHERE kind='RESUME' AND state IN ('READY','LEASED') AND expires_at<=transaction_timestamp();
+  UPDATE queue.private_jobs AS j SET state='EXPIRED',lease_owner=NULL,lease_until=NULL
+    WHERE j.kind='RESUME' AND j.state IN ('READY','LEASED') AND j.expires_at<=transaction_timestamp();
   RETURN QUERY
   WITH candidate AS (
-    SELECT id FROM queue.private_jobs WHERE kind='RESUME' AND state='READY'
-      AND available_at<=transaction_timestamp() AND expires_at>transaction_timestamp()
-      AND attempts<3 ORDER BY created_at,id FOR UPDATE SKIP LOCKED LIMIT 1
+    SELECT j.id FROM queue.private_jobs AS j WHERE j.kind='RESUME' AND j.state='READY'
+      AND j.available_at<=transaction_timestamp() AND j.expires_at>transaction_timestamp()
+      AND j.attempts<3 ORDER BY j.created_at,j.id FOR UPDATE SKIP LOCKED LIMIT 1
   ), claimed AS (
     UPDATE queue.private_jobs j SET state='LEASED',attempts=j.attempts+1,
       fencing_token=j.fencing_token+1,lease_owner=owner,
@@ -94,8 +94,8 @@ BEGIN
     UPDATE queue.private_jobs SET state='EXPIRED',lease_owner=NULL,lease_until=NULL WHERE id=job; RETURN 'EXPIRED';
   END IF;
   IF retryable AND attempt<3 THEN
-    UPDATE queue.private_jobs SET state='READY',lease_owner=NULL,lease_until=NULL,
-      available_at=LEAST(expires_at,transaction_timestamp()+(2^attempt * interval '1 second')) WHERE id=job;
+    UPDATE queue.private_jobs AS j SET state='READY',lease_owner=NULL,lease_until=NULL,
+      available_at=LEAST(j.expires_at,transaction_timestamp()+(2^attempt * interval '1 second')) WHERE j.id=job;
     RETURN 'RETRY';
   END IF;
   UPDATE queue.private_jobs SET state='FAILED',lease_owner=NULL,lease_until=NULL WHERE id=job;
@@ -160,9 +160,9 @@ CREATE FUNCTION private.reap_expired_resume_handles() RETURNS SETOF uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
 BEGIN
   IF session_user<>'cb_private_worker' THEN RAISE EXCEPTION 'worker denied' USING ERRCODE='42501'; END IF;
-  RETURN QUERY UPDATE queue.private_jobs SET state='EXPIRED',lease_owner=NULL,lease_until=NULL
-    WHERE kind='RESUME' AND state IN ('READY','LEASED') AND expires_at<=transaction_timestamp()
-    RETURNING temporary_handle;
+  RETURN QUERY UPDATE queue.private_jobs AS j SET state='EXPIRED',lease_owner=NULL,lease_until=NULL
+    WHERE j.kind='RESUME' AND j.state IN ('READY','LEASED') AND j.expires_at<=transaction_timestamp()
+    RETURNING j.temporary_handle;
 END $$;
 
 GRANT SELECT ON private.resume_requests TO cb_api,cb_private_worker;
