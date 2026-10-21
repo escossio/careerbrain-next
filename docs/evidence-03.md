@@ -15,4 +15,5 @@ A revisão de publicação e os 49 testes offline passaram. O PR exige os checks
 `contracts` e `repository-policy` no SHA final. O teste usa chave RSA inventada;
 não houve sessão Google real nem uso de client IDs reais. Os IDs públicos OAuth
 aprovados continuam necessários para certificar a configuração real da 03.
+Por isso a 03 permanece BLOQUEADA para merge, apesar do aceite técnico offline.
 Não houve deploy, banco de produção ou chamada faturável.

@@ -7,7 +7,7 @@ na main; implementação da 03 ainda não equivale a aceite ou merge.
 | --- | --- |
 | 01 | CERTIFICADA E MERGED; 49 testes e dois checks aprovados |
 | 02 | CERTIFICADA E MERGED; 18 testes SQL e restore/ledger aprovados |
-| 03 | IMPLEMENTAÇÃO TESTADA; CI, IDs OAuth públicos aprovados e merge pendentes |
+| 03 | BLOQUEADA para certificação/merge: IDs OAuth públicos aprovados pendentes; implementação testada, CI do SHA final pendente |
 | 04–10 | NÃO_AUTORIZADAS nesta sequência |
 
 **Após merge: 2/10 validadas.** Não confundir a implementação da branch com a
