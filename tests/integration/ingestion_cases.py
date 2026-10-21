@@ -29,8 +29,8 @@ class IngestionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         with connect('cb_migrator') as conn:
-            migrate(conn, target=4)
-            migrate(conn, target=4)
+            migrate(conn, target=5)
+            migrate(conn, target=5)
         cls.pool = tenant_pool(make_conninfo(dbname=DB, user='cb_ingest', host=SOCKET), max_size=4)
         cls.pool.wait(timeout=5)
         cls.service = IngestionService(cls.pool)
@@ -64,6 +64,8 @@ class IngestionTests(unittest.TestCase):
             VALUES(%s,%s,%s,%s,'source_api',%s,%s,%s,%s,'synthetic-v1')''',
             (evidence, self.source, self.authorization, 'a'*64, self.access,
              published + timedelta(hours=1), published, event))
+        self.admin.execute('INSERT INTO catalog.evidence_approvals VALUES(%s,%s,%s)',
+                           (evidence, self.source, self.authorization))
 
     def batch(self, *, batch_id=None, event='event-one', evidence=None, published=None, kind='original', previous=None):
         published = published or self.published
@@ -122,6 +124,29 @@ class IngestionTests(unittest.TestCase):
         error, _ = self.submit(changed)
         self.assertEqual(error['code'], 'EVENT_CONFLICT')
         self.assertEqual(self.counts(), (1, 1, 1))
+
+    def test_same_proof_from_second_authorized_producer_maps_to_existing_event(self):
+        self.submit(self.batch())
+        second_producer, second_auth = uuid4(), uuid4()
+        second_token = 'synthetic-' + uuid4().hex + uuid4().hex
+        self.admin.execute('INSERT INTO catalog.producers(id) VALUES(%s)', (second_producer,))
+        self.admin.execute('''INSERT INTO catalog.authorizations(id,producer_id,source_id,active,usage_allowed)
+            VALUES(%s,%s,%s,true,true)''', (second_auth, second_producer, self.source))
+        self.admin.execute('INSERT INTO catalog.official_contacts VALUES(%s,%s,%s)',
+                           (second_auth, 'https', self.access))
+        self.admin.execute('INSERT INTO catalog.evidence_approvals VALUES(%s,%s,%s)',
+                           (self.evidence, self.source, second_auth))
+        self.admin.execute("INSERT INTO catalog.producer_tokens VALUES(%s,%s,'ingestion:write',true)",
+                           (hashlib.sha256(second_token.encode()).hexdigest(), second_producer))
+        batch = self.batch(); batch['records'][0]['vacancy']['event']['provenance']['authorization_id'] = str(second_auth)
+        value = self.service.decode(json.dumps(batch).encode(), batch['batch_id'])
+        producer = self.service.authenticate(second_token)
+        receipt, _ = self.service.submit(producer, value)
+        self.assertEqual((receipt['accepted'], receipt['duplicates'], self.counts()), (0, 1, (1, 1, 1)))
+        self.admin.execute('UPDATE catalog.authorizations SET active=false WHERE id=%s', (second_auth,))
+        next_batch = self.batch(); next_batch['records'][0]['vacancy']['event']['provenance']['authorization_id'] = str(second_auth)
+        denied, _ = self.service.submit(producer, self.service.decode(json.dumps(next_batch).encode(), next_batch['batch_id']))
+        self.assertEqual(denied['code'], 'SOURCE_NOT_AUTHORIZED')
 
     def test_invalid_second_record_rolls_back_entire_batch_and_records_rejection(self):
         batch = self.batch(); second = deepcopy(batch['records'][0]); second['vacancy']['event']['source_event_id'] = 'other-event'

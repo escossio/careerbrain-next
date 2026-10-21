@@ -7,6 +7,8 @@ pode ler credenciais brutas, identidades de usuário nem dados privados. Credenc
 fontes, direitos, contatos oficiais e provas são provisionados fora da API; a
 execução 04 usa exclusivamente registros sintéticos em PostgreSQL descartável.
 Nenhum cadastro real de origem é inferido a partir do corpo enviado.
+Uma mesma evidência pode ter aprovações explícitas para mais de um produtor;
+o mesmo evento, prova e conteúdo gera duplicata sem evento/fila novos.
 
 O serviço valida JSON estrito e o schema V1, limites de 1 MiB/100 itens, chave
 idempotente, fonte, autorização ativa com direito de uso, evidência previamente

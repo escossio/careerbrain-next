@@ -12,9 +12,12 @@ protegido ainda são condições de aceite.
 - 03: API base, OIDC e sessão revogável; 12 testes de autenticação aprovados
   com identidades sintéticas. Os dois IDs OAuth públicos aprovados foram testados
   com assinatura sintética fora do Git. Login Google real pertence à 10.
-- 04: ingestão contratual autenticada com fixtures sintéticas; 11 testes de
+- 04: ingestão contratual autenticada com fixtures sintéticas; 12 testes de
   ingestão, 18 SQL, 12 identidade e restauração passaram no worker isolado.
   Direitos de fontes reais permanecem gate externo.
+- Ajuste da 04 testado em worker: mesma evidência aprovada por produtores
+  distintos resulta em duplicata, sem publicação ou trabalho novo. PR corretivo
+  aguarda checks e merge antes do fechamento definitivo.
 - 05–10 não iniciadas nesta execução.
 
 Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md e

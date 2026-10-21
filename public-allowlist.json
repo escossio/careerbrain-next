@@ -377,6 +377,10 @@
       "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
     },
     {
+      "path": "db/migrations/005_shared_evidence.sql",
+      "reason": "Correção da passada 04: prova compartilhada por produtores autorizados em migração compatível."
+    },
+    {
       "path": "docs/acceptance.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
