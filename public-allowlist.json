@@ -397,6 +397,10 @@
       "reason": "Evidência técnica saneada dos testes reais da passada 02; sem inventário operacional."
     },
     {
+      "path": "docs/evidence-03.md",
+      "reason": "Evidência pública sintética da passada 03; logs e inventários operacionais excluídos."
+    },
+    {
       "path": "docs/gates.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
