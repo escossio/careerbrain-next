@@ -53,7 +53,7 @@ def main():
             assert c.execute('SELECT count(*) FROM identity.accounts WHERE id=%s',(state['account_a'],)).fetchone()[0]==1
         # Restore remains isolated; no runtime read happens before ledger application.
         with connect('cb_privacy') as c:
-            c.execute('INSERT INTO ops.deletion_ledger VALUES(%s,%s,%s,%s) ON CONFLICT(account_id) DO NOTHING',
+            c.execute('SELECT ops.import_deletion_marker(%s,%s,%s,%s)',
                       (ledger['account_id'],ledger['epoch'],ledger['requested_at'],ledger['expires_at']))
             c.execute('SELECT ops.apply_deletion_ledger()')
         assert profiles(state['tenant_a'])==0 and profiles(state['tenant_b'])==1

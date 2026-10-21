@@ -253,6 +253,11 @@ BEGIN
     ON CONFLICT(account_id) DO NOTHING;
   INSERT INTO ops.audit_events(action,entity_id,actor_role) VALUES('DELETION_REQUESTED',account,session_user);
 END $$;
+CREATE FUNCTION ops.import_deletion_marker(account uuid,epoch bigint,requested timestamptz,expires timestamptz)
+RETURNS void LANGUAGE sql SECURITY DEFINER SET search_path=pg_catalog AS $$
+  INSERT INTO ops.deletion_ledger(account_id,deletion_epoch,requested_at,expires_at)
+    VALUES(account,epoch,requested,expires) ON CONFLICT(account_id) DO NOTHING
+$$;
 CREATE FUNCTION ops.apply_deletion_ledger() RETURNS bigint LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
 DECLARE removed bigint;
 BEGIN
@@ -294,9 +299,9 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON queue.catalog_jobs,queue.catalog_outbox TO 
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA queue TO cb_global_worker;
 GRANT SELECT ON private.tenants,private.feed_counters TO cb_api,cb_private_worker;
 GRANT SELECT,INSERT,UPDATE,DELETE ON private.profiles,private.applications,private.recommendations,private.feed,private.commands,queue.private_jobs TO cb_api,cb_private_worker;
-GRANT INSERT ON ops.deletion_ledger TO cb_privacy;
+
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA identity,private,ops,catalog FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION identity.active_tenant(),private.event_eligible(uuid,uuid) TO cb_api,cb_private_worker;
 GRANT EXECUTE ON FUNCTION identity.provision(text,text) TO cb_auth;
 GRANT EXECUTE ON FUNCTION ops.begin_deletion() TO cb_api;
-GRANT EXECUTE ON FUNCTION ops.apply_deletion_ledger() TO cb_privacy;
+GRANT EXECUTE ON FUNCTION ops.apply_deletion_ledger(),ops.import_deletion_marker(uuid,bigint,timestamptz,timestamptz) TO cb_privacy;

@@ -209,6 +209,16 @@ class DatabaseTests(unittest.TestCase):
         finally:self.admin.execute('UPDATE ops.schema_migrations SET checksum=%s WHERE version=1',(checksum,))
         with connect('cb_migrator') as c,self.assertRaises(MigrationError):migrate(c,target=0)
 
+    def test_privacy_import_is_idempotent_without_direct_table_access(self):
+        with connect('cb_privacy') as c:
+            marker=uuid4()
+            with c.transaction():
+                for _ in range(2):
+                    c.execute("SELECT ops.import_deletion_marker(%s,1,transaction_timestamp(),transaction_timestamp()+interval '30 days')",(marker,))
+            for statement in ['SELECT * FROM ops.deletion_ledger',"INSERT INTO ops.deletion_ledger VALUES(gen_random_uuid(),1,transaction_timestamp(),transaction_timestamp()+interval '30 days')"]:
+                with self.subTest(statement=statement),self.assertRaises(psycopg.errors.InsufficientPrivilege):c.execute(statement)
+        self.assertEqual(self.admin.execute('SELECT count(*) FROM ops.deletion_ledger WHERE account_id=%s',(marker,)).fetchone()[0],1)
+
     def test_deletion_denies_reads_jobs_and_login_immediately(self):
         with tenant_transaction(self.pool,str(self.a[1])) as c:c.execute('SELECT ops.begin_deletion()')
         with tenant_transaction(self.pool,str(self.a[1])) as c:self.assertEqual(c.execute('SELECT * FROM private.profiles').fetchall(),[])

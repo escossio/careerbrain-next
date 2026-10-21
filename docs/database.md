@@ -15,7 +15,8 @@ produtivos, credenciais, volumes duráveis e backup externo continuam gates da 1
 cb_owner é NOLOGIN; cb_migrator pode assumir somente o owner durante uma transação
 de migração. cb_auth executa provisionamento sem acesso a perfis. cb_api e
 cb_private_worker usam tenant transacional. cb_global_worker não acessa dados
-privados. cb_privacy só insere ledger e executa expurgo controlado. Runtimes são
+privados. cb_privacy executa funções restritas de importação idempotente do ledger e expurgo,
+sem acesso direto à tabela. Runtimes são
 NOSUPERUSER/NOBYPASSRLS/NOCREATEROLE/NOCREATEDB e não herdam owner.
 
 RLS é forçada nas tabelas de identidade/tenant, inclusive filas privadas. Ausência
