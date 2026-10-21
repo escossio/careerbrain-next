@@ -1,12 +1,16 @@
 # STATUS — CareerBrain Next
 
-Candidato saneado preparado para revisão humana, sem publicação ou histórico Git.
-**Passada 01 BLOQUEADA até autorização de publicação e proteção efetiva de main.**
-1 passada iniciada; 0/10 validadas. Passadas 02–10 NÃO_INICIADAS.
+## Checkpoint da passada 02
 
-- Fundação: contratos V1, schemas, exemplos sintéticos e testes offline.
-- Nenhuma alegação de CI remoto, implantação, autenticação real ou isolamento SQL certificado neste candidato.
-- Gates externos descritos sem identificadores de conta, topologia ou dados de operação.
-- Evidências locais do candidato em docs/evidence-01.md; execução remota futura deve produzir evidências novas.
+**Estado aplicado na main após checks verdes e merge deste PR: 2/10 validadas.**
+Antes do merge, este checkpoint representa o aceite SQL concluído e a conclusão
+condicionada ao CI obrigatório e merge protegido.
 
-Marco de preparação: 49 testes offline e política do candidato aprovados; 81 arquivos admitidos, com revisão editorial e verificação contextual. A revisão humana final do proprietário e a configuração remota continuam pendentes. Nenhum CI remoto herdado ou executado nesta preparação.
+- 01 certificada e merged; fundação, contratos V1 e CI offline aprovados.
+- 02: PostgreSQL 16, papéis mínimos/RLS, fila/outbox, migrações/checksums e índices.
+  18 testes SQL e restore/ledger aprovados em worker isolado, com dados sintéticos.
+- 03 autorizada após certificação/merge da 02. 04–10 não autorizadas nesta sequência.
+
+Ver docs/database.md e docs/evidence-02.md. Nenhum banco produtivo, deploy público,
+chamada de IA ou mudança de credenciais/permissões de integrações.
+Auditoria geral de GitHub Apps permanece atividade de segurança independente.

@@ -68,6 +68,30 @@
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
     },
     {
+      "path": "careerbrain/__init__.py",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "careerbrain/db.py",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "ci/Dockerfile.database",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "ci/compose.postgres.yml",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "ci/restore_case.py",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "ci/worker_run.py",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
       "path": "contracts/README.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -313,6 +337,22 @@
       "review_basis": "Contrato estrutural V1; sem valores de ambiente."
     },
     {
+      "path": "db/bootstrap.sql",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "db/migrations/001_foundation.sql",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "db/migrations/002_indexes.down.sql",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "db/migrations/002_indexes.sql",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
       "path": "docs/acceptance.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -328,9 +368,17 @@
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
     },
     {
+      "path": "docs/database.md",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
       "path": "docs/evidence-01.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
+    },
+    {
+      "path": "docs/evidence-02.md",
+      "reason": "Evidência técnica saneada dos testes reais da passada 02; sem inventário operacional."
     },
     {
       "path": "docs/gates.md",
@@ -358,6 +406,14 @@
       "review_basis": "Dependências públicas com versões e hashes fixos."
     },
     {
+      "path": "requirements-db.txt",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "tests/integration/database_cases.py",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
       "path": "tests/synthetic-source.txt",
       "category": "synthetic-example",
       "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
@@ -381,6 +437,10 @@
       "path": "tools/__init__.py",
       "category": "offline-tooling",
       "review_basis": "Validação local e casos adversariais sintéticos."
+    },
+    {
+      "path": "tools/ci_worker.py",
+      "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
     },
     {
       "path": "tools/contracts.py",

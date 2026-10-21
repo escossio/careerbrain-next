@@ -1,35 +1,18 @@
 # CareerBrain Next — estado da execução
 
-**Estado:** preparação de candidato público; passada 01 BLOQUEADA.
-**Contagem:** 1 iniciada, 0/10 validadas. Nenhuma passada posterior autorizada.
+Este checkpoint assume efeito de conclusão na main somente depois dos checks
+obrigatórios verdes e merge protegido do PR da passada 02. Na branch de trabalho,
+o aceite SQL está comprovado; CI/merge continuam sendo condições explícitas.
 
-| Passada | Escopo | Estado |
-| --- | --- | --- |
-| 01 | Fundação, contratos, governança e CI | BLOQUEADA: publicação e proteção pendentes |
-| 02 | PostgreSQL exclusivo e segurança | NÃO_INICIADA |
-| 03 | OIDC e identidade | NÃO_INICIADA |
-| 04 | Ingestão autenticada | NÃO_INICIADA |
-| 05 | Fila e classificação global | NÃO_INICIADA |
-| 06 | Currículo transitório e perfil privado | NÃO_INICIADA |
-| 07 | Matching e corte temporal | NÃO_INICIADA |
-| 08 | Sincronização, candidaturas e exclusão | NÃO_INICIADA |
-| 09 | APK e testes controlados | NÃO_INICIADA |
-| 10 | Certificação pública integrada | NÃO_INICIADA |
+| Passada | Estado resultante do merge |
+| --- | --- |
+| 01 | CERTIFICADA E MERGED; 49 testes e dois checks aprovados |
+| 02 | CERTIFICADA E MERGED; 18 testes SQL e restore/ledger aprovados |
+| 03 | AUTORIZADA a iniciar após a 02; exige seus próprios gates |
+| 04–10 | NÃO_AUTORIZADAS nesta sequência |
 
-## Gate imediato
-
-Revisão humana do candidato e autorização de publicação. A futura main exige PR,
-checks contracts e repository-policy, bloqueio de force-push/deleção e regras
-aplicadas também a administradores. Enquanto houver um mantenedor, aprovação de
-outro revisor não será obrigatória. Não fazer merge automaticamente.
-
-## Evidências e limites
-
-Ver docs/evidence-01.md para a verificação local deste candidato. Históricos de
-execução anteriores não são evidências públicas desta árvore. A configuração real
-no GitHub e as integrações ainda devem ser verificadas quando autorizadas.
-A passada 02 requer nova ordem e workers de teste certificados.
-
-## Marco de preparação local
-
-Candidato com 81 arquivos, 21 schemas e 20 exemplos. Testes offline (49) e política de publicação aprovados. Revisão editorial preparada para avaliação do proprietário. Publicação, proteção remota, merge e passada 02 não executados.
+**Após merge: 2/10 validadas.** Não confundir a implementação da branch com a
+certificação final: o PR/CI é a prova pública de atendimento às condições acima.
+Evidências em docs/evidence-02.md; inventários e logs operacionais ficam privados.
+A autorização sequencial não permite novo custo, credencial, produção, deploy ou
+mudança de produto. A auditoria geral de Apps foi retirada dos gates pelo proprietário.

@@ -20,3 +20,7 @@ Este documento descreve desenho, não serviços implantados ou contas configurad
 
 Mudança de produto, custo, privacidade ou fronteira exige revisão do proprietário.
 A preparação deste candidato não autoriza publicação, proteção remota, merge ou a 02.
+
+## Implementação da passada 02
+
+PostgreSQL 16 e Psycopg 3.3.6/pool 3.3.3; migrações SQL numeradas, checksum e advisory lock, sem ORM. Ambiente descartável exclusivo do job, sem TCP ou rede de testes, dados em tmpfs. Migração aditiva e rollback de índices preservam dados. Autorização sequencial explícita para 01–03 substitui apenas a espera entre essas passadas; 04 não autorizada. Controles produtivos e integração real permanecem nos gates próprios.
