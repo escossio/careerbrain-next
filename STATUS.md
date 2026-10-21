@@ -1,9 +1,11 @@
 # STATUS — CareerBrain Next
 
-## Checkpoint da passada 04
+## Checkpoint da passada 05
 
 **4/10 certificadas e incorporadas à main.** A implementação e a correção
 contratual da 04 passaram em CI e foram incorporadas por PRs protegidos.
+A 05 está em branch isolada; integração no worker passou, com CI e merge ainda
+pendentes.
 
 - 01 certificada e merged; fundação, contratos V1 e CI offline aprovados.
 - 02: PostgreSQL 16, papéis mínimos/RLS, fila/outbox, migrações/checksums e índices.
@@ -16,7 +18,10 @@ contratual da 04 passaram em CI e foram incorporadas por PRs protegidos.
   Direitos de fontes reais permanecem gate externo.
 - Ajuste da 04 testado em worker: mesma evidência aprovada por produtores
   distintos resulta em duplicata, sem publicação ou trabalho novo.
-- 05–10 não iniciadas nesta execução.
+- 05 implementada na branch: consumo com lease/fencing, cache global versionado
+  e classificação determinística sintética, sem tráfego de IA real. O worker
+  isolado aprovou 11 testes novos e as suítes anteriores; aguardam PR e checks.
+- 06–10 não iniciadas nesta execução.
 
 Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md e
 docs/ingestion-04.md. Nenhum banco produtivo, deploy público,
