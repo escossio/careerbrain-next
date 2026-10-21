@@ -146,11 +146,13 @@ class CareerBrainAPI:
                 value = self.ingestion.decode(raw, key)
                 output, replay = self.ingestion.submit(producer, value)
                 if output['schema_version'] == 'careerbrain.error.v1':
-                    status = '422 Unprocessable Content' if output['code'] != 'SOURCE_NOT_AUTHORIZED' else '403 Forbidden'
+                    status = ('403 Forbidden' if output['code'] == 'SOURCE_NOT_AUTHORIZED'
+                              else '409 Conflict' if output['code'] == 'EVENT_CONFLICT'
+                              else '422 Unprocessable Content')
                 else:
                     status = '202 Accepted'
-                    if replay:
-                        headers.append(('Idempotent-Replay', 'true'))
+                if replay:
+                    headers.append(('Idempotent-Replay', 'true'))
             elif method == 'GET' and path.startswith('/v1/ingestion/batches/'):
                 batch_id = path.removeprefix('/v1/ingestion/batches/')
                 if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}', batch_id):
@@ -172,6 +174,8 @@ class CareerBrainAPI:
             status, output = f'{failure.status} {reason}', failure.response(correlation)
             if failure.code == 'BATCH_IN_PROGRESS':
                 headers.append(('Retry-After', '1'))
+            if failure.code == 'RATE_LIMITED':
+                headers.append(('Retry-After', '60'))
         except psycopg.Error:
             status = '503 Service Unavailable'
             output = IngestionFailure(503, 'UNAVAILABLE', retryable=True).response(correlation)

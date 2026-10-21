@@ -70,6 +70,17 @@ class IngestionService:
         batch_id = value['batch_id']
         hashed = digest(value)
         correlation = str(uuid4())
+        with self.pool.connection() as limiter:
+            with limiter.transaction():
+                attempts = limiter.execute('''INSERT INTO ops.producer_rate(producer_id,attempts)
+                    VALUES(%s,1) ON CONFLICT(producer_id) DO UPDATE SET
+                    window_start=CASE WHEN ops.producer_rate.window_start<=transaction_timestamp()-interval '1 minute'
+                      THEN transaction_timestamp() ELSE ops.producer_rate.window_start END,
+                    attempts=CASE WHEN ops.producer_rate.window_start<=transaction_timestamp()-interval '1 minute'
+                      THEN 1 ELSE ops.producer_rate.attempts+1 END
+                    RETURNING attempts''', (producer,)).fetchone()[0]
+        if attempts > 120:
+            raise IngestionFailure(429, 'RATE_LIMITED', retryable=True)
         with self.pool.connection() as conn:
             with conn.transaction():
                 # Try-lock gives a bounded 409 for concurrent replays; unique receipt is durable.
@@ -86,7 +97,7 @@ class IngestionService:
                     if old[1] == 'ACCEPTED':
                         return old[2], True
                     if old[1] == 'REJECTED':
-                        raise IngestionFailure(409, 'BATCH_REJECTED')
+                        return old[2], True
                     raise IngestionFailure(409, 'BATCH_IN_PROGRESS', retryable=True)
                 # Serialize overlapping logical vacancies in a global order, across batches.
                 names = sorted({f"vacancy:{r['vacancy']['source_id']}:{r['vacancy']['source_vacancy_id']}"
@@ -114,6 +125,8 @@ class IngestionService:
                         (producer_id,route_version,batch_id,digest,state,receipt)
                         VALUES(%s,%s,%s,%s,'REJECTED',%s)''',
                         (producer, ROUTE, batch_id, hashed, Jsonb(failure.response(correlation))))
+                    conn.execute("INSERT INTO ops.audit_events(action,entity_id,actor_role) VALUES('INGESTION_REJECTED',%s,'cb_ingest')",
+                                 (producer,))
                     return failure.response(correlation), False
                 receipt = dict(schema_version='careerbrain.ingestion-receipt.v1',
                                batch_id=batch_id, correlation_id=correlation,
@@ -123,6 +136,8 @@ class IngestionService:
                     (producer_id,route_version,batch_id,digest,state,receipt)
                     VALUES(%s,%s,%s,%s,'ACCEPTED',%s)''',
                     (producer, ROUTE, batch_id, hashed, Jsonb(receipt)))
+                conn.execute("INSERT INTO ops.audit_events(action,entity_id,actor_role) VALUES('INGESTION_ACCEPTED',%s,'cb_ingest')",
+                             (producer,))
             if fault == 'after_commit':
                 raise RuntimeError('synthetic crash after commit')
         return receipt, False

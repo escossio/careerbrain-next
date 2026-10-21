@@ -109,6 +109,8 @@ class IngestionTests(unittest.TestCase):
             self.submit(other)
         self.assertEqual(error.exception.code, 'IDEMPOTENCY_CONFLICT')
         self.assertEqual(self.counts(), (1, 1, 1))
+        self.assertEqual(self.admin.execute("SELECT count(*) FROM ops.audit_events WHERE entity_id=%s AND action='INGESTION_ACCEPTED'",
+                                            (self.producer,)).fetchone()[0], 1)
 
     def test_duplicate_event_is_not_new_and_changed_publish_conflicts(self):
         batch = self.batch(); self.submit(batch)
@@ -131,6 +133,16 @@ class IngestionTests(unittest.TestCase):
         state = self.admin.execute('SELECT state FROM ops.ingestion_receipts WHERE producer_id=%s AND batch_id=%s',
                                    (self.producer, batch['batch_id'])).fetchone()[0]
         self.assertEqual(state, 'REJECTED')
+        self.assertEqual(self.admin.execute("SELECT count(*) FROM ops.audit_events WHERE entity_id=%s AND action='INGESTION_REJECTED'",
+                                            (self.producer,)).fetchone()[0], 1)
+
+    def test_rate_limit_is_per_producer_and_has_no_partial_commit(self):
+        self.admin.execute('INSERT INTO ops.producer_rate(producer_id,attempts) VALUES(%s,120)',
+                           (self.producer,))
+        with self.assertRaises(IngestionFailure) as error:
+            self.submit(self.batch())
+        self.assertEqual((error.exception.status, error.exception.code), (429, 'RATE_LIMITED'))
+        self.assertEqual(self.counts(), (0, 0, 0))
 
     def test_auth_scope_source_and_sql_permissions(self):
         with self.assertRaises(IngestionFailure):

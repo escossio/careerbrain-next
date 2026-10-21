@@ -23,6 +23,11 @@ CREATE TABLE catalog.ingestion_events (
   event_id uuid PRIMARY KEY REFERENCES catalog.publication_events(id),
   record_digest text NOT NULL CHECK (record_digest ~ '^[a-f0-9]{64}$')
 );
+CREATE TABLE ops.producer_rate (
+  producer_id uuid PRIMARY KEY REFERENCES catalog.producers(id),
+  window_start timestamptz NOT NULL DEFAULT transaction_timestamp(),
+  attempts integer NOT NULL DEFAULT 0 CHECK (attempts >= 0)
+);
 CREATE FUNCTION catalog.authenticate_producer(candidate_digest text) RETURNS uuid
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path=pg_catalog AS $$
  SELECT t.producer_id FROM catalog.producer_tokens t JOIN catalog.producers p ON p.id=t.producer_id
@@ -40,5 +45,8 @@ GRANT INSERT ON catalog.vacancies,catalog.publication_events,catalog.revisions,
 GRANT UPDATE(content,content_version) ON catalog.vacancies TO cb_ingest;
 GRANT UPDATE(state) ON catalog.publication_events TO cb_ingest;
 GRANT SELECT,INSERT,UPDATE ON ops.ingestion_receipts TO cb_ingest;
+GRANT SELECT,INSERT,UPDATE ON ops.producer_rate TO cb_ingest;
+GRANT INSERT ON ops.audit_events TO cb_ingest;
+GRANT USAGE ON SEQUENCE ops.audit_events_id_seq TO cb_ingest;
 GRANT SELECT,INSERT ON queue.catalog_jobs,queue.catalog_outbox TO cb_ingest;
 GRANT USAGE ON SEQUENCE queue.catalog_outbox_id_seq TO cb_ingest;

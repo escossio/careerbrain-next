@@ -15,6 +15,12 @@ oficial. Não faz fetch de URLs. Falha rejeita o lote inteiro; apenas digest e e
 sanitizado podem ficar em recibo de rejeição. Uma nova chave é necessária para
 corrigir lote rejeitado. Corpos, tokens e URLs com token não entram em logs.
 
+O contador SQL por produtor admite até 120 tentativas por minuto, com resposta
+`429` e `Retry-After: 60` após o limite. O contador não guarda payload nem token.
+Auditoria técnica persiste somente o tipo de aceite/rejeição e o identificador
+interno do produtor. A retenção desses registros e a quota de chaves são controles
+operacionais exigidos antes de exposição produtiva.
+
 Uma transação contém eventos, conteúdo, revisões, recibo, filas e outbox.
 Advisory locks por chave e vaga lógica impedem reenvio concorrente e escrita
 simultânea conflitante. Lock ocupado resulta em `409 BATCH_IN_PROGRESS` com
