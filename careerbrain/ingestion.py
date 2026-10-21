@@ -58,13 +58,23 @@ class IngestionService:
     def decode(raw: bytes, key: str) -> dict:
         try:
             value = strict_load(raw)
-            validate('ingestion-batch', value)
         except ContractError as error:
             status = 413 if error.code == 'PAYLOAD_TOO_LARGE' else 422
             raise IngestionFailure(status, error.code) from error
-        if key != value['batch_id']:
+        if not isinstance(value.get('batch_id'), str) or key != value['batch_id']:
             raise IngestionFailure(400, 'SCHEMA_INVALID')
         return value
+
+    @staticmethod
+    def _reject(conn, producer, batch_id, hashed, correlation, failure):
+        response = failure.response(correlation)
+        conn.execute('''INSERT INTO ops.ingestion_receipts
+            (producer_id,route_version,batch_id,digest,state,receipt)
+            VALUES(%s,%s,%s,%s,'REJECTED',%s)''',
+            (producer, ROUTE, batch_id, hashed, Jsonb(response)))
+        conn.execute("INSERT INTO ops.audit_events(action,entity_id,actor_role) VALUES('INGESTION_REJECTED',%s,'cb_ingest')",
+                     (producer,))
+        return response, False
 
     def submit(self, producer: UUID, value: dict, *, fault: str | None = None) -> tuple[dict, bool]:
         batch_id = value['batch_id']
@@ -99,6 +109,14 @@ class IngestionService:
                     if old[1] == 'REJECTED':
                         return old[2], True
                     raise IngestionFailure(409, 'BATCH_IN_PROGRESS', retryable=True)
+                try:
+                    validate('ingestion-batch', value)
+                except ContractError as error:
+                    parts = error.field.split('/') if error.field else []
+                    index = int(parts[1]) if len(parts) > 1 and parts[0] == 'records' and parts[1].isdigit() else None
+                    failure = IngestionFailure(422, error.code, index=index,
+                                               field='/'.join(parts[2:]) or 'record')
+                    return self._reject(conn, producer, batch_id, hashed, correlation, failure)
                 # Serialize overlapping logical vacancies in a global order, across batches.
                 names = sorted({f"vacancy:{r['vacancy']['source_id']}:{r['vacancy']['source_vacancy_id']}"
                                 if r['operation'] == 'publish' else
@@ -121,13 +139,7 @@ class IngestionService:
                             raise RuntimeError('synthetic crash before commit')
                 except IngestionFailure as failure:
                     # Save only a sanitized rejection, never a partial catalog mutation.
-                    conn.execute('''INSERT INTO ops.ingestion_receipts
-                        (producer_id,route_version,batch_id,digest,state,receipt)
-                        VALUES(%s,%s,%s,%s,'REJECTED',%s)''',
-                        (producer, ROUTE, batch_id, hashed, Jsonb(failure.response(correlation))))
-                    conn.execute("INSERT INTO ops.audit_events(action,entity_id,actor_role) VALUES('INGESTION_REJECTED',%s,'cb_ingest')",
-                                 (producer,))
-                    return failure.response(correlation), False
+                    return self._reject(conn, producer, batch_id, hashed, correlation, failure)
                 receipt = dict(schema_version='careerbrain.ingestion-receipt.v1',
                                batch_id=batch_id, correlation_id=correlation,
                                accepted_at=timestamp(now), status='ACCEPTED',

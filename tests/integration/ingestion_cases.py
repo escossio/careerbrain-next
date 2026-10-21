@@ -144,6 +144,19 @@ class IngestionTests(unittest.TestCase):
         self.assertEqual((error.exception.status, error.exception.code), (429, 'RATE_LIMITED'))
         self.assertEqual(self.counts(), (0, 0, 0))
 
+    def test_structural_rejection_keeps_digest_and_requires_new_key(self):
+        batch = self.batch()
+        del batch['records'][0]['vacancy']['title']
+        error, replay = self.submit(batch)
+        self.assertEqual((error['code'], replay), ('SCHEMA_INVALID', False))
+        self.assertEqual(error['items'][0]['index'], 0)
+        self.assertEqual(self.submit(batch), (error, True))
+        repaired = self.batch(batch_id=batch['batch_id'])
+        with self.assertRaises(IngestionFailure) as conflict:
+            self.submit(repaired)
+        self.assertEqual(conflict.exception.code, 'IDEMPOTENCY_CONFLICT')
+        self.assertEqual(self.counts(), (0, 0, 0))
+
     def test_auth_scope_source_and_sql_permissions(self):
         with self.assertRaises(IngestionFailure):
             self.service.authenticate('wrong-' + uuid4().hex)
