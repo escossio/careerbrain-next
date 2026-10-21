@@ -10,7 +10,7 @@ from uuid import UUID, uuid4
 
 from psycopg.types.json import Jsonb
 
-from tools.contracts import ContractError, validate
+from tools.contracts import ContractError, validate, validate_evidence
 
 
 MAX_BYTES = 5 * 1024 * 1024
@@ -184,12 +184,15 @@ class ResumeService:
             self.store.delete(claim.handle)
             return 'EXPIRED' if result else 'FENCED'
         try:
+            text = self.extractor.extract(document)
             status, attributes = self.extractor.profile(document)
-            validate('private-profile-v2', {'schema_version': 'careerbrain.profile.v2',
+            profile = {'schema_version': 'careerbrain.profile.v2',
                      'tenant_id': str(claim.tenant_id), 'profile_version': 1,
                      'generation': claim.generation, 'status': status, 'attributes': attributes,
                      'extractor_version': self.extractor_version,
-                     'taxonomy_version': self.taxonomy_version})
+                     'taxonomy_version': self.taxonomy_version}
+            validate('private-profile-v2', profile)
+            validate_evidence(text, profile, schema='private-profile-v2')
             result = self._call('private.complete_resume_job', claim, status, Jsonb(attributes),
                                 self.extractor_version, self.taxonomy_version)
         except (ResumeRejected, ContractError):
