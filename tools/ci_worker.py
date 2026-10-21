@@ -24,6 +24,9 @@ def main():
     def git(*a):return subprocess.run(['git','--no-optional-locks','-C',str(ROOT),*a],capture_output=True,check=True).stdout
     if git('status','--porcelain=v1').strip():raise RuntimeError('Commit the reviewed source before dispatch')
     sha=git('rev-parse','HEAD').decode().strip()
+    admitted={x['path'] for x in json.loads((ROOT/'public-allowlist.json').read_text())['files']}
+    if set(git('ls-files','-z').decode().strip('\0').split('\0')) != admitted:
+        raise RuntimeError('Tracked source differs from the reviewed allowlist')
     archive=evidence/'source.tar'
     with tarfile.open(archive,'w') as tar:
         for name in git('ls-files','-z').decode().strip('\0').split('\0'):
@@ -36,12 +39,15 @@ def main():
     remote('mkdir -m 700 '+shlex.quote(job),capture_output=True,check=True)
     subprocess.run(['scp','-q','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes',str(archive),args.ssh_target+':'+job+'/source.tar'],check=True)
     extract='''import pathlib,tarfile,sys
-job=pathlib.Path(sys.argv[1]);code=job/'code';code.mkdir(mode=0o755)
+job=pathlib.Path(sys.argv[1]);code=job/'code';code.mkdir(mode=0o755);code.chmod(0o755)
 with tarfile.open(job/'source.tar') as archive:
  for item in archive:
   relative=pathlib.PurePosixPath(item.name)
   assert item.isfile() and not relative.is_absolute() and '..' not in relative.parts
   target=code/pathlib.Path(relative);target.parent.mkdir(mode=0o755,parents=True,exist_ok=True)
+  for parent in [target.parent,*target.parent.parents]:
+   if parent==job:break
+   parent.chmod(0o755)
   target.write_bytes(archive.extractfile(item).read());target.chmod(0o644)
 (job/'source-sha').write_text(sys.argv[2]+'\\n')
 '''

@@ -29,3 +29,7 @@ backups/
 *.log
 *.bak
 *.before
+
+# Reviewed source migrations only; SQL dumps elsewhere remain ignored.
+!db/bootstrap.sql
+!db/migrations/*.sql

@@ -37,7 +37,7 @@ def main():
         ids=run('docker','ps','-aq','--no-trunc').stdout.decode().splitlines()
         if not ids:return []
         return sorted(run('docker','inspect','--format','{{.Id}} {{.Image}} {{.State.StartedAt}} {{.RestartCount}}',*ids).stdout.decode().splitlines())
-    before=inventory();socket=job/'socket';socket.mkdir(mode=0o775);os.chown(socket,70,70)
+    before=inventory();socket=job/'socket';socket.mkdir(mode=0o700);socket.chmod(0o1777)
     name='cbn-ci-'+uuid.uuid4().hex[:16];image='careerbrain-next-ci:'+hashlib.sha256((code/'requirements-db.txt').read_bytes()).hexdigest()[:16]
     report={'status':'FAIL','job_id':name,'source_sha':(job/'source-sha').read_text().strip(),'network':'none','postgres_image':POSTGRES,'python_image':PYTHON,'results':{}}
     started=False
