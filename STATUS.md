@@ -1,9 +1,9 @@
 # STATUS — CareerBrain Next
 
-## Checkpoint da passada 05
+## Checkpoint da passada 06
 
-**5/10 certificadas e incorporadas à main.** A passada 05 foi integrada pelo
-PR #7, após testes isolados e os checks obrigatórios.
+**6/10 certificadas e incorporadas à main.** A passada 06 foi integrada pelo
+PR #9, após testes isolados e os checks obrigatórios.
 
 - 01 certificada e merged; fundação, contratos V1 e CI offline aprovados.
 - 02: PostgreSQL 16, papéis mínimos/RLS, fila/outbox, migrações/checksums e índices.
@@ -20,12 +20,13 @@ PR #7, após testes isolados e os checks obrigatórios.
   e classificação determinística sintética, sem tráfego de IA real. O worker
   isolado aprovou 11 testes novos e as suítes anteriores; `contracts` e
   `repository-policy` passaram no PR #7.
-- 06 implementada em branch: PDF transitório, handle opaco, limpeza, CAS de
-  geração/epoch e perfil V2. CI03 aprovou 11 testes novos e regressões; PR,
-  checks e merge ainda são gates. A prova de ambiente produtivo continua externa.
+- 06 certificada e merged: PDF transitório, handle opaco, limpeza, CAS de
+  geração/epoch e perfil V2. CI03 aprovou 11 testes novos e regressões;
+  `contracts` e `repository-policy` passaram no PR #9. A prova de ambiente
+  produtivo continua externa.
 - 07–10 não iniciadas nesta execução.
 
-Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md e
-docs/ingestion-04.md. Nenhum banco produtivo, deploy público,
+Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md,
+docs/ingestion-04.md e docs/resume-06.md. Nenhum banco produtivo, deploy público,
 chamada de IA ou mudança de credenciais/permissões de integrações.
 Auditoria geral de GitHub Apps permanece atividade de segurança independente.
