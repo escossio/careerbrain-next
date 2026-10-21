@@ -3,7 +3,7 @@ ALTER TABLE private.profiles
   ADD COLUMN status text NOT NULL DEFAULT 'READY' CHECK(status IN ('READY','UNCERTAIN'));
 ALTER TABLE queue.private_jobs
   ADD COLUMN available_at timestamptz NOT NULL DEFAULT transaction_timestamp();
-ALTER TABLE queue.private_jobs DROP CONSTRAINT queue_private_jobs_state_check;
+ALTER TABLE queue.private_jobs DROP CONSTRAINT private_jobs_state_check;
 ALTER TABLE queue.private_jobs ADD CONSTRAINT private_jobs_state_check
   CHECK(state IN ('READY','LEASED','DONE','FAILED','EXPIRED','CANCELLED'));
 CREATE INDEX private_resume_ready ON queue.private_jobs(expires_at,available_at,id)
