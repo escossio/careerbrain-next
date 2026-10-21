@@ -1,6 +1,6 @@
 # Evidência técnica da passada 06
 
-A fonte `5f166a5b73ecb390019356deae6dfb1d6da086af` passou no CI03 descartável,
+A fonte `837dd97e4e475c02eb1edb04080d113986600698` passou no CI03 descartável,
 sem rede: 18 testes SQL, restauração/ledger, 12 de autenticação, 12 de ingestão,
 11 de classificação e 11 de currículo. Os casos de currículo cobrem sucesso,
 incerteza, limites defensivos, idempotência, geração/epoch, cancelamento,
