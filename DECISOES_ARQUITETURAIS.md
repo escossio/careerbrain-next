@@ -24,3 +24,9 @@ A preparação deste candidato não autoriza publicação, proteção remota, me
 ## Implementação da passada 02
 
 PostgreSQL 16 e Psycopg 3.3.6/pool 3.3.3; migrações SQL numeradas, checksum e advisory lock, sem ORM. Ambiente descartável exclusivo do job, sem TCP ou rede de testes, dados em tmpfs. Migração aditiva e rollback de índices preservam dados. Autorização sequencial explícita para 01–03 substitui apenas a espera entre essas passadas; 04 não autorizada. Controles produtivos e integração real permanecem nos gates próprios.
+
+## Implementação da passada 03
+
+API WSGI explícita e PyJWT/cryptography para RS256 com chave pública Google em URL fixa. Audiência e presenters exigidos na construção da aplicação, sem valor real presumido. Challenge de uso único, tokens opacos com digest no PostgreSQL, refresh rotativo com revogação da família em replay, papéis SQL distintos e revogação transacional na exclusão. Migração 003 é aditiva e não admite downgrade destrutivo. Testes com RSA e usuários sintéticos no worker isolado; Google/Android reais seguem os gates dependentes.
+
+Os dois client IDs públicos da configuração OAuth foram informados pelo proprietário e validados em teste sintético sem rede. Permanecem fora do Git; não houve alteração da decisão de produto nem uso de client secret.

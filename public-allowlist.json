@@ -72,8 +72,20 @@
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
     },
     {
+      "path": "careerbrain/api.py",
+      "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
+    },
+    {
+      "path": "careerbrain/auth.py",
+      "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
+    },
+    {
       "path": "careerbrain/db.py",
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "careerbrain/server.py",
+      "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
     {
       "path": "ci/Dockerfile.database",
@@ -353,6 +365,10 @@
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
     },
     {
+      "path": "db/migrations/003_identity.sql",
+      "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
+    },
+    {
       "path": "docs/acceptance.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -381,9 +397,17 @@
       "reason": "Evidência técnica saneada dos testes reais da passada 02; sem inventário operacional."
     },
     {
+      "path": "docs/evidence-03.md",
+      "reason": "Evidência pública sintética da passada 03; logs e inventários operacionais excluídos."
+    },
+    {
       "path": "docs/gates.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
+    },
+    {
+      "path": "docs/identity-03.md",
+      "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
     {
       "path": "docs/operations.md",
@@ -408,6 +432,10 @@
     {
       "path": "requirements-db.txt",
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "tests/integration/auth_cases.py",
+      "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
     {
       "path": "tests/integration/database_cases.py",

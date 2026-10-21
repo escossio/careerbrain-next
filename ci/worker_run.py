@@ -99,6 +99,11 @@ def main():
         (results/'restore.log').write_bytes(restored.stdout+restored.stderr)
         if restored.returncode:raise RuntimeError('Restore/erasure verification failed; see restore.log')
         report['results']['restore']=json.loads(restored.stdout)
+        authentication=client(['python','-m','unittest','discover','-s','tests/integration','-p','auth_cases.py','-v'])
+        (results/'authentication.log').write_bytes(authentication.stdout+authentication.stderr)
+        if authentication.returncode:raise RuntimeError('Identity integration tests failed; see authentication.log')
+        assert b'\nOK\n' in authentication.stderr
+        report['results']['authentication']='PASS'
         report['backup_sha256']=hashlib.sha256(dump).hexdigest()
         report['status']='PASS'
     except Exception as error:
