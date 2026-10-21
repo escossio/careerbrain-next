@@ -8,8 +8,10 @@ interrupção, perda de temporário, expiração, limpeza, isolamento de tenant,
 multipart autenticado e limites de memória/swap/core dump. O PostgreSQL foi
 removido e os containers preexistentes foram preservados.
 
-Os checks do PR validarão a fonte final. Logs, hashes e inventários operacionais
-ficam em checkpoint privado.
+No PR #9, `contracts` e `repository-policy` aprovaram a fonte final
+`67359a9c01a8aa170e49c6073dd48e25a6f12ece`; ela foi integrada por squash como
+`e884cefb40dc4871f7361a6bc41c493d950f9362`. Logs, hashes e inventários
+operacionais ficam em checkpoint privado.
 
 O teste prova somente o runtime isolado. Currículos reais, tráfego de IA e a
 proteção do ambiente produtivo permanecem fora desta execução.
