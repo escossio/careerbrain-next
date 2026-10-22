@@ -1,7 +1,7 @@
 # CareerBrain Next — estado da execução
 
-Checkpoint certificado da passada 06. As passadas 01–06 estão certificadas
-na main; a 06 passou nos testes isolados, checks e merge protegido.
+Checkpoint certificado da passada 07. As passadas 01–07 estão certificadas
+na main; a 07 passou nas regressões isoladas, checks e merge protegido.
 
 | Passada | Estado |
 | --- | --- |
@@ -11,12 +11,12 @@ na main; a 06 passou nos testes isolados, checks e merge protegido.
 | 04 | CERTIFICADA E MERGED; 12 testes de ingestão e gates SQL aprovados no worker |
 | 05 | CERTIFICADA E MERGED; PR #7, 11 testes novos, regressões e dois checks aprovados |
 | 06 | CERTIFICADA E MERGED; PR #9, 11 testes novos, regressões e dois checks aprovados |
-| 07 | EXTENSÃO V2/V3 implementada no branch; aguarda teste PostgreSQL no CI03 e validação final; PR #11 segue rascunho, sem certificação/merge |
+| 07 | CERTIFICADA E MERGED; PR #11, CI03 (5 matching e regressões), 51 offline e checks verdes |
 | 08–10 | NÃO_INICIADAS nesta execução |
 
-**6/10 validadas.** Evidências públicas em docs/evidence-02.md,
+**7/10 validadas.** Evidências públicas em docs/evidence-02.md,
 docs/evidence-03.md, docs/evidence-04.md, docs/evidence-05.md e docs/evidence-06.md;
-inventários e logs operacionais ficam privados. O PR #9 passou nos checks
-obrigatórios e foi incorporado sem bypass da proteção da main.
+inventários e logs operacionais ficam privados. Os PRs #9 e #11 passaram nos checks
+obrigatórios e foram incorporados sem bypass da proteção da main.
 A autorização sequencial não permite novo custo, credencial, produção, deploy ou
 mudança de produto. A auditoria geral de Apps foi retirada dos gates pelo proprietário.
