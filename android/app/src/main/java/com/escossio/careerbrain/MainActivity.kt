@@ -29,6 +29,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable private fun CareerBrainScreen(state: ScreenState, model: CareerBrainViewModel, choosePdf: () -> Unit) {
     var confirmDelete by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     Scaffold(topBar = { TopAppBar(title = { Text("CareerBrain Next") }) }) { padding ->
