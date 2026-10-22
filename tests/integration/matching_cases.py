@@ -60,7 +60,7 @@ class MatchingTests(unittest.TestCase):
 
     def test_cutoff_equal_after_late_observation_and_evidenced_affinity(self):
         created=self.tenant[2]
-        before=self.event(created-timedelta(microseconds=1),observed=created+timedelta(days=1))
+        before=self.event(created-timedelta(microseconds=1),observed=created+timedelta(microseconds=1))
         equal=self.event(created)
         after=self.event(created+timedelta(microseconds=1))
         self.assertIsNone(self.service.schedule(str(self.tenant[1]),str(before)))
@@ -106,7 +106,7 @@ class MatchingTests(unittest.TestCase):
                                                     'quote':'I do not hold a Python License','start':0,'end':30}}
         validate_requirement_evidence('Python License',requirement)
         validate_requirement_evidence('I do not hold a Python License',attestation)
-        self.admin.execute("UPDATE private.profiles SET contract_version='careerbrain.profile.v3',source_version=%s,negative_attestations=%s WHERE tenant_id=%s",
+        self.admin.execute("UPDATE private.profiles SET profile_version=profile_version+1,contract_version='careerbrain.profile.v3',source_version=%s,negative_attestations=%s WHERE tenant_id=%s",
                            ('profile-source-v2',Jsonb([attestation]),self.tenant[1]))
         result={'schema_version':'careerbrain.semantics.v2','status':'READY','attributes':[],
                 'source_version':'vacancy-content-v2','mandatory_requirements':[requirement]}
@@ -125,7 +125,7 @@ class MatchingTests(unittest.TestCase):
                                  'quote':'Python License','start':0,'end':14}}
         result={'schema_version':'careerbrain.semantics.v2','status':'READY','attributes':[],
                 'source_version':'vacancy-content-v2','mandatory_requirements':[requirement]}
-        self.admin.execute("UPDATE private.profiles SET contract_version='careerbrain.profile.v3',source_version='profile-source-v2',negative_attestations='[]'::jsonb WHERE tenant_id=%s",(self.tenant[1],))
+        self.admin.execute("UPDATE private.profiles SET profile_version=profile_version+1,contract_version='careerbrain.profile.v3',source_version='profile-source-v2',negative_attestations='[]'::jsonb WHERE tenant_id=%s",(self.tenant[1],))
         absent=self.event(self.tenant[2],classification_result=result)
         self.assertIsNotNone(self.service.schedule(str(self.tenant[1]),str(absent)))
         self.assertEqual(self.service.process_once(),'READY')
@@ -135,7 +135,7 @@ class MatchingTests(unittest.TestCase):
                             'quote':'invented attestation','start':0,'end':19}}
         with self.assertRaises(ContractError):
             validate_requirement_evidence('I do not hold a Python License',forged)
-        self.admin.execute('UPDATE private.profiles SET negative_attestations=%s WHERE tenant_id=%s',(Jsonb([forged]),self.tenant[1]))
+        self.admin.execute('UPDATE private.profiles SET profile_version=profile_version+1,negative_attestations=%s WHERE tenant_id=%s',(Jsonb([forged]),self.tenant[1]))
         forged_event=self.event(self.tenant[2],classification_result=result)
         self.assertIsNotNone(self.service.schedule(str(self.tenant[1]),str(forged_event)))
         self.assertEqual(self.service.process_once(),'READY')

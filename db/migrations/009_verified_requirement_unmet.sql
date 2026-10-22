@@ -54,5 +54,5 @@ BEGIN
   RETURN private.complete_match_job(job,owner,fence,result_affinity,result_confidence,result_reasons);
 END $$;
 
-GRANT EXECUTE ON FUNCTION private.complete_match_job(uuid,uuid,bigint,numeric,numeric,text[],jsonb)
+-- Grant only schema lookup needed for the already-scoped classification view.\nGRANT USAGE ON SCHEMA catalog TO cb_private_worker;\n\nGRANT EXECUTE ON FUNCTION private.complete_match_job(uuid,uuid,bigint,numeric,numeric,text[],jsonb)
   TO cb_private_worker;
