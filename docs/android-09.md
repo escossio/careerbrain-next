@@ -16,5 +16,6 @@ sha256sum app/build/outputs/apk/debug/app-debug.apk
 ```
 
 O APK não é release, não usa keystore de produção e não deve ser publicado. A
-instrumentação requer emulador/dispositivo descartável; ausência dessa evidência
-não autoriza certificação da passada.
+instrumentação requer emulador/dispositivo descartável; o teste controlado de
+inicialização limpa usa apenas a identidade sintética e só é executado depois de
+verificar SDK, AVD, KVM, disco e memória no worker.
