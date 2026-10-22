@@ -639,6 +639,10 @@
       "reason": "Passada 09: testes unitários com fixtures sintéticas."
     },
     {
+      "path": "android/app/src/androidTest/java/com/escossio/careerbrain/MainActivityInstrumentedTest.kt",
+      "reason": "Passada 09: instrumentação descartável de inicialização com identidade sintética."
+    },
+    {
       "path": "docs/android-09.md",
       "category": "public-documentation",
       "review_basis": "Instruções controladas do APK debug sem inventário operacional."
