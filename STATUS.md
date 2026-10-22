@@ -1,23 +1,25 @@
 # STATUS — CareerBrain Next
 
-## Passada 07 em implementação
+## Passada 07 — certificada e integrada
 
-O branch `feat/passada-07-matching` contém a migração aditiva e os testes sintéticos
-de matching privado e foi publicado em `origin` no commit
-`cd0d26b8879701405934e9bc7f8cc34fb9d4b260`. A certificação, PR, checks, merge e
-atualização para 7/10 estão bloqueados externamente: duas tentativas do dispatcher
-PostgreSQL encontraram CI03 pronto, mas a descoberta foi roteada para outro
-repositório e não iniciou a suíte; a autenticação do GitHub CLI também está inválida
-para criar o PR. A decisão de produto para negativa foi aprovada e a extensão
-compatível V2/V3 foi implementada localmente: somente requisito obrigatório e
-atestado `NOT_MET` explícitos, ambos versionados e com trechos/offsets verificados,
-emitem `REQUIREMENT_UNMET`; V1/V2 e ausência seguem `REQUIREMENT_UNKNOWN`. A
-certificação continua bloqueada até o PostgreSQL no CI03; não houve fallback local
-pesado. A passada 08 não foi iniciada.
+A execução 07 foi concluída pelo PR #11, merge squash
+a5fab98cfa8cc28bfb9c0caeb0d4101d47461faa. A branch final
+feat/passada-07-matching (979c59327b3814acf817ce43499eb19d535e6c6f)
+inclui matching privado e corte temporal, versões e provas negativas
+explícitas. REQUIREMENT_UNMET exige requisito obrigatório e atestado
+NOT_MET com evidências versionadas; ausência permanece REQUIREMENT_UNKNOWN.
+Contratos legados V1 permanecem compatíveis.
 
-## Checkpoint da passada 06
+CI03 sem rede: PostgreSQL 18, restore/ledger, identidade 12,
+ingestão 12, classificação 11, currículo 11 e matching 5: todos PASS.
+GitHub Actions run 39849211014: 51 testes offline, checks contracts
+e repository-policy SUCCESS no mesmo SHA. Nenhum artefato dos jobs,
+credencial, dado real, deploy ou chamada paga. Main protegida.
+08–10 não iniciadas nesta execução.
 
-**6/10 certificadas e incorporadas à main.** A passada 06 foi integrada pelo
+## Histórico das passadas 01–06
+
+**7/10 certificadas e incorporadas à main.** A passada 06 foi integrada pelo
 PR #9, após testes isolados e os checks obrigatórios.
 
 - 01 certificada e merged; fundação, contratos V1 e CI offline aprovados.
@@ -39,7 +41,8 @@ PR #9, após testes isolados e os checks obrigatórios.
   geração/epoch e perfil V2. CI03 aprovou 11 testes novos e regressões;
   `contracts` e `repository-policy` passaram no PR #9. A prova de ambiente
   produtivo continua externa.
-- 07–10 não iniciadas nesta execução.
+- 07 certificada e merged; PR #11 e cinco testes de matching aprovados no CI03.
+- 08–10 não iniciadas nesta execução.
 
 Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md,
 docs/ingestion-04.md e docs/resume-06.md. Nenhum banco produtivo, deploy público,
