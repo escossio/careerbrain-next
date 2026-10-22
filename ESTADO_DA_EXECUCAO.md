@@ -13,7 +13,7 @@ na main; a 08 passou nas regressões isoladas, checks e merge protegido.
 | 06 | CERTIFICADA E MERGED; PR #9, 11 testes novos, regressões e dois checks aprovados |
 | 07 | CERTIFICADA E MERGED; PR #11, CI03 (5 matching e regressões), 51 offline e checks verdes |
 | 08 | CERTIFICADA E MERGED; PR #13, migração 010, CI03 (8 matching e regressões) e checks verdes |
-| 09 | BLOQUEADA; cliente preparado, sem SDK/emulador Android no AGT01 ou CI03 para build/APK/instrumentação |
+| 09 | BLOQUEADA; sem SDK/emulador Android para APK/instrumentação e policy remoto aponta blobs históricos já substituídos |
 | 10 | NÃO_INICIADA nesta execução |
 
 **8/10 validadas.** Evidências públicas em docs/evidence-02.md,

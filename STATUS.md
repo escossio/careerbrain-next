@@ -35,7 +35,9 @@ Branch `feat/passada-09-android` contém o cliente Android preparado com fake
 contratual e testes unitários. AGT01 e CI03 não possuem Android SDK, `adb`,
 emulador ou toolchain Android; portanto build, APK debug e instrumentação não
 foram executados nem certificados. O PR permanece sem merge até worker Android
-isolado disponível. A passada 10 não foi iniciada.
+isolado disponível. O `repository-policy` remoto também permanece vermelho por
+dois blobs históricos de namespace Android já substituídos; a árvore atual passa
+na auditoria local e o histórico não será reescrito. A passada 10 não foi iniciada.
 
 ## Histórico das passadas 01–06
 
