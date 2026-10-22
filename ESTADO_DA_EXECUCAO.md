@@ -12,7 +12,8 @@ na main; a 07 passou nas regressões isoladas, checks e merge protegido.
 | 05 | CERTIFICADA E MERGED; PR #7, 11 testes novos, regressões e dois checks aprovados |
 | 06 | CERTIFICADA E MERGED; PR #9, 11 testes novos, regressões e dois checks aprovados |
 | 07 | CERTIFICADA E MERGED; PR #11, CI03 (5 matching e regressões), 51 offline e checks verdes |
-| 08–10 | NÃO_INICIADAS nesta execução |
+| 08 | EM_VALIDAÇÃO; branch isolada, migração 010 e testes sintéticos preparados; sem certificação |
+| 09–10 | NÃO_INICIADAS nesta execução |
 
 **7/10 validadas.** Evidências públicas em docs/evidence-02.md,
 docs/evidence-03.md, docs/evidence-04.md, docs/evidence-05.md e docs/evidence-06.md;
