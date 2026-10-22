@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v3/private-profile.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {"const": "careerbrain.profile.v3"},
+    "tenant_id": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "profile_version": {"type": "integer", "minimum": 1},
+    "generation": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["READY", "UNCERTAIN"]},
+    "attributes": {"type": "array", "items": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/attribute"}, "maxItems": 200},
+    "extractor_version": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "taxonomy_version": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "source_version": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "negative_attestations": {"type": "array", "items": {"$ref": "https://careerbrain.invalid/contracts/v2/match.schema.json#/$defs/negative-attestation"}, "maxItems": 100}
+  },
+  "required": ["schema_version", "tenant_id", "profile_version", "generation", "status", "attributes", "extractor_version", "taxonomy_version", "source_version", "negative_attestations"],
+  "additionalProperties": false
+}

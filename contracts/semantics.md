@@ -19,6 +19,22 @@ Ausência de informação é incerteza; não se inventa requisito/qualificação
 transforma preferência geográfica em veto. Alta/baixa afinidade calibradas depois;
 nenhum limiar arbitrário de produção é implantado na 01.
 
+Na V1 da passada 07, `affinity` e `confidence` de `careerbrain.match.v1` podem ser
+`null`: isso declara que não há comparação sustentada por evidência, em vez de
+atribuir zero ou outro score fictício. `REQUIREMENT_UNKNOWN` preserva elegibilidade;
+somente uma futura representação contratual de não atendimento comprovado poderá
+emitir `REQUIREMENT_UNMET`. Local, modalidade e competências são comparados apenas
+como afinidade evidenciada, nunca como veto implícito.
+
+Essa representação agora existe somente nas versões aditivas
+`careerbrain.semantics.v2`, `careerbrain.profile.v3` e `careerbrain.match.v2`.
+Ela exige o mesmo `requirement_id`, nome e valor em (1) requisito obrigatório da
+vaga e (2) atestado explícito `NOT_MET` do perfil. Cada lado carrega uma única prova
+com `source_version`, campo, trecho e offsets; os offsets são validados contra o
+texto de origem antes de a prova ser retida. Atributos V1/V2, falta de dados,
+taxonomia inconsistente, local e modalidade não são prova negativa. Sem o par
+completo e verificado, o resultado permanece `REQUIREMENT_UNKNOWN`.
+
 Dados insuficientes de ingestão são rejeitados antes da IA. Resultado ambíguo de
 vaga contratualmente válida fica UNCERTAIN; falha/JSON inválido → retry limitado
 ou estado de erro, sem score fictício. Jobs têm lease, fencing token e idempotência;

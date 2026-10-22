@@ -123,6 +123,12 @@ def main():
         if resume.returncode:raise RuntimeError('Resume integration tests failed; see resume.log')
         assert b'\nOK\n' in resume.stderr
         report['results']['resume']='PASS'
+        matching=client(['python','-m','unittest','discover','-s','tests/integration',
+                         '-p','matching_cases.py','-v'])
+        (results/'matching.log').write_bytes(matching.stdout+matching.stderr)
+        if matching.returncode:raise RuntimeError('PostgreSQL matching tests failed; see matching.log')
+        assert b'\nOK\n' in matching.stderr
+        report['results']['matching']='PASS'
         report['backup_sha256']=hashlib.sha256(dump).hexdigest()
         report['status']='PASS'
     except Exception as error:

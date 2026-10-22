@@ -1,0 +1,12 @@
+{
+  "schema_version": "careerbrain.semantics.v2",
+  "vacancy_id": "vacancy-1",
+  "content_version": "content-v2",
+  "taxonomy_version": "professional-v1",
+  "model_version": "offline-fake-v2",
+  "prompt_version": "prompt-v2",
+  "status": "READY",
+  "attributes": [],
+  "source_version": "vacancy-content-v2",
+  "mandatory_requirements": [{"requirement_id": "license-python", "name": "license", "value": "Python License", "evidence": {"source_version": "vacancy-content-v2", "field": "requirements/0", "quote": "Python License", "start": 0, "end": 14}}]
+}

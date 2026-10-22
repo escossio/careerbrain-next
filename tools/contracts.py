@@ -256,6 +256,17 @@ def validate_evidence(source: str, result: dict, *, schema: str) -> None:
                 raise ContractError("INSUFFICIENT_CONTENT", "attributes/evidence")
 
 
+def validate_requirement_evidence(source: str, proof: dict) -> None:
+    """Verify the quoted, version-identified source slice before it is retained."""
+    evidence = proof.get("evidence") if isinstance(proof, dict) else None
+    if not isinstance(evidence, dict):
+        raise ContractError("INSUFFICIENT_CONTENT", "requirement/evidence")
+    start, end, quote = evidence.get("start"), evidence.get("end"), evidence.get("quote")
+    if (not isinstance(start, int) or not isinstance(end, int) or not isinstance(quote, str)
+            or end <= start or source[start:end] != quote):
+        raise ContractError("INSUFFICIENT_CONTENT", "requirement/evidence")
+
+
 def validate_page(page: dict, *, after: int = 0) -> None:
     validate("sync-page", page)
     sequences = [item["sequence"] for item in page["items"]]

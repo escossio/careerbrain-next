@@ -96,6 +96,10 @@
       "reason": "Passada 06 autorizada: currículo efêmero, perfil privado e testes sintéticos em worker isolado."
     },
     {
+      "path": "careerbrain/matching.py",
+      "reason": "Passada 07 autorizada: matching privado por versões, evidência explícita e worker isolado."
+    },
+    {
       "path": "careerbrain/server.py",
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
@@ -181,6 +185,11 @@
       "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
     },
     {
+      "path": "contracts/examples/match-v2.json",
+      "category": "synthetic-example",
+      "review_basis": "Par de requisito/atestado inteiramente sintético, sem perfil real."
+    },
+    {
       "path": "contracts/examples/private-profile.json",
       "category": "synthetic-example",
       "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
@@ -189,6 +198,11 @@
       "path": "contracts/examples/private-profile-v2.json",
       "category": "synthetic-example",
       "review_basis": "Exemplo inventado de incerteza; nenhum dado de usuário real."
+    },
+    {
+      "path": "contracts/examples/private-profile-v3.json",
+      "category": "synthetic-example",
+      "review_basis": "Atestado negativo explícito inteiramente sintético, sem perfil real."
     },
     {
       "path": "contracts/examples/recommendation-page.json",
@@ -229,6 +243,11 @@
       "path": "contracts/examples/vacancy-semantics.json",
       "category": "synthetic-example",
       "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
+    },
+    {
+      "path": "contracts/examples/vacancy-semantics-v2.json",
+      "category": "synthetic-example",
+      "review_basis": "Requisito obrigatório e evidência inteiramente sintéticos."
     },
     {
       "path": "contracts/identity.md",
@@ -321,6 +340,11 @@
       "review_basis": "Contrato estrutural V1; sem valores de ambiente."
     },
     {
+      "path": "contracts/v1/match-v2.schema.json",
+      "category": "schema",
+      "review_basis": "Extensão versionada para par verificável de requisito e atestado negativo."
+    },
+    {
       "path": "contracts/v1/private-profile.schema.json",
       "category": "schema",
       "review_basis": "Contrato estrutural V1; sem valores de ambiente."
@@ -329,6 +353,11 @@
       "path": "contracts/v1/private-profile-v2.schema.json",
       "category": "schema",
       "review_basis": "Contrato de perfil V2, versionado e sem valores de ambiente."
+    },
+    {
+      "path": "contracts/v1/private-profile-v3.schema.json",
+      "category": "schema",
+      "review_basis": "Extensão de perfil para atestado negativo explícito e versionado."
     },
     {
       "path": "contracts/v1/recommendation-page.schema.json",
@@ -371,6 +400,11 @@
       "review_basis": "Contrato estrutural V1; sem valores de ambiente."
     },
     {
+      "path": "contracts/v1/vacancy-semantics-v2.schema.json",
+      "category": "schema",
+      "review_basis": "Extensão de semântica para requisito obrigatório com prova versionada."
+    },
+    {
       "path": "db/bootstrap.sql",
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
     },
@@ -405,6 +439,14 @@
     {
       "path": "db/migrations/007_resume_private.sql",
       "reason": "Passada 06 autorizada: fila por handle opaco e perfil privado em banco descartável."
+    },
+    {
+      "path": "db/migrations/008_private_matching.sql",
+      "reason": "Passada 07 autorizada: projeção privada versionada, RLS, lease/fencing e testes sintéticos."
+    },
+    {
+      "path": "db/migrations/009_verified_requirement_unmet.sql",
+      "reason": "Passada 07 autorizada: extensão aditiva para veto apenas com par versionado e verificável."
     },
     {
       "path": "docs/acceptance.md",
@@ -468,6 +510,10 @@
       "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
     },
     {
+      "path": "docs/matching-07.md",
+      "reason": "Passada 07 autorizada: semântica pública do matching privado e limites de evidência."
+    },
+    {
       "path": "docs/operations.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -514,6 +560,10 @@
     {
       "path": "tests/integration/resume_cases.py",
       "reason": "Passada 06 autorizada: testes de currículo sintético e isolamento de perfil."
+    },
+    {
+      "path": "tests/integration/matching_cases.py",
+      "reason": "Passada 07 autorizada: corte temporal, incerteza, fencing e isolamento com fixtures sintéticas."
     },
     {
       "path": "tests/synthetic-source.txt",

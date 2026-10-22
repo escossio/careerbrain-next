@@ -26,12 +26,12 @@
       "type": "boolean"
     },
     "affinity": {
-      "type": "number",
+      "type": ["number", "null"],
       "minimum": 0,
       "maximum": 1
     },
     "confidence": {
-      "type": "number",
+      "type": ["number", "null"],
       "minimum": 0,
       "maximum": 1
     },

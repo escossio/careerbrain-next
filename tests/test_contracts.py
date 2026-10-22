@@ -123,6 +123,12 @@ class SchemaTests(unittest.TestCase):
         with self.assertRaises(ContractError):
             validate("private-profile", legacy)
 
+    def test_match_can_express_absent_evidence_without_a_fictitious_score(self):
+        value = example("match")
+        value["affinity"] = value["confidence"] = None
+        value["reasons"] = ["REQUIREMENT_UNKNOWN"]
+        validate("match", value)
+
 
 class TimeTests(unittest.TestCase):
     def test_before_equal_after_and_utc_equivalence(self):

@@ -1,5 +1,20 @@
 # STATUS — CareerBrain Next
 
+## Passada 07 em implementação
+
+O branch `feat/passada-07-matching` contém a migração aditiva e os testes sintéticos
+de matching privado e foi publicado em `origin` no commit
+`cd0d26b8879701405934e9bc7f8cc34fb9d4b260`. A certificação, PR, checks, merge e
+atualização para 7/10 estão bloqueados externamente: duas tentativas do dispatcher
+PostgreSQL encontraram CI03 pronto, mas a descoberta foi roteada para outro
+repositório e não iniciou a suíte; a autenticação do GitHub CLI também está inválida
+para criar o PR. A decisão de produto para negativa foi aprovada e a extensão
+compatível V2/V3 foi implementada localmente: somente requisito obrigatório e
+atestado `NOT_MET` explícitos, ambos versionados e com trechos/offsets verificados,
+emitem `REQUIREMENT_UNMET`; V1/V2 e ausência seguem `REQUIREMENT_UNKNOWN`. A
+certificação continua bloqueada até o PostgreSQL no CI03; não houve fallback local
+pesado. A passada 08 não foi iniciada.
+
 ## Checkpoint da passada 06
 
 **6/10 certificadas e incorporadas à main.** A passada 06 foi integrada pelo
