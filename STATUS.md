@@ -29,6 +29,14 @@ run 39858487393 aprovou `contracts` e `repository-policy` no SHA revisado.
 Não houve dados reais, produção, deploy, credenciais ou tráfego pago. 09–10 não
 foram iniciadas.
 
+## Passada 09 — implementação bloqueada no gate de APK
+
+Branch `feat/passada-09-android` contém o cliente Android preparado com fake
+contratual e testes unitários. AGT01 e CI03 não possuem Android SDK, `adb`,
+emulador ou toolchain Android; portanto build, APK debug e instrumentação não
+foram executados nem certificados. O PR permanece sem merge até worker Android
+isolado disponível. A passada 10 não foi iniciada.
+
 ## Histórico das passadas 01–06
 
 **8/10 certificadas e incorporadas à main.** A passada 06 foi integrada pelo
