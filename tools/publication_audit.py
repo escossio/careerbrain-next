@@ -28,7 +28,7 @@ HOST = re.compile(r"https?://([A-Za-z0-9.-]+)(?=[:/\s\"'`<>),;]|$)")
 ALLOWED_HOSTS = frozenset({
     "example.org", "api.example.org", "careerbrain.invalid", "accounts.google.com",
     "json-schema.org", "docs.github.com", "developers.openai.com", "pypi.org",
-    "www.googleapis.com",
+    "www.googleapis.com", "schemas.android.com",
 })
 PRIVATE_IP = re.compile(r"(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?![\w.])")
 SYNTHETIC_IPS = frozenset({"127." + "0.0.1", "10." + "0.0.1"})

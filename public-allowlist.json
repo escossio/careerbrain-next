@@ -23,6 +23,11 @@
       "review_basis": "Governança/CI sem credenciais e sem topologia de implantação."
     },
     {
+      "path": ".github/workflows/android-debug.yml",
+      "category": "governance-ci",
+      "review_basis": "Build Android debug efêmero, sem release, credencial ou artefato permanente."
+    },
+    {
       "path": ".github/workflows/worker-readiness.yml",
       "category": "governance-ci",
       "review_basis": "Governança/CI sem credenciais e sem topologia de implantação."

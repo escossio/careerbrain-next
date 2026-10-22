@@ -32,12 +32,11 @@ foram iniciadas.
 ## Passada 09 — implementação bloqueada no gate de APK
 
 Branch `feat/passada-09-android` contém o cliente Android preparado com fake
-contratual e testes unitários. AGT01 e CI03 não possuem Android SDK, `adb`,
-emulador ou toolchain Android; portanto build, APK debug e instrumentação não
-foram executados nem certificados. O PR permanece sem merge até worker Android
-isolado disponível. O `repository-policy` remoto também permanece vermelho por
-dois blobs históricos de namespace Android já substituídos; a árvore atual passa
-na auditoria local e o histórico não será reescrito. A passada 10 não foi iniciada.
+contratual e testes unitários. AGT01 tem SDK, mas não executará build pesado;
+CI03 não possui Android SDK. O pipeline Android isolado em GitHub Actions usa
+Ubuntu/API 35/Gradle 8.11 para produzir e registrar o APK debug. Instrumentação
+em emulador continua pendente de checagem de recursos no note-leo. A passada 10
+não foi iniciada.
 
 ## Histórico das passadas 01–06
 
