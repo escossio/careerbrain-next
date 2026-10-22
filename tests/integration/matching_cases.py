@@ -1,5 +1,6 @@
 """Private matching tests. Run only in the networkless disposable PostgreSQL worker."""
 from datetime import timedelta
+import concurrent.futures
 import os
 import unittest
 from uuid import uuid4
@@ -10,6 +11,7 @@ from psycopg.types.json import Jsonb
 
 from careerbrain.db import migrate, tenant_pool, tenant_transaction
 from careerbrain.matching import MatchService
+from careerbrain.mobile import Conflict, MobileService
 from tools.contracts import ContractError, validate_requirement_evidence
 
 DB=os.environ['NEXT_TEST_DATABASE']; SOCKET=os.environ['NEXT_TEST_SOCKET']
@@ -22,12 +24,14 @@ def connect(role='postgres'):
 class MatchingTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        with connect('cb_migrator') as c: migrate(c,target=9)
+        with connect('cb_migrator') as c: migrate(c,target=10)
         cls.worker=tenant_pool(make_conninfo(dbname=DB,user='cb_private_worker',host=SOCKET),max_size=4)
+        cls.api=tenant_pool(make_conninfo(dbname=DB,user='cb_api',host=SOCKET),max_size=4)
         cls.worker.wait(timeout=5)
+        cls.api.wait(timeout=5)
 
     @classmethod
-    def tearDownClass(cls): cls.worker.close()
+    def tearDownClass(cls): cls.worker.close(); cls.api.close()
 
     def setUp(self):
         self.admin=connect(); self.addCleanup(self.admin.close)
@@ -42,6 +46,7 @@ class MatchingTests(unittest.TestCase):
         for tenant in self.tenants:
             self.admin.execute("INSERT INTO private.profiles(tenant_id,profile_version,generation,deletion_epoch,status,attributes,extractor_version,taxonomy_version) VALUES(%s,1,0,0,'READY',%s,'synthetic','professional-v1')",(tenant[1],Jsonb([attribute])))
         self.service=MatchService(self.worker,self.worker)
+        self.mobile=MobileService(self.api)
 
     def event(self,published,*,observed=None,state='ACTIVE',classification_result=None):
         source,producer,authorization,evidence=[uuid4() for _ in range(4)]
@@ -140,6 +145,41 @@ class MatchingTests(unittest.TestCase):
         self.assertIsNotNone(self.service.schedule(str(self.tenant[1]),str(forged_event)))
         self.assertEqual(self.service.process_once(),'READY')
         self.assertEqual(self.admin.execute('SELECT reasons FROM private.recommendations WHERE event_id=%s',(forged_event,)).fetchone()[0],['REQUIREMENT_UNKNOWN'])
+
+    def test_mobile_sync_snapshots_keep_late_availability_for_both_devices(self):
+        first=self.event(self.tenant[2]); self.service.schedule(str(self.tenant[1]),str(first)); self.assertEqual(self.service.process_once(),'READY')
+        device_a=self.mobile.changes(str(self.tenant[1]),limit=1)
+        self.assertEqual(device_a['items'][0]['kind'],'AVAILABLE')
+        second=self.event(self.tenant[2]); self.service.schedule(str(self.tenant[1]),str(second)); self.assertEqual(self.service.process_once(),'READY')
+        end=self.mobile.changes(str(self.tenant[1]),device_a['next_cursor'],1)
+        self.assertEqual(end['items'],[])
+        device_b=self.mobile.changes(str(self.tenant[1]),limit=10)
+        self.assertEqual(len(device_b['items']),2)
+        later=self.mobile.changes(str(self.tenant[1]),end['next_cursor'],10)
+        self.assertEqual([x['publication_event_id'] for x in later['items']],[str(second)])
+
+    def test_application_cas_replay_and_concurrent_devices(self):
+        event=self.event(self.tenant[2]); command={'schema_version':'careerbrain.application.v1','request_id':'save-'+uuid4().hex,'publication_event_id':str(event),'expected_version':0,'state':'SAVED'}
+        self.mobile.application(str(self.tenant[1]),command); self.mobile.application(str(self.tenant[1]),command)
+        changed=dict(command,state='APPLIED')
+        with self.assertRaises(Conflict): self.mobile.application(str(self.tenant[1]),changed)
+        def write(state):
+            value={'schema_version':'careerbrain.application.v1','request_id':state.lower()+'-'+uuid4().hex,'publication_event_id':str(event),'expected_version':1,'state':state}
+            try: self.mobile.application(str(self.tenant[1]),value); return True
+            except Conflict: return False
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor: outcome=list(executor.map(write,('APPLIED','WITHDRAWN')))
+        self.assertEqual(sum(outcome),1)
+        self.assertEqual(self.admin.execute('SELECT version,count(*) FROM private.applications GROUP BY version').fetchone(),(2,1))
+
+    def test_deletion_purges_private_state_and_ledger_sanitizes_restore(self):
+        event=self.event(self.tenant[2]); self.service.schedule(str(self.tenant[1]),str(event)); self.service.process_once()
+        receipt=self.mobile.delete(str(self.tenant[1]),'delete-'+uuid4().hex)
+        self.assertEqual(receipt['state'],'ACTIVE_DATA_REMOVED')
+        self.assertEqual(self.admin.execute('SELECT count(*) FROM private.tenants WHERE id=%s',(self.tenant[1],)).fetchone()[0],0)
+        self.assertEqual(self.admin.execute('SELECT count(*) FROM private.recommendations WHERE tenant_id=%s',(self.tenant[1],)).fetchone()[0],0)
+        self.assertIsNotNone(self.mobile.receipt(receipt['receipt_id'],receipt['deletion_capability']))
+        self.assertEqual(self.admin.execute('SELECT ops.apply_deletion_ledger()').fetchone()[0],1)
+        self.assertEqual(self.admin.execute('SELECT count(*) FROM identity.accounts WHERE id=%s',(self.tenant[0],)).fetchone()[0],0)
 
 
 if __name__=='__main__': unittest.main(verbosity=2)
