@@ -8,7 +8,10 @@ de matching privado e foi publicado em `origin` no commit
 atualização para 7/10 estão bloqueados externamente: duas tentativas do dispatcher
 PostgreSQL encontraram CI03 pronto, mas a descoberta foi roteada para outro
 repositório e não iniciou a suíte; a autenticação do GitHub CLI também está inválida
-para criar o PR. Não houve fallback local pesado. A passada 08 não foi iniciada.
+para criar o PR. Há ainda uma decisão de produto necessária: V1 só modela evidência
+positiva ou desconhecida, não uma negativa comprovada para emitir
+`REQUIREMENT_UNMET`; a 07 preserva `REQUIREMENT_UNKNOWN` sem veto até essa extensão
+ser aprovada. Não houve fallback local pesado. A passada 08 não foi iniciada.
 
 ## Checkpoint da passada 06
 

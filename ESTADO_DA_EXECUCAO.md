@@ -11,7 +11,7 @@ na main; a 06 passou nos testes isolados, checks e merge protegido.
 | 04 | CERTIFICADA E MERGED; 12 testes de ingestão e gates SQL aprovados no worker |
 | 05 | CERTIFICADA E MERGED; PR #7, 11 testes novos, regressões e dois checks aprovados |
 | 06 | CERTIFICADA E MERGED; PR #9, 11 testes novos, regressões e dois checks aprovados |
-| 07 | IMPLEMENTADA e publicada no branch; BLOQUEADA antes de testes PostgreSQL/PR por roteamento do worker e autenticação GitHub inválida |
+| 07 | IMPLEMENTADA e publicada no branch; BLOQUEADA antes de testes PostgreSQL/PR por roteamento do worker, autenticação GitHub inválida e decisão pendente sobre evidência negativa de requisito |
 | 08–10 | NÃO_INICIADAS nesta execução |
 
 **6/10 validadas.** Evidências públicas em docs/evidence-02.md,
