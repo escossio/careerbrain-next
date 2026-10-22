@@ -3,8 +3,12 @@
 ## Passada 07 em implementação
 
 O branch `feat/passada-07-matching` contém a migração aditiva e os testes sintéticos
-de matching privado. A certificação, PR, checks, merge e atualização para 7/10
-dependem ainda do worker distribuído e dos gates remotos. A passada 08 não foi iniciada.
+de matching privado e foi publicado em `origin` no commit
+`cd0d26b8879701405934e9bc7f8cc34fb9d4b260`. A certificação, PR, checks, merge e
+atualização para 7/10 estão bloqueados externamente: duas tentativas do dispatcher
+PostgreSQL encontraram CI03 pronto, mas a descoberta foi roteada para outro
+repositório e não iniciou a suíte; a autenticação do GitHub CLI também está inválida
+para criar o PR. Não houve fallback local pesado. A passada 08 não foi iniciada.
 
 ## Checkpoint da passada 06
 
