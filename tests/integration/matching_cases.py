@@ -10,6 +10,7 @@ from psycopg.types.json import Jsonb
 
 from careerbrain.db import migrate, tenant_pool, tenant_transaction
 from careerbrain.matching import MatchService
+from tools.contracts import ContractError, validate_requirement_evidence
 
 DB=os.environ['NEXT_TEST_DATABASE']; SOCKET=os.environ['NEXT_TEST_SOCKET']
 assert DB.startswith('cbn_test_') and os.environ.get('NEXT_DISPOSABLE_CI') == '1'
@@ -21,7 +22,7 @@ def connect(role='postgres'):
 class MatchingTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        with connect('cb_migrator') as c: migrate(c,target=8)
+        with connect('cb_migrator') as c: migrate(c,target=9)
         cls.worker=tenant_pool(make_conninfo(dbname=DB,user='cb_private_worker',host=SOCKET),max_size=4)
         cls.worker.wait(timeout=5)
 
@@ -42,7 +43,7 @@ class MatchingTests(unittest.TestCase):
             self.admin.execute("INSERT INTO private.profiles(tenant_id,profile_version,generation,deletion_epoch,status,attributes,extractor_version,taxonomy_version) VALUES(%s,1,0,0,'READY',%s,'synthetic','professional-v1')",(tenant[1],Jsonb([attribute])))
         self.service=MatchService(self.worker,self.worker)
 
-    def event(self,published,*,observed=None,state='ACTIVE'):
+    def event(self,published,*,observed=None,state='ACTIVE',classification_result=None):
         source,producer,authorization,evidence=[uuid4() for _ in range(4)]
         self.admin.execute('INSERT INTO catalog.sources VALUES(%s,%s)',(source,'synthetic matching source'))
         self.admin.execute('INSERT INTO catalog.producers(id) VALUES(%s)',(producer,))
@@ -52,7 +53,7 @@ class MatchingTests(unittest.TestCase):
         vacancy=self.admin.execute('INSERT INTO catalog.vacancies(source_id,source_vacancy_id,content) VALUES(%s,%s,%s) RETURNING id',(source,uuid4().hex,Jsonb(content))).fetchone()[0]
         observed=observed or published
         event=self.admin.execute("INSERT INTO catalog.publication_events(vacancy_id,source_id,source_event_id,kind,published_at,observed_at,received_at,evidence_id,state) VALUES(%s,%s,%s,'original',%s,%s,%s,%s,%s) RETURNING id",(vacancy,source,uuid4().hex,published,observed,observed,evidence,state)).fetchone()[0]
-        result={'schema_version':'careerbrain.semantics.v1','status':'READY','attributes':[{'name':'skill','value':'Python','basis':'explicit','confidence':1,'evidence':[{'field':'description','quote':'Python','start':0,'end':6}]}]}
+        result=classification_result or {'schema_version':'careerbrain.semantics.v1','status':'READY','attributes':[{'name':'skill','value':'Python','basis':'explicit','confidence':1,'evidence':[{'field':'description','quote':'Python','start':0,'end':6}]}]}
         cache=self.admin.execute("INSERT INTO catalog.classification_cache(vacancy_id,content_version,content_digest,taxonomy_version,model_version,prompt_version,status,result) VALUES(%s,1,%s,'professional-v1','synthetic-v1','prompt-v1','READY',%s) RETURNING id",(vacancy,'b'*64,Jsonb(result))).fetchone()[0]
         self.admin.execute('INSERT INTO catalog.event_classifications(event_id,cache_id) VALUES(%s,%s)',(event,cache))
         return event
@@ -95,6 +96,50 @@ class MatchingTests(unittest.TestCase):
         with tenant_transaction(self.worker,str(self.other[1])) as c:
             self.assertEqual(c.execute('SELECT * FROM private.current_recommendations').fetchall(),[])
             self.assertEqual(c.execute('SELECT * FROM private.match_requests').fetchall(),[])
+
+    def test_verified_mandatory_requirement_and_explicit_negative_hide_recommendation(self):
+        requirement={'requirement_id':'license-python','name':'license','value':'Python License',
+                     'evidence':{'source_version':'vacancy-content-v2','field':'requirements/0',
+                                 'quote':'Python License','start':0,'end':14}}
+        attestation={'requirement_id':'license-python','name':'license','value':'Python License',
+                     'state':'NOT_MET','evidence':{'source_version':'profile-source-v2','field':'attestation',
+                                                    'quote':'I do not hold a Python License','start':0,'end':30}}
+        validate_requirement_evidence('Python License',requirement)
+        validate_requirement_evidence('I do not hold a Python License',attestation)
+        self.admin.execute("UPDATE private.profiles SET contract_version='careerbrain.profile.v3',source_version=%s,negative_attestations=%s WHERE tenant_id=%s",
+                           ('profile-source-v2',Jsonb([attestation]),self.tenant[1]))
+        result={'schema_version':'careerbrain.semantics.v2','status':'READY','attributes':[],
+                'source_version':'vacancy-content-v2','mandatory_requirements':[requirement]}
+        event=self.event(self.tenant[2],classification_result=result)
+        self.assertIsNotNone(self.service.schedule(str(self.tenant[1]),str(event)))
+        self.assertEqual(self.service.process_once(),'READY')
+        row=self.admin.execute('SELECT reasons,requirement_proofs FROM private.recommendations').fetchone()
+        self.assertEqual(row,(['REQUIREMENT_UNMET'],[{'mandatory_requirement':requirement,
+                                                       'negative_attestation':attestation}]))
+        with tenant_transaction(self.worker,str(self.tenant[1])) as c:
+            self.assertEqual(c.execute('SELECT * FROM private.current_recommendations').fetchall(),[])
+
+    def test_missing_or_forged_negative_attestation_stays_unknown(self):
+        requirement={'requirement_id':'license-python','name':'license','value':'Python License',
+                     'evidence':{'source_version':'vacancy-content-v2','field':'requirements/0',
+                                 'quote':'Python License','start':0,'end':14}}
+        result={'schema_version':'careerbrain.semantics.v2','status':'READY','attributes':[],
+                'source_version':'vacancy-content-v2','mandatory_requirements':[requirement]}
+        self.admin.execute("UPDATE private.profiles SET contract_version='careerbrain.profile.v3',source_version='profile-source-v2',negative_attestations='[]'::jsonb WHERE tenant_id=%s",(self.tenant[1],))
+        absent=self.event(self.tenant[2],classification_result=result)
+        self.assertIsNotNone(self.service.schedule(str(self.tenant[1]),str(absent)))
+        self.assertEqual(self.service.process_once(),'READY')
+        self.assertEqual(self.admin.execute('SELECT reasons FROM private.recommendations WHERE event_id=%s',(absent,)).fetchone()[0],['REQUIREMENT_UNKNOWN'])
+        forged={'requirement_id':'license-python','name':'license','value':'Python License','state':'NOT_MET',
+                'evidence':{'source_version':'wrong-profile-source','field':'attestation',
+                            'quote':'invented attestation','start':0,'end':19}}
+        with self.assertRaises(ContractError):
+            validate_requirement_evidence('I do not hold a Python License',forged)
+        self.admin.execute('UPDATE private.profiles SET negative_attestations=%s WHERE tenant_id=%s',(Jsonb([forged]),self.tenant[1]))
+        forged_event=self.event(self.tenant[2],classification_result=result)
+        self.assertIsNotNone(self.service.schedule(str(self.tenant[1]),str(forged_event)))
+        self.assertEqual(self.service.process_once(),'READY')
+        self.assertEqual(self.admin.execute('SELECT reasons FROM private.recommendations WHERE event_id=%s',(forged_event,)).fetchone()[0],['REQUIREMENT_UNKNOWN'])
 
 
 if __name__=='__main__': unittest.main(verbosity=2)

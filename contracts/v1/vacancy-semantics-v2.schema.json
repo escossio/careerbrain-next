@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v2/vacancy-semantics.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {"const": "careerbrain.semantics.v2"},
+    "vacancy_id": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "content_version": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "taxonomy_version": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "model_version": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "prompt_version": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "status": {"enum": ["READY", "UNCERTAIN"]},
+    "attributes": {"type": "array", "items": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/attribute"}, "maxItems": 200},
+    "source_version": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "mandatory_requirements": {"type": "array", "items": {"$ref": "https://careerbrain.invalid/contracts/v2/match.schema.json#/$defs/mandatory-requirement"}, "maxItems": 100}
+  },
+  "required": ["schema_version", "vacancy_id", "content_version", "taxonomy_version", "model_version", "prompt_version", "status", "attributes", "source_version", "mandatory_requirements"],
+  "additionalProperties": false
+}

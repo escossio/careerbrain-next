@@ -1,0 +1,12 @@
+{
+  "schema_version": "careerbrain.profile.v3",
+  "tenant_id": "synthetic-tenant-A",
+  "profile_version": 2,
+  "generation": 1,
+  "status": "READY",
+  "attributes": [],
+  "extractor_version": "attested-profile-v1",
+  "taxonomy_version": "professional-v1",
+  "source_version": "profile-source-v2",
+  "negative_attestations": [{"requirement_id": "license-python", "name": "license", "value": "Python License", "state": "NOT_MET", "evidence": {"source_version": "profile-source-v2", "field": "attestation", "quote": "I do not hold a Python License", "start": 0, "end": 30}}]
+}

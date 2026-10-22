@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://careerbrain.invalid/contracts/v2/match.schema.json",
+  "$defs": {
+    "source-evidence": {
+      "type": "object",
+      "properties": {
+        "source_version": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+        "field": {"type": "string", "minLength": 1, "maxLength": 256},
+        "quote": {"type": "string", "minLength": 1, "maxLength": 500},
+        "start": {"type": "integer", "minimum": 0},
+        "end": {"type": "integer", "minimum": 1}
+      },
+      "required": ["source_version", "field", "quote", "start", "end"],
+      "additionalProperties": false
+    },
+    "mandatory-requirement": {
+      "type": "object",
+      "properties": {
+        "requirement_id": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+        "name": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/attribute/properties/name"},
+        "value": {"type": "string", "minLength": 1, "maxLength": 500},
+        "evidence": {"$ref": "#/$defs/source-evidence"}
+      },
+      "required": ["requirement_id", "name", "value", "evidence"],
+      "additionalProperties": false
+    },
+    "negative-attestation": {
+      "type": "object",
+      "properties": {
+        "requirement_id": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+        "name": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/attribute/properties/name"},
+        "value": {"type": "string", "minLength": 1, "maxLength": 500},
+        "state": {"const": "NOT_MET"},
+        "evidence": {"$ref": "#/$defs/source-evidence"}
+      },
+      "required": ["requirement_id", "name", "value", "state", "evidence"],
+      "additionalProperties": false
+    },
+    "unmet-requirement-proof": {
+      "type": "object",
+      "properties": {
+        "mandatory_requirement": {"$ref": "#/$defs/mandatory-requirement"},
+        "negative_attestation": {"$ref": "#/$defs/negative-attestation"}
+      },
+      "required": ["mandatory_requirement", "negative_attestation"],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "schema_version": {"const": "careerbrain.match.v2"},
+    "tenant_id": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "vacancy_id": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "publication_event_id": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "profile_version": {"type": "integer", "minimum": 1},
+    "policy_version": {"$ref": "https://careerbrain.invalid/contracts/v1/common.schema.json#/$defs/id"},
+    "eligible": {"type": "boolean"},
+    "affinity": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "reasons": {"type": "array", "items": {"enum": ["TEMPORAL_CUTOFF", "REQUIREMENT_UNMET", "REQUIREMENT_UNKNOWN", "EVIDENCED_AFFINITY", "SOURCE_WITHDRAWN", "VACANCY_CLOSED"]}, "minItems": 1, "maxItems": 20},
+    "unmet_requirement_proofs": {"type": "array", "items": {"$ref": "#/$defs/unmet-requirement-proof"}, "maxItems": 20}
+  },
+  "required": ["schema_version", "tenant_id", "vacancy_id", "publication_event_id", "profile_version", "policy_version", "eligible", "affinity", "confidence", "reasons", "unmet_requirement_proofs"],
+  "additionalProperties": false,
+  "allOf": [{
+    "if": {"properties": {"reasons": {"contains": {"const": "REQUIREMENT_UNMET"}}}},
+    "then": {"properties": {"eligible": {"const": false}, "affinity": {"const": null}, "confidence": {"const": null}, "unmet_requirement_proofs": {"minItems": 1}}},
+    "else": {"properties": {"unmet_requirement_proofs": {"maxItems": 0}}}
+  }]
+}

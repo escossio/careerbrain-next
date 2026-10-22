@@ -1,0 +1,16 @@
+{
+  "schema_version": "careerbrain.match.v2",
+  "tenant_id": "synthetic-tenant-A",
+  "vacancy_id": "vacancy-1",
+  "publication_event_id": "event-1",
+  "profile_version": 2,
+  "policy_version": "matching-v2",
+  "eligible": false,
+  "affinity": null,
+  "confidence": null,
+  "reasons": ["REQUIREMENT_UNMET"],
+  "unmet_requirement_proofs": [{
+    "mandatory_requirement": {"requirement_id": "license-python", "name": "license", "value": "Python License", "evidence": {"source_version": "vacancy-content-v2", "field": "requirements/0", "quote": "Python License", "start": 0, "end": 14}},
+    "negative_attestation": {"requirement_id": "license-python", "name": "license", "value": "Python License", "state": "NOT_MET", "evidence": {"source_version": "profile-source-v2", "field": "attestation", "quote": "I do not hold a Python License", "start": 0, "end": 30}}
+  }]
+}
