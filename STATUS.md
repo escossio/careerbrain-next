@@ -17,17 +17,21 @@ e repository-policy SUCCESS no mesmo SHA. Nenhum artefato dos jobs,
 credencial, dado real, deploy ou chamada paga. Main protegida.
 08–10 não iniciadas nesta execução.
 
-## Passada 08 — implementação em validação
+## Passada 08 — certificada e integrada
 
-Branch isolada `feat/passada-08-mobile-sync`, derivada de `c52286c`, contém a
-migração aditiva 010 e endpoints móveis privados: recomendações paginadas,
-sync por watermark, ACK idempotente, candidaturas manuais com CAS e recibo de
-exclusão com capability separada. Testes de PostgreSQL, restore/ledger, checks
-e PR/merge ainda são pendentes; não há certificação nesta etapa.
+PR #13, merge squash `547bcf26d06f89b84f1500984ab72b11d94556f3`, incorporou
+a migração aditiva 010: recomendações privadas paginadas, sync com snapshot e
+watermark, ACK idempotente, candidaturas manuais com CAS e exclusão com receipt
+opaco/capability e ledger. CI03 sem rede aprovou 18 SQL, restore/ledger, 12 de
+identidade, 12 de ingestão, 11 de classificação, 11 de currículo e 8 de matching
+(incluindo sync multi-dispositivo, CAS concorrente e exclusão). GitHub Actions
+run 39858487393 aprovou `contracts` e `repository-policy` no SHA revisado.
+Não houve dados reais, produção, deploy, credenciais ou tráfego pago. 09–10 não
+foram iniciadas.
 
 ## Histórico das passadas 01–06
 
-**7/10 certificadas e incorporadas à main.** A passada 06 foi integrada pelo
+**8/10 certificadas e incorporadas à main.** A passada 06 foi integrada pelo
 PR #9, após testes isolados e os checks obrigatórios.
 
 - 01 certificada e merged; fundação, contratos V1 e CI offline aprovados.
@@ -50,7 +54,8 @@ PR #9, após testes isolados e os checks obrigatórios.
   `contracts` e `repository-policy` passaram no PR #9. A prova de ambiente
   produtivo continua externa.
 - 07 certificada e merged; PR #11 e cinco testes de matching aprovados no CI03.
-- 08–10 não iniciadas nesta execução.
+- 08 certificada e merged; PR #13, CI03 e checks obrigatórios aprovados.
+- 09–10 não iniciadas nesta execução.
 
 Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md,
 docs/ingestion-04.md e docs/resume-06.md. Nenhum banco produtivo, deploy público,

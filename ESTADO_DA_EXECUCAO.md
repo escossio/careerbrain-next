@@ -1,7 +1,7 @@
 # CareerBrain Next — estado da execução
 
-Checkpoint certificado da passada 07. As passadas 01–07 estão certificadas
-na main; a 07 passou nas regressões isoladas, checks e merge protegido.
+Checkpoint certificado da passada 08. As passadas 01–08 estão certificadas
+na main; a 08 passou nas regressões isoladas, checks e merge protegido.
 
 | Passada | Estado |
 | --- | --- |
@@ -12,10 +12,10 @@ na main; a 07 passou nas regressões isoladas, checks e merge protegido.
 | 05 | CERTIFICADA E MERGED; PR #7, 11 testes novos, regressões e dois checks aprovados |
 | 06 | CERTIFICADA E MERGED; PR #9, 11 testes novos, regressões e dois checks aprovados |
 | 07 | CERTIFICADA E MERGED; PR #11, CI03 (5 matching e regressões), 51 offline e checks verdes |
-| 08 | EM_VALIDAÇÃO; branch isolada, migração 010 e testes sintéticos preparados; sem certificação |
+| 08 | CERTIFICADA E MERGED; PR #13, migração 010, CI03 (8 matching e regressões) e checks verdes |
 | 09–10 | NÃO_INICIADAS nesta execução |
 
-**7/10 validadas.** Evidências públicas em docs/evidence-02.md,
+**8/10 validadas.** Evidências públicas em docs/evidence-02.md,
 docs/evidence-03.md, docs/evidence-04.md, docs/evidence-05.md e docs/evidence-06.md;
 inventários e logs operacionais ficam privados. Os PRs #9 e #11 passaram nos checks
 obrigatórios e foram incorporados sem bypass da proteção da main.
