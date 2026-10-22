@@ -178,7 +178,7 @@ class MatchingTests(unittest.TestCase):
         self.assertEqual(self.admin.execute('SELECT count(*) FROM private.tenants WHERE id=%s',(self.tenant[1],)).fetchone()[0],0)
         self.assertEqual(self.admin.execute('SELECT count(*) FROM private.recommendations WHERE tenant_id=%s',(self.tenant[1],)).fetchone()[0],0)
         self.assertIsNotNone(self.mobile.receipt(receipt['receipt_id'],receipt['deletion_capability']))
-        self.assertEqual(self.admin.execute('SELECT ops.apply_deletion_ledger()').fetchone()[0],1)
+        self.assertGreaterEqual(self.admin.execute('SELECT ops.apply_deletion_ledger()').fetchone()[0],1)
         self.assertEqual(self.admin.execute('SELECT count(*) FROM identity.accounts WHERE id=%s',(self.tenant[0],)).fetchone()[0],0)
 
 

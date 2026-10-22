@@ -64,6 +64,11 @@ class MobileService:
                 high = c.execute('SELECT COALESCE(sequence,0) FROM private.feed_counters').fetchone()
                 snapshot = (high[0] if high else 0, 0)
             high, after = snapshot
+            # A terminal cursor starts the next immutable snapshot.  Thus a
+            # late classification is not hidden behind a completed watermark.
+            if after == high:
+                row = c.execute('SELECT COALESCE(sequence,0) FROM private.feed_counters').fetchone()
+                high, after = (row[0] if row else 0), 0
             rows = c.execute('''SELECT sequence,recommendation_id,event_id,profile_version,kind,created_at
                 FROM private.feed WHERE sequence>%s AND sequence<=%s ORDER BY sequence LIMIT %s''', (after, high, limit + 1)).fetchall()
             page, more = rows[:limit], len(rows) > limit
