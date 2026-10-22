@@ -11,7 +11,8 @@ na main; a 06 passou nos testes isolados, checks e merge protegido.
 | 04 | CERTIFICADA E MERGED; 12 testes de ingestão e gates SQL aprovados no worker |
 | 05 | CERTIFICADA E MERGED; PR #7, 11 testes novos, regressões e dois checks aprovados |
 | 06 | CERTIFICADA E MERGED; PR #9, 11 testes novos, regressões e dois checks aprovados |
-| 07–10 | NÃO_INICIADAS nesta execução |
+| 07 | EM_IMPLEMENTAÇÃO nesta branch; sem certificação ou merge |
+| 08–10 | NÃO_INICIADAS nesta execução |
 
 **6/10 validadas.** Evidências públicas em docs/evidence-02.md,
 docs/evidence-03.md, docs/evidence-04.md, docs/evidence-05.md e docs/evidence-06.md;

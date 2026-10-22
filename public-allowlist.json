@@ -96,6 +96,10 @@
       "reason": "Passada 06 autorizada: currículo efêmero, perfil privado e testes sintéticos em worker isolado."
     },
     {
+      "path": "careerbrain/matching.py",
+      "reason": "Passada 07 autorizada: matching privado por versões, evidência explícita e worker isolado."
+    },
+    {
       "path": "careerbrain/server.py",
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
@@ -407,6 +411,10 @@
       "reason": "Passada 06 autorizada: fila por handle opaco e perfil privado em banco descartável."
     },
     {
+      "path": "db/migrations/008_private_matching.sql",
+      "reason": "Passada 07 autorizada: projeção privada versionada, RLS, lease/fencing e testes sintéticos."
+    },
+    {
       "path": "docs/acceptance.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -468,6 +476,10 @@
       "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
     },
     {
+      "path": "docs/matching-07.md",
+      "reason": "Passada 07 autorizada: semântica pública do matching privado e limites de evidência."
+    },
+    {
       "path": "docs/operations.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -514,6 +526,10 @@
     {
       "path": "tests/integration/resume_cases.py",
       "reason": "Passada 06 autorizada: testes de currículo sintético e isolamento de perfil."
+    },
+    {
+      "path": "tests/integration/matching_cases.py",
+      "reason": "Passada 07 autorizada: corte temporal, incerteza, fencing e isolamento com fixtures sintéticas."
     },
     {
       "path": "tests/synthetic-source.txt",

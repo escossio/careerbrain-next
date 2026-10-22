@@ -1,5 +1,11 @@
 # STATUS — CareerBrain Next
 
+## Passada 07 em implementação
+
+O branch `feat/passada-07-matching` contém a migração aditiva e os testes sintéticos
+de matching privado. A certificação, PR, checks, merge e atualização para 7/10
+dependem ainda do worker distribuído e dos gates remotos. A passada 08 não foi iniciada.
+
 ## Checkpoint da passada 06
 
 **6/10 certificadas e incorporadas à main.** A passada 06 foi integrada pelo
