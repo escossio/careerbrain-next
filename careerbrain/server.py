@@ -4,6 +4,7 @@ from .api import CareerBrainAPI, IdentityAPI
 from .auth import AuthService, GoogleVerifier
 from .ingestion import IngestionService
 from .resume import EphemeralResumeStore, ResumeService
+from .mobile import MobileService
 from .db import tenant_pool
 
 
@@ -22,7 +23,12 @@ def create_app(*, auth_conninfo: str, api_conninfo: str, web_client_id: str,
                 worker_pool = tenant_pool(private_worker_conninfo)
                 try:
                     resume = ResumeService(api_pool, worker_pool, EphemeralResumeStore())
-                    return CareerBrainAPI(IdentityAPI(service), ingestion, resume)
+                    mobile_pool = tenant_pool(api_conninfo)
+                    try:
+                        return CareerBrainAPI(IdentityAPI(service), ingestion, resume, MobileService(mobile_pool))
+                    except BaseException:
+                        mobile_pool.close()
+                        raise
                 except BaseException:
                     worker_pool.close()
                     raise

@@ -17,6 +17,14 @@ e repository-policy SUCCESS no mesmo SHA. Nenhum artefato dos jobs,
 credencial, dado real, deploy ou chamada paga. Main protegida.
 08–10 não iniciadas nesta execução.
 
+## Passada 08 — implementação em validação
+
+Branch isolada `feat/passada-08-mobile-sync`, derivada de `c52286c`, contém a
+migração aditiva 010 e endpoints móveis privados: recomendações paginadas,
+sync por watermark, ACK idempotente, candidaturas manuais com CAS e recibo de
+exclusão com capability separada. Testes de PostgreSQL, restore/ledger, checks
+e PR/merge ainda são pendentes; não há certificação nesta etapa.
+
 ## Histórico das passadas 01–06
 
 **7/10 certificadas e incorporadas à main.** A passada 06 foi integrada pelo

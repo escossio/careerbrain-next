@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import re
+from urllib.parse import parse_qsl
 from uuid import uuid4
 
 import psycopg
@@ -10,7 +11,8 @@ import psycopg
 from .auth import Denied
 from .ingestion import IngestionFailure
 from .resume import MAX_BYTES, ResumeRejected
-from tools.contracts import strict_load
+from tools.contracts import ContractError, strict_load
+from .mobile import Conflict
 
 
 class PayloadTooLarge(ValueError):
@@ -191,18 +193,24 @@ class ResumeAPI:
 class CareerBrainAPI:
     """Route producer traffic separately from user identity traffic."""
 
-    def __init__(self, identity: IdentityAPI, ingestion, resume=None):
+    def __init__(self, identity: IdentityAPI, ingestion, resume=None, mobile=None):
         self.identity, self.ingestion = identity, ingestion
         self.resume = None if resume is None else ResumeAPI(identity, resume)
+        self.mobile = mobile
 
     def close(self):
         self.ingestion.pool.close()
         if self.resume is not None:
             self.resume.service.worker_pool.close()
+        if self.mobile is not None:
+            self.mobile.pool.close()
         self.identity.close()
 
     def __call__(self, environ, start_response):
         method, path = environ.get('REQUEST_METHOD'), environ.get('PATH_INFO', '')
+        if self.mobile is not None and (path == '/v1/recommendations' or path.startswith('/v1/recommendations/')
+                                       or path == '/v1/applications' or path == '/v1/me' or path.startswith('/v1/deletions/')):
+            return self._mobile(environ, start_response)
         if path == '/v1/me/resume' or path.startswith('/v1/me/jobs/'):
             if self.resume is None:
                 return self.identity(environ, start_response)
@@ -270,3 +278,46 @@ class CareerBrainAPI:
         headers.append(('Content-Length', str(len(body))))
         start_response(status, headers)
         return [body]
+
+    def _mobile(self, environ, start_response):
+        method, path = environ.get('REQUEST_METHOD'), environ.get('PATH_INFO', '')
+        headers = [('Content-Type', 'application/json'), ('Cache-Control', 'no-store')]
+        try:
+            if method == 'GET' and path.startswith('/v1/deletions/'):
+                capability = environ.get('HTTP_DELETION_CAPABILITY', '')
+                output = self.mobile.receipt(path.removeprefix('/v1/deletions/'), capability)
+                status = '200 OK'
+            else:
+                access = IdentityAPI._bearer(environ)
+                principal = self.identity.service.identity(access)
+                query = dict(parse_qsl(environ.get('QUERY_STRING', ''), strict_parsing=True))
+                limit = int(query.get('limit', '50'))
+                if method == 'GET' and path == '/v1/recommendations': output, status = self.mobile.recommendations(principal['tenant_id'], query.get('cursor'), limit), '200 OK'
+                elif method == 'GET' and path == '/v1/recommendations/changes': output, status = self.mobile.changes(principal['tenant_id'], query.get('cursor'), limit), '200 OK'
+                elif method == 'POST' and path == '/v1/recommendations/ack': self.mobile.ack(principal['tenant_id'], strict_load(self._raw(environ))); output, status = None, '204 No Content'
+                elif method == 'PUT' and path == '/v1/applications': self.mobile.application(principal['tenant_id'], strict_load(self._raw(environ))); output, status = None, '204 No Content'
+                elif method == 'DELETE' and path == '/v1/me':
+                    request_id = environ.get('HTTP_IDEMPOTENCY_KEY', '')
+                    output, status = self.mobile.delete(principal['tenant_id'], request_id), '202 Accepted'
+                    headers.append(('Deletion-Capability', output.pop('deletion_capability')))
+                else: return self._respond(start_response, '404 Not Found', IdentityAPI._error('404 Not Found', 'RESOURCE_GONE')[1])
+        except Denied: return self._respond(start_response, '401 Unauthorized', IdentityAPI._error('401 Unauthorized', 'UNAUTHENTICATED')[1])
+        except LookupError: return self._respond(start_response, '410 Gone', IdentityAPI._error('410 Gone', 'RESOURCE_GONE')[1])
+        except Conflict: return self._respond(start_response, '409 Conflict', IdentityAPI._error('409 Conflict', 'IDEMPOTENCY_CONFLICT')[1])
+        except (ContractError, ValueError, KeyError, TypeError): return self._respond(start_response, '422 Unprocessable Content', IdentityAPI._error('422 Unprocessable Content', 'SCHEMA_INVALID')[1])
+        except psycopg.Error: return self._respond(start_response, '503 Service Unavailable', IdentityAPI._error('503 Service Unavailable', 'UNAVAILABLE')[1])
+        if output is None:
+            start_response(status, headers + [('Content-Length', '0')]); return [b'']
+        body = json.dumps(output, separators=(',', ':')).encode(); start_response(status, headers + [('Content-Length', str(len(body)))]); return [body]
+
+    @staticmethod
+    def _raw(environ):
+        size = environ.get('CONTENT_LENGTH', '')
+        if not size.isdecimal() or int(size) > 1_048_576 or environ.get('CONTENT_TYPE', '').split(';')[0] != 'application/json': raise ValueError('invalid body')
+        raw = environ['wsgi.input'].read(int(size))
+        if len(raw) != int(size): raise ValueError('short body')
+        return raw
+
+    @staticmethod
+    def _respond(start_response, status, output):
+        body = json.dumps(output, separators=(',', ':')).encode(); start_response(status, [('Content-Type', 'application/json'), ('Content-Length', str(len(body))), ('Cache-Control', 'no-store')]); return [body]

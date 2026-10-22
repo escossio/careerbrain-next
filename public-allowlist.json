@@ -100,6 +100,10 @@
       "reason": "Passada 07 autorizada: matching privado por versões, evidência explícita e worker isolado."
     },
     {
+      "path": "careerbrain/mobile.py",
+      "reason": "Passada 08 autorizada: APIs móveis privadas, sync idempotente, candidaturas manuais e exclusão testados com fixtures sintéticas."
+    },
+    {
       "path": "careerbrain/server.py",
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
@@ -449,6 +453,10 @@
       "reason": "Passada 07 autorizada: extensão aditiva para veto apenas com par versionado e verificável."
     },
     {
+      "path": "db/migrations/010_mobile_sync_privacy.sql",
+      "reason": "Passada 08 autorizada: sync privado, candidaturas com CAS e exclusão com ledger em banco descartável."
+    },
+    {
       "path": "docs/acceptance.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
@@ -563,7 +571,7 @@
     },
     {
       "path": "tests/integration/matching_cases.py",
-      "reason": "Passada 07 autorizada: corte temporal, incerteza, fencing e isolamento com fixtures sintéticas."
+      "reason": "Passadas 07–08: corte temporal, incerteza, fencing, sync multi-dispositivo, CAS e exclusão com fixtures sintéticas."
     },
     {
       "path": "tests/synthetic-source.txt",
