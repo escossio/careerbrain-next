@@ -771,6 +771,11 @@
       "path": "careerbrain/worker.py",
       "category": "runtime-template",
       "review_basis": "Consumidor determinístico de filas sintéticas, sem provedor externo ou segredo."
+    },
+    {
+      "path": "android/app/src/debug/AndroidManifest.xml",
+      "category": "runtime-template",
+      "review_basis": "Configuração de segurança exclusiva do build debug; a CA é gerada localmente e não entra no Git."
     }
   ]
 }

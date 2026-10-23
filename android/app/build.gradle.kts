@@ -6,12 +6,37 @@ android { namespace = "com.escossio.careerbrain"; compileSdk = 35
     buildFeatures { compose = true; buildConfig = true }
     val apiBaseUrl = providers.gradleProperty("careerbrainApiBaseUrl").orElse("").get()
     val googleWebClientId = providers.gradleProperty("careerbrainGoogleWebClientId").orElse("").get()
+    val debugCaFile = providers.gradleProperty("careerbrainDebugCaFile").orElse("").get()
+    val debugSecurityResources = layout.buildDirectory.dir("generated/res/careerbrainDebugSecurity")
     defaultConfig {
         buildConfigField("String", "CAREERBRAIN_API_BASE_URL", "\"${apiBaseUrl.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
         buildConfigField("String", "CAREERBRAIN_GOOGLE_WEB_CLIENT_ID", "\"${googleWebClientId.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
     }
+    sourceSets.getByName("debug").res.srcDir(debugSecurityResources)
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
 }
+
+val generateCareerBrainDebugSecurity by tasks.registering {
+    outputs.dir(layout.buildDirectory.dir("generated/res/careerbrainDebugSecurity"))
+    doLast {
+        val root = layout.buildDirectory.dir("generated/res/careerbrainDebugSecurity").get().asFile
+        val xml = root.resolve("xml/careerbrain_network_security.xml")
+        xml.parentFile.mkdirs()
+        val apiUrl = providers.gradleProperty("careerbrainApiBaseUrl").orElse("").get()
+        val caPath = providers.gradleProperty("careerbrainDebugCaFile").orElse("").get()
+        if (apiUrl.isNotBlank() && caPath.isBlank()) throw GradleException("careerbrainDebugCaFile is required for a real debug endpoint")
+        val extraAnchor = if (caPath.isBlank()) "" else {
+            val ca = file(caPath)
+            if (!ca.isFile) throw GradleException("careerbrainDebugCaFile is not a readable file")
+            val raw = root.resolve("raw/careerbrain_homolog_ca.pem")
+            raw.parentFile.mkdirs(); ca.copyTo(raw, overwrite = true)
+            "<debug-overrides><trust-anchors><certificates src=\"@raw/careerbrain_homolog_ca\" /></trust-anchors></debug-overrides>"
+        }
+        xml.writeText("<network-security-config><base-config cleartextTrafficPermitted=\"false\"><trust-anchors><certificates src=\"system\" /></trust-anchors></base-config>$extraAnchor</network-security-config>")
+    }
+}
+
+tasks.named("preDebugBuild").configure { dependsOn(generateCareerBrainDebugSecurity) }
 
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
 
