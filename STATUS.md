@@ -40,10 +40,13 @@ reentrega/offline, cursor e remoção; a instrumentação sintética cobre entra
 segunda página, salvar, sincronizar e limpeza.
 
 O workflow Android agora compila o APK debug e o APK AndroidTest, registra SHA256
-dos dois e os publica juntos no artefato privado por um dia. Nenhum build pesado
-foi executado no AGT; o novo SHA aguarda o GitHub Actions e a instrumentação
-externa no AVD descartável. Não há backend real, credencial, sessão produtiva ou
-dados reais. A passada 10 não foi iniciada.
+dos dois e os publica juntos no artefato privado por um dia. GitHub Actions
+`39984692113` aprovou unitários, lint e os dois APKs no SHA `f5e53ca`; os digests
+são `70d2da759a0ba040c5ad8b6beca1eee9f4fdc070b0db8ff712121ca12c73ecb9`
+(debug) e `e8775f63769b511a31e20a7f807480c54b267d277156dfadd4eecb3f7484010c`
+(AndroidTest). Nenhum build pesado foi executado no AGT; a instrumentação externa
+no AVD descartável permanece pendente. Não há backend real, credencial, sessão
+produtiva ou dados reais. A passada 10 não foi iniciada.
 
 ## Histórico das passadas 01–06
 

@@ -13,7 +13,7 @@ na main; a 08 passou nas regressões isoladas, checks e merge protegido.
 | 06 | CERTIFICADA E MERGED; PR #9, 11 testes novos, regressões e dois checks aprovados |
 | 07 | CERTIFICADA E MERGED; PR #11, CI03 (5 matching e regressões), 51 offline e checks verdes |
 | 08 | CERTIFICADA E MERGED; PR #13, migração 010, CI03 (8 matching e regressões) e checks verdes |
-| 09 | EM_VALIDAÇÃO FINAL; PR #15 adiciona sync fake/ACK/cursor seguro, páginas/estados manuais e APK AndroidTest; novo CI e instrumentação externa pendentes |
+| 09 | EM_VALIDAÇÃO FINAL; PR #15 adiciona sync fake/ACK/cursor seguro, páginas/estados manuais e APK AndroidTest; CI 39984692113 passou, instrumentação externa pendente |
 | 10 | NÃO_INICIADA nesta execução |
 
 **8/10 validadas.** Evidências públicas em docs/evidence-02.md,
