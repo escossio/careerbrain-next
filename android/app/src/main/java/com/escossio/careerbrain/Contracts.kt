@@ -110,7 +110,11 @@ class HttpCareerBrainApi(baseUrl: String) : CareerBrainApi {
         } catch (_: Exception) { ApiResult.Offline }
         val first = execute(session?.accessToken)
         if (first !is ApiResult.Http || first.status != 401 || session == null || (method != "GET" && idempotency == null)) first
-        else when (val renewed = refresh(session!!)) { is ApiResult.Ok -> execute(renewed.value.accessToken); else -> renewed }
+        else when (val renewed = refresh(session!!)) {
+            is ApiResult.Ok -> execute(renewed.value.accessToken)
+            is ApiResult.Http -> ApiResult.Http(renewed.status)
+            ApiResult.Offline -> ApiResult.Offline
+        }
     }
     private fun ApiResult<JSONObject>.mapSession(): ApiResult<Session> = map { Session(it.getString("access_token"), it.getString("refresh_token")).also { next -> session = next } }
 }
