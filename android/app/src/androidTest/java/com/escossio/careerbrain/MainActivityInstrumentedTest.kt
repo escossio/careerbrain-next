@@ -1,7 +1,6 @@
 package com.escossio.careerbrain
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -26,17 +25,17 @@ class MainActivityInstrumentedTest {
     @Test fun syntheticFlowShowsSecondPageSavesSyncsAndCleansLocalState() {
         composeRule.onNodeWithText("Entrar com identidade sintética").performClick()
         awaitText("Analista de Dados")
-        composeRule.onNodeWithText("Analista de Dados").assertExists()
+        composeRule.onNodeWithText("Analista de Dados").assertIsDisplayed()
         composeRule.onNodeWithText("Carregar próxima oportunidade").performClick()
         awaitText("Técnica de manutenção")
-        composeRule.onNodeWithText("Técnica de manutenção").assertExists()
-        composeRule.onAllNodesWithText("Salvar oportunidade").onFirst().performClick()
+        composeRule.onNodeWithText("Técnica de manutenção").assertIsDisplayed()
+        composeRule.onAllNodesWithText("Salvar oportunidade")[0].performClick()
         awaitText("Estado registrado: SAVED (1)")
         composeRule.onNodeWithText("Sincronizar").performClick()
         awaitText("Sincronização concluída até 2")
         composeRule.onNodeWithText("Excluir conta").performClick()
         composeRule.onNodeWithText("Confirmar exclusão").performClick()
         awaitText("Dados locais removidos")
-        composeRule.onNodeWithText("Entrar com identidade sintética").assertExists()
+        composeRule.onNodeWithText("Entrar com identidade sintética").assertIsDisplayed()
     }
 }
