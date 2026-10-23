@@ -4,6 +4,7 @@ import json, logging, os, signal, time
 from .classification import ClassificationConfig, DeterministicClassifier, GlobalClassifier
 from .db import tenant_pool
 from .matching import MatchService
+from .resume import FilesystemResumeStore, ResumeService
 
 STOP=False
 def _stop(*_):
@@ -18,12 +19,14 @@ def main():
     private_pool=tenant_pool(_need('CBN_PRIVATE_WORKER_CONNINFO'))
     classifier=GlobalClassifier(global_pool, ClassificationConfig('professional-v1','deterministic-v1','synthetic-homolog-v1'), DeterministicClassifier())
     matcher=MatchService(private_pool, private_pool)
+    resume=ResumeService(None, private_pool, FilesystemResumeStore(_need('CBN_RESUME_DIRECTORY')))
     try:
         while not STOP:
             classified=classifier.run_once()
+            resumed=resume.process_once()
             matched=matcher.process_once()
-            if classified or matched:
-                print(json.dumps({'component':'careerbrain-worker','classification':classified,'matching':matched}),flush=True)
+            if classified or resumed or matched:
+                print(json.dumps({'component':'careerbrain-worker','classification':classified,'resume':resumed,'matching':matched}),flush=True)
             else: time.sleep(1)
     finally: global_pool.close(); private_pool.close()
 if __name__=='__main__': main()

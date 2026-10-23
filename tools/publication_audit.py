@@ -47,7 +47,10 @@ def content_findings(text: str, relative: str) -> list[str]:
         host = match.group(1).lower().rstrip(".")
         if relative == "tests/test_contracts.py" and host in SYNTHETIC_HOSTS:
             continue  # Exact hand-reviewed adversarial fixtures, never arbitrary hosts.
-        if host not in ALLOWED_HOSTS:
+        synthetic_homolog_host = host == "homolog.invalid" and relative in {
+            "careerbrain/homolog_admin.py", "careerbrain/homolog_producer.py",
+        }
+        if host not in ALLOWED_HOSTS and not synthetic_homolog_host:
             findings.append("unapproved-url-host")
     for value in PRIVATE_IP.findall(text):
         try:

@@ -1,5 +1,24 @@
 # STATUS — CareerBrain Next
 
+## Passada 10 — homologação integrada em andamento
+
+Marco A comprovado no runtime local isolado: massa determinística SYNTHETIC/HOMOLOG
+com 141 registros, artefatos privados e lotes `synthetic-141-a` (100) e
+`synthetic-141-b` (41) foi provisionada por função administrativa restrita e
+enviada à API HTTPS com CA privada validada. PostgreSQL registrou 141 vagas,
+141 eventos e 141 classificações: 121 `READY` e 20 `UNCERTAIN`. O replay
+autenticado não duplicou registros. Dois recibos rejeitados anteriores foram
+preservados como prova dos controles de token/envelope; a credencial inicial
+incompatível foi revogada e o produtor foi rotacionado.
+
+O runtime agora copia contratos para a imagem, usa tmpfs compartilhado entre API
+e worker somente para PDF transitório, consome jobs de currículo e agenda matching
+por tenant. Um currículo PDF sintético produziu perfil `READY`, concluiu 142 jobs
+(um currículo e 141 matches), gerou 61 afinidades evidenciadas e manteve 80 casos
+incertos fora da API de recomendações. O multipart Android passou a emitir CRLF
+real. Ainda não há certificação da Passada 10: faltam regressão distribuída, build
+Android de integração, OAuth Google legítimo e a interação voluntária no POCO X6.
+
 ## Passada 07 — certificada e integrada
 
 A execução 07 foi concluída pelo PR #11, merge squash

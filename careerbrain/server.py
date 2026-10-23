@@ -3,7 +3,7 @@
 from .api import CareerBrainAPI, IdentityAPI
 from .auth import AuthService, GoogleVerifier
 from .ingestion import IngestionService
-from .resume import EphemeralResumeStore, ResumeService
+from .resume import EphemeralResumeStore, FilesystemResumeStore, ResumeService
 from .mobile import MobileService
 from .tts import TtsService
 from .db import tenant_pool
@@ -11,7 +11,7 @@ from .db import tenant_pool
 
 def create_app(*, auth_conninfo: str, api_conninfo: str, web_client_id: str,
                presenter_client_ids: tuple[str, ...], ingest_conninfo: str,
-               private_worker_conninfo: str) -> CareerBrainAPI:
+               private_worker_conninfo: str, resume_directory: str = '') -> CareerBrainAPI:
     verifier = GoogleVerifier(web_client_id, presenter_client_ids)
     auth_pool = tenant_pool(auth_conninfo)
     try:
@@ -23,7 +23,8 @@ def create_app(*, auth_conninfo: str, api_conninfo: str, web_client_id: str,
                 ingestion = IngestionService(ingest_pool)
                 worker_pool = tenant_pool(private_worker_conninfo)
                 try:
-                    resume = ResumeService(api_pool, worker_pool, EphemeralResumeStore())
+                    store = FilesystemResumeStore(resume_directory) if resume_directory else EphemeralResumeStore()
+                    resume = ResumeService(api_pool, worker_pool, store)
                     mobile_pool = tenant_pool(api_conninfo)
                     try:
                         return CareerBrainAPI(IdentityAPI(service), ingestion, resume, MobileService(mobile_pool), TtsService())

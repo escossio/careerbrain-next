@@ -42,7 +42,8 @@ class MobileService:
                 r.affinity::float8,r.confidence::float8,r.reasons,r.available_at,e.vacancy_id,v.content->>'title',v.content->'access'
                 FROM private.current_recommendations r JOIN private.recommendations base ON base.recommendation_id=r.recommendation_id
                 JOIN catalog.publication_events e ON e.id=r.event_id JOIN catalog.vacancies v ON v.id=e.vacancy_id
-                WHERE (%s::timestamptz IS NULL OR (base.available_at,base.recommendation_id)>(%s::timestamptz,%s::uuid))
+                WHERE r.affinity IS NOT NULL AND r.confidence IS NOT NULL
+                  AND (%s::timestamptz IS NULL OR (base.available_at,base.recommendation_id)>(%s::timestamptz,%s::uuid))
                 ORDER BY base.available_at,base.recommendation_id LIMIT %s''', (after_time, after_time, after_id, limit + 1)).fetchall()
         page, more = rows[:limit], len(rows) > limit
         items = [{'recommendation_id': str(x[0]), 'match': {'schema_version': 'careerbrain.match.v1', 'tenant_id': str(tenant_id),

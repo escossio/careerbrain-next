@@ -76,6 +76,52 @@ class EphemeralResumeStore:
         return handle in self._entries
 
 
+class FilesystemResumeStore:
+    """Shared tmpfs-only store; PostgreSQL receives only its opaque handle."""
+    def __init__(self, directory: str):
+        self.directory = os.path.realpath(directory)
+        if not os.path.isdir(self.directory) or os.path.islink(self.directory):
+            raise RuntimeError('invalid ephemeral resume directory')
+
+    def _path(self, handle: UUID) -> str:
+        return os.path.join(self.directory, str(handle))
+
+    def put(self, document: bytes, expires_at: datetime) -> UUID:
+        handle = uuid4(); path = self._path(handle)
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, 'O_NOFOLLOW', 0)
+        fd = os.open(path, flags, 0o600)
+        try:
+            with os.fdopen(fd, 'wb') as target:
+                target.write(document); target.flush(); os.fsync(target.fileno())
+        except BaseException:
+            try: os.unlink(path)
+            except FileNotFoundError: pass
+            raise
+        return handle
+
+    def get(self, handle: UUID, now: datetime | None = None) -> bytes:
+        try:
+            with open(self._path(handle), 'rb', opener=lambda path, flags: os.open(path, flags | getattr(os, 'O_NOFOLLOW', 0))) as source:
+                value = source.read(MAX_BYTES + 1)
+        except FileNotFoundError as error:
+            raise TemporaryMissing('temporary content unavailable') from error
+        if len(value) > MAX_BYTES: raise ResumeRejected('invalid size')
+        return value
+
+    def delete(self, handle: UUID) -> None:
+        try: os.unlink(self._path(handle))
+        except FileNotFoundError: pass
+
+    def reap(self, now: datetime | None = None) -> int:
+        now = now or datetime.now(timezone.utc); removed = 0
+        for name in os.listdir(self.directory):
+            try:
+                handle = UUID(name); age = datetime.fromtimestamp(os.stat(self._path(handle), follow_symlinks=False).st_mtime, timezone.utc)
+                if age + TTL <= now: self.delete(handle); removed += 1
+            except (ValueError, FileNotFoundError): continue
+        return removed
+
+
 def assert_ephemeral_runtime() -> None:
     """CI proof of process limits only; deployment proof remains a separate gate."""
     soft, hard = resource.getrlimit(resource.RLIMIT_CORE)
@@ -133,15 +179,17 @@ class ResumeService:
     extractor_version = 'deterministic-pdf-v1'
     taxonomy_version = 'professional-v1'
 
-    def __init__(self, api_pool, worker_pool, store: EphemeralResumeStore, extractor=None):
+    def __init__(self, api_pool, worker_pool, store: EphemeralResumeStore | FilesystemResumeStore, extractor=None):
         self.api_pool, self.worker_pool, self.store = api_pool, worker_pool, store
         self.extractor = extractor or DeterministicPdfExtractor()
         for pool, role in ((api_pool, 'cb_api'), (worker_pool, 'cb_private_worker')):
+            if pool is None: continue
             with pool.connection() as conn:
                 if conn.execute('SELECT current_user').fetchone()[0] != role:
                     raise ValueError('Runtime database role mismatch')
 
     def upload(self, tenant_id: str, metadata: dict, document: bytes, idempotency_key: str) -> dict:
+        if self.api_pool is None: raise RuntimeError('upload unavailable in worker')
         validate('resume-upload', metadata)
         if metadata['request_id'] != idempotency_key or metadata['content_length'] != len(document):
             raise ResumeRejected('invalid upload envelope')
@@ -201,9 +249,20 @@ class ResumeService:
             result = self._call('private.fail_resume_job', claim, True)
         if result != 'RETRY':
             self.store.delete(claim.handle)
+        if result in ('READY', 'UNCERTAIN'):
+            self._schedule_matches(claim.tenant_id)
         return result
 
+    def _schedule_matches(self, tenant_id: UUID) -> None:
+        """Profile completion queues every classified event under tenant RLS."""
+        with self.worker_pool.connection() as conn, conn.transaction():
+            conn.execute("SELECT set_config('careerbrain.tenant_id',%s,true)", (str(tenant_id),))
+            events = conn.execute('SELECT event_id FROM catalog.current_classifications').fetchall()
+            for (event_id,) in events:
+                conn.execute('SELECT private.create_match_job(%s)', (event_id,))
+
     def cancel(self, tenant_id: str, job_id: str) -> bool:
+        if self.api_pool is None: raise RuntimeError('cancel unavailable in worker')
         with self.api_pool.connection() as conn, conn.transaction():
             conn.execute("SELECT set_config('careerbrain.tenant_id',%s,true)", (str(UUID(tenant_id)),))
             handle = conn.execute('SELECT private.cancel_resume_job(%s)', (UUID(job_id),)).fetchone()[0]
@@ -213,6 +272,7 @@ class ResumeService:
         return True
 
     def status(self, tenant_id: str, job_id: str) -> dict | None:
+        if self.api_pool is None: raise RuntimeError('status unavailable in worker')
         with self.api_pool.connection() as conn, conn.transaction():
             conn.execute("SELECT set_config('careerbrain.tenant_id',%s,true)", (str(UUID(tenant_id)),))
             state = conn.execute('SELECT private.resume_job_status(%s)', (UUID(job_id),)).fetchone()[0]

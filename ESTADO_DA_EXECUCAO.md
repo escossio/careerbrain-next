@@ -1,5 +1,21 @@
 # CareerBrain Next — estado da execução
 
+## Atualização de homologação integrada — 23/10/2026
+
+Marco A está comprovado no ambiente local isolado: 141 vagas inteiramente
+sintéticas chegaram pela rota HTTPS autenticada em dois lotes, foram persistidas,
+classificadas e reenviadas sem duplicação. A distribuição observada foi 121
+`READY` e 20 `UNCERTAIN`. O produtor não recebeu privilégio de banco; fontes,
+autorizações, 141 evidências/aprovações e contatos foram provisionados por trilha
+administrativa idempotente. Evidências privadas e segredos permanecem fora do Git.
+
+Foi corrigida a imagem de runtime para incluir contratos e fechada a fronteira
+API/worker do currículo com tmpfs compartilhado, handles opacos e remoção após
+processamento. A prova sintética demonstrou perfil `READY`, matching privado e
+feed com somente afinidades evidenciadas. Isso não substitui Google real, PDF
+voluntário nem prova no POCO X6; esses passos dependem de configuração OAuth e
+interação humana e permanecem pendentes antes de certificação.
+
 Checkpoint certificado da passada 09. As passadas 01–09 estão certificadas
 na main. CI Android, testes unitários, lint, APKs e instrumentação Compose
 no Android 14 passaram antes do merge protegido.

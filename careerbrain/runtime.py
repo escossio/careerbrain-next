@@ -24,6 +24,7 @@ def build_application():
         api_conninfo=_required('CBN_API_CONNINFO'),
         ingest_conninfo=_required('CBN_INGEST_CONNINFO'),
         private_worker_conninfo=_required('CBN_PRIVATE_WORKER_CONNINFO'),
+        resume_directory=os.environ.get('CBN_RESUME_DIRECTORY', ''),
         web_client_id=_required('CBN_WEB_CLIENT_ID'),
         presenter_client_ids=tuple(filter(None, _required('CBN_PRESENTER_CLIENT_IDS').split(','))),
     )

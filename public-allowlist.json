@@ -714,6 +714,16 @@
       "review_basis": "Comando administrativo com guarda explícita de destino, sem topologia ou segredo."
     },
     {
+      "path": "careerbrain/homolog_admin.py",
+      "category": "runtime-template",
+      "review_basis": "Provisionador idempotente exclusivo da massa sintética, sem segredo ou topologia operacional."
+    },
+    {
+      "path": "careerbrain/homolog_producer.py",
+      "category": "runtime-template",
+      "review_basis": "Gerador e produtor HTTPS determinístico exclusivo da massa SYNTHETIC/HOMOLOG."
+    },
+    {
       "path": "careerbrain/runtime.py",
       "category": "runtime-template",
       "review_basis": "Construção WSGI configurada exclusivamente por ambiente de runtime."

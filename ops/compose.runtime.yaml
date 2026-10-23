@@ -39,10 +39,12 @@ services:
     build: {context: .., dockerfile: ops/Dockerfile.api}
     restart: unless-stopped
     env_file: ["${CBN_API_ENV_FILE}"]
+    environment: {CBN_RESUME_DIRECTORY: /run/careerbrain/resumes}
     volumes:
       - "${CBN_TLS_CERT_FILE}:/run/careerbrain/tls/server.crt:ro"
       - "${CBN_TLS_KEY_FILE}:/run/careerbrain/tls/server.key:ro"
       - "${CBN_TLS_CA_FILE}:/run/careerbrain/tls/ca.crt:ro"
+      - resume_ephemeral:/run/careerbrain/resumes
     networks:
       internal: {ipv4_address: "${CBN_API_INTERNAL_ADDRESS}"}
       vlan: {ipv4_address: "${CBN_API_VLAN_ADDRESS}"}
@@ -80,6 +82,9 @@ services:
     restart: unless-stopped
     env_file: ["${CBN_WORKER_ENV_FILE}"]
     command: ["python", "-m", "careerbrain.worker"]
+    environment: {CBN_RESUME_DIRECTORY: /run/careerbrain/resumes}
+    volumes:
+      - resume_ephemeral:/run/careerbrain/resumes
     networks:
       internal: {ipv4_address: "${CBN_WORKER_INTERNAL_ADDRESS}"}
     depends_on: {migrate: {condition: service_completed_successfully}}
@@ -101,6 +106,10 @@ networks:
     internal: true
     ipam: {config: [{subnet: "${CBN_INTERNAL_SUBNET}"}]}
   vlan: {name: "${CBN_VLAN_NETWORK}", external: true}
+volumes:
+  resume_ephemeral:
+    driver: local
+    driver_opts: {type: tmpfs, device: tmpfs, o: "size=32m,uid=10001,gid=10001,mode=0700"}
 secrets:
   postgres_admin_password: {file: "${CBN_SECRETS_DIR}/postgres_admin_password"}
   cb_migrator_password: {file: "${CBN_SECRETS_DIR}/cb_migrator_password"}
