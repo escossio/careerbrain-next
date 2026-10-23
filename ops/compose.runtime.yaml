@@ -2,6 +2,7 @@ name: careerbrain-next
 services:
   postgres:
     image: postgres:16.11-alpine
+    user: "70:70"
     restart: unless-stopped
     environment:
       POSTGRES_DB: "${CBN_DATABASE}"
@@ -11,15 +12,19 @@ services:
     command: ["postgres", "-c", "listen_addresses=${CBN_DB_LISTEN_ADDRESS}", "-c", "hba_file=/etc/postgresql/pg_hba.conf", "-c", "password_encryption=scram-sha-256"]
     volumes:
       - "${CBN_POSTGRES_DATA}:/var/lib/postgresql/data"
-      - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - "${CBN_POSTGRES_HBA_FILE}:/etc/postgresql/pg_hba.conf:ro"
       - ./postgres/init-roles.sh:/docker-entrypoint-initdb.d/10-init-roles.sh:ro
-      - ../../db/bootstrap.sql:/bootstrap.sql:ro
+      - ../db/bootstrap.sql:/bootstrap.sql:ro
+      - ./postgres/runtime-permissions.sql:/runtime-permissions.sql:ro
     secrets: [postgres_admin_password, cb_migrator_password, cb_auth_password, cb_api_password, cb_ingest_password, cb_global_worker_password, cb_private_worker_password, cb_privacy_password]
     networks:
       internal: {ipv4_address: "${CBN_DB_INTERNAL_ADDRESS}"}
       vlan: {ipv4_address: "${CBN_DB_VLAN_ADDRESS}"}
     read_only: true
-    tmpfs: [/run, /tmp]
+    tmpfs:
+      - /run
+      - /tmp
+      - /var/run/postgresql:uid=70,gid=70,mode=3775
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     pids_limit: 128

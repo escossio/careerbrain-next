@@ -1,3 +1,5 @@
 --require-hashes
 -r requirements-db.txt
+-r requirements-ci.txt
 gunicorn==23.0.0 --hash=sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d
+packaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c

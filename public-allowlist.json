@@ -742,6 +742,16 @@
       "path": "ops/postgres/pg_hba.conf.template",
       "category": "runtime-template",
       "review_basis": "Template de ACL a ser renderizado fora do Git com sub-redes privadas."
+    },
+    {
+      "path": "ops/postgres/runtime-permissions.sql",
+      "category": "runtime-template",
+      "review_basis": "Privilégios SQL mínimos e parametrizados pelo banco conectado, sem dado ou segredo."
+    },
+    {
+      "path": "docs/runtime-10.md",
+      "category": "public-documentation",
+      "review_basis": "Procedimento operacional sem inventário, endereço, segredo ou evidência privada."
     }
   ]
 }

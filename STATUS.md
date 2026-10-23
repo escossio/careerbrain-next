@@ -89,6 +89,17 @@ docs/ingestion-04.md e docs/resume-06.md. Nenhum banco produtivo, deploy públic
 chamada de IA ou mudança de credenciais/permissões de integrações.
 Auditoria geral de GitHub Apps permanece atividade de segurança independente.
 
+## Passada 10 — runtime local persistente (não certificada)
+
+Foi implantado um PostgreSQL dedicado persistente e uma API Gunicorn no ambiente
+local isolado, com migrações 1–10, papéis SQL, SCRAM, healthchecks separados e
+conexão interna confirmada. Backup custom e restauração em banco temporário
+confirmaram as 10 migrações. A API respondeu readiness e erro HTTP sanitizado; o
+listener do banco não aceita a interface de identificação externa. Configuração,
+secrets, topologia, hashes de backup e logs permanecem privados. O importador CSV,
+fontes autorizadas, identidade real, Android em rede móvel e demais gates continuam
+pendentes; esta evidência não certifica a passada 10.
+
 ## Passada 10 — preparação de homologação HTTP isolada
 
 Na branch isolada `feat/passada-10-homologacao-isolada`, foi preparado um harness
