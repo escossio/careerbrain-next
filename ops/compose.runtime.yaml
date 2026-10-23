@@ -39,6 +39,10 @@ services:
     build: {context: .., dockerfile: ops/Dockerfile.api}
     restart: unless-stopped
     env_file: ["${CBN_API_ENV_FILE}"]
+    volumes:
+      - "${CBN_TLS_CERT_FILE}:/run/careerbrain/tls/server.crt:ro"
+      - "${CBN_TLS_KEY_FILE}:/run/careerbrain/tls/server.key:ro"
+      - "${CBN_TLS_CA_FILE}:/run/careerbrain/tls/ca.crt:ro"
     networks:
       internal: {ipv4_address: "${CBN_API_INTERNAL_ADDRESS}"}
       vlan: {ipv4_address: "${CBN_API_VLAN_ADDRESS}"}
@@ -52,7 +56,7 @@ services:
     cpus: 1.0
     stop_grace_period: 30s
     healthcheck:
-      test: ["CMD-SHELL", "python -c 'import os, urllib.request; assert urllib.request.urlopen(os.environ[\"CBN_API_HEALTH_URL\"], timeout=3).status == 200'"]
+      test: ["CMD-SHELL", "python -c 'import os,ssl,urllib.request; c=ssl.create_default_context(cafile=os.environ[\"CBN_TLS_CA\"]); assert urllib.request.urlopen(os.environ[\"CBN_API_HEALTH_URL\"], context=c, timeout=3).status == 200'"]
       interval: 15s
       timeout: 5s
       retries: 4

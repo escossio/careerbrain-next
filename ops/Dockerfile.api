@@ -7,4 +7,4 @@ COPY careerbrain ./careerbrain
 COPY db ./db
 COPY tools ./tools
 USER 10001:10001
-CMD ["sh", "-c", "exec gunicorn --bind \"$CBN_API_LISTEN\" --workers=2 --threads=2 --timeout=20 --graceful-timeout=20 --error-logfile=- --log-level=warning careerbrain.runtime:application"]
+CMD ["sh", "-c", "exec gunicorn --bind \"$CBN_API_LISTEN\" --workers=2 --threads=2 --timeout=20 --graceful-timeout=20 --error-logfile=- --log-level=warning --certfile=\"$CBN_TLS_CERT\" --keyfile=\"$CBN_TLS_KEY\" careerbrain.runtime:application"]
