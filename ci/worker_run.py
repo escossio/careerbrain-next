@@ -129,6 +129,11 @@ def main():
         if matching.returncode:raise RuntimeError('PostgreSQL matching tests failed; see matching.log')
         assert b'\nOK\n' in matching.stderr
         report['results']['matching']='PASS'
+        homolog=client(['python','-m','unittest','discover','-s','tests/integration','-p','homolog_cases.py','-v'])
+        (results/'homolog-http.log').write_bytes(homolog.stdout+homolog.stderr)
+        if homolog.returncode:raise RuntimeError('Loopback HTTP homolog smoke failed; see homolog-http.log')
+        assert b'\nOK\n' in homolog.stderr
+        report['results']['homolog_http']='PASS'
         report['backup_sha256']=hashlib.sha256(dump).hexdigest()
         report['status']='PASS'
     except Exception as error:

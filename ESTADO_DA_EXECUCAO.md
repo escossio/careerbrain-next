@@ -15,7 +15,7 @@ no Android 14 passaram antes do merge protegido.
 | 07 | CERTIFICADA E MERGED; PR #11, CI03 (5 matching e regressões), 51 offline e checks verdes |
 | 08 | CERTIFICADA E MERGED; PR #13, migração 010, CI03 (8 matching e regressões) e checks verdes |
 | 09 | CERTIFICADA E MERGED; PR #15, Android CI + 2 testes instrumentados PASS |
-| 10 | EM_ANDAMENTO; cliente HTTP/Google configurável e fronteira TTS fail-closed implementados, sem gate externo exercido |
+| 10 | EM_ANDAMENTO; cliente HTTP/Google configurável, fronteira TTS fail-closed e smoke WSGI loopback preparado; execução CI03 pendente |
 
 **9/10 validadas.** Evidências públicas em docs/evidence-02.md,
 docs/evidence-03.md, docs/evidence-04.md, docs/evidence-05.md e docs/evidence-06.md;
@@ -25,3 +25,9 @@ A autorização sequencial não permite novo custo, credencial, produção, depl
 mudança de produto. A auditoria geral de Apps foi retirada dos gates pelo proprietário.
 O checkpoint inicial da 10 passou 53 testes offline leves no AGT; a execução pesada
 permanece reservada ao worker dedicado e não certifica integração real.
+O smoke da homologação isolada usa somente fonte commitada, banco `cbn_test_*`, socket
+UNIX e HTTP loopback dentro do cliente do worker; não foi executado no control plane
+nem certificado até retorno da execução externa. Não autoriza URL Android local,
+exposição pública, DNS, proxy, TLS, segredo, backup persistente ou 4G/5G.
+Compilação Python, 54 testes offline, política pública e `diff --check` passaram nesta
+branch; a prova HTTP real continua reservada ao CI03.

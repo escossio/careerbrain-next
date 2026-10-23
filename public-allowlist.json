@@ -97,6 +97,10 @@
       "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
     },
     {
+      "path": "careerbrain/homolog.py",
+      "reason": "Passada 10: harness WSGI descartável e limitado a loopback para smoke HTTP no worker isolado, sem implantação."
+    },
+    {
       "path": "careerbrain/resume.py",
       "reason": "Passada 06 autorizada: currículo efêmero, perfil privado e testes sintéticos em worker isolado."
     },
@@ -523,6 +527,11 @@
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
     {
+      "path": "docs/homolog-10.md",
+      "category": "public-documentation",
+      "review_basis": "Checklist de smoke HTTP isolado e fronteiras explícitas, sem topologia, credencial ou dado operacional."
+    },
+    {
       "path": "docs/ingestion-04.md",
       "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
     },
@@ -573,6 +582,10 @@
     {
       "path": "tests/integration/ingestion_cases.py",
       "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
+    },
+    {
+      "path": "tests/integration/homolog_cases.py",
+      "reason": "Passada 10: smoke HTTP real por loopback no worker, com banco descartável e identificadores sintéticos."
     },
     {
       "path": "tests/integration/resume_cases.py",

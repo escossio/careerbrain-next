@@ -88,3 +88,16 @@ Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md,
 docs/ingestion-04.md e docs/resume-06.md. Nenhum banco produtivo, deploy público,
 chamada de IA ou mudança de credenciais/permissões de integrações.
 Auditoria geral de GitHub Apps permanece atividade de segurança independente.
+
+## Passada 10 — preparação de homologação HTTP isolada
+
+Na branch isolada `feat/passada-10-homologacao-isolada`, foi preparado um harness
+WSGI descartável, limitado a loopback, sem logs de requisição e com health mínimo.
+O smoke automatizado usa `create_app(...)`, banco `cbn_test_*` e HTTP real somente
+dentro do cliente isolado do worker; ele verifica resposta sanitizada de autenticação
+e fecha os pools. A expansão do CI03 é pendente de execução externa autorizada; a
+regressão anterior `ci03-pr17-regression-01` não foi repetida. Sem deploy, DNS,
+Cloudflare, proxy, TLS público, segredo, dado real ou URL Android local. G-DEPLOY e
+os demais gates de uso real continuam pendentes; total permanece 9/10 certificadas.
+Checks leves desta preparação: compilação Python, 54 testes offline, política pública
+e `diff --check` passaram no control plane; isso não valida o smoke do worker.
