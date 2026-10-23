@@ -15,7 +15,7 @@ no Android 14 passaram antes do merge protegido.
 | 07 | CERTIFICADA E MERGED; PR #11, CI03 (5 matching e regressões), 51 offline e checks verdes |
 | 08 | CERTIFICADA E MERGED; PR #13, migração 010, CI03 (8 matching e regressões) e checks verdes |
 | 09 | CERTIFICADA E MERGED; PR #15, Android CI + 2 testes instrumentados PASS |
-| 10 | NÃO_INICIADA nesta execução |
+| 10 | EM_ANDAMENTO; cliente HTTP/Google configurável e fronteira TTS fail-closed implementados, sem gate externo exercido |
 
 **9/10 validadas.** Evidências públicas em docs/evidence-02.md,
 docs/evidence-03.md, docs/evidence-04.md, docs/evidence-05.md e docs/evidence-06.md;
@@ -23,3 +23,5 @@ inventários e logs operacionais ficam privados. Os PRs #9, #11 e #15 passaram n
 obrigatórios e foram incorporados sem bypass da proteção da main.
 A autorização sequencial não permite novo custo, credencial, produção, deploy ou
 mudança de produto. A auditoria geral de Apps foi retirada dos gates pelo proprietário.
+O checkpoint inicial da 10 passou 53 testes offline leves no AGT; a execução pesada
+permanece reservada ao worker dedicado e não certifica integração real.

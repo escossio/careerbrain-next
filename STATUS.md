@@ -73,7 +73,16 @@ PR #9, após testes isolados e os checks obrigatórios.
 - 07 certificada e merged; PR #11 e cinco testes de matching aprovados no CI03.
 - 08 certificada e merged; PR #13, CI03 e checks obrigatórios aprovados.
 - 09 certificada e merged; PR #15, Android CI e instrumentação PASS.
-- 10 não iniciada nesta execução.
+- 10 iniciada em branch isolada `feat/passada-10-integracao`, ainda não certificada.
+  O primeiro checkpoint implementou o cliente HTTP Android opt-in por configuração
+  de build (HTTPS, timeouts, refresh, operações idempotentes e cursors), o caminho
+  Credential Manager/Google Identity com challenge/nonce e uma fronteira TTS
+  dedicada fail-closed. O fake da 09 foi preservado para testes. Validação leve no
+  AGT: 53 testes offline (contratos, política e TTS), `py_compile` e `diff --check`
+  PASS. Build/lint/instrumentação Android e PostgreSQL não foram executados no
+  control plane. Não houve chamada Google/TTS/IA, PDF pessoal, credencial, deploy,
+  alteração de DNS ou produção. G-OIDC, G-PRIVACY, G-TTS, G-DEPLOY e a prova 4G/5G
+  continuam pendentes; G-WORKERS será requerido para as suítes pesadas.
 
 Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md,
 docs/ingestion-04.md e docs/resume-06.md. Nenhum banco produtivo, deploy público,

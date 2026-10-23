@@ -113,6 +113,10 @@
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
     {
+      "path": "careerbrain/tts.py",
+      "reason": "Passada 10: fronteira TTS dedicada, fail-closed e sem credencial, rota ou serviço compartilhado."
+    },
+    {
       "path": "ci/Dockerfile.database",
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
     },
@@ -599,6 +603,11 @@
       "review_basis": "Validação local e casos adversariais sintéticos."
     },
     {
+      "path": "tests/test_tts.py",
+      "category": "offline-tooling",
+      "review_basis": "Passada 10: teste sintético da minimização e falha fechada do adaptador TTS."
+    },
+    {
       "path": "android/settings.gradle.kts",
       "reason": "Passada 09: configuração pública do módulo Android sem segredo ou inventário operacional."
     },
@@ -646,6 +655,11 @@
       "path": "docs/android-09.md",
       "category": "public-documentation",
       "review_basis": "Instruções controladas do APK debug sem inventário operacional."
+    },
+    {
+      "path": "docs/android-10.md",
+      "category": "public-documentation",
+      "review_basis": "Configuração pública do cliente HTTP/Google sem IDs, topologia, credenciais ou evidência operacional."
     },
     {
       "path": "tools/__init__.py",

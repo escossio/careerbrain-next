@@ -66,16 +66,31 @@ data class ScreenState(
 )
 
 class CareerBrainViewModel(
-    private val api: CareerBrainApi = FakeCareerBrainApi(),
+    private val api: CareerBrainApi = CareerBrainApiFactory.create(),
     private val cursors: SyncCursorStore = InMemorySyncCursorStore()
 ) : ViewModel() {
     var state = androidx.compose.runtime.mutableStateOf(ScreenState()); private set
     private val sync = SyncCoordinator(api, cursors)
 
+    fun usesGoogleLogin() = CareerBrainApiFactory.isGoogleConfigured()
     fun login() = viewModelScope.launch {
         when (val result = api.syntheticLogin()) {
             is ApiResult.Ok -> { state.value = state.value.copy(session = result.value, message = "Sessão sintética ativa"); refreshRecommendations(reset = true) }
             is ApiResult.Http -> state.value = state.value.copy(message = "Erro HTTP ${result.status}")
+            ApiResult.Offline -> state.value = state.value.copy(message = "Sem conexão; tente novamente")
+        }
+    }
+    fun beginGoogleLogin(onChallenge: (LoginChallenge) -> Unit) = viewModelScope.launch {
+        when (val result = api.challenge()) {
+            is ApiResult.Ok -> onChallenge(result.value)
+            is ApiResult.Http -> state.value = state.value.copy(message = "Erro HTTP ${result.status}")
+            ApiResult.Offline -> state.value = state.value.copy(message = "Sem conexão; tente novamente")
+        }
+    }
+    fun completeGoogleLogin(idToken: String, challengeId: String) = viewModelScope.launch {
+        when (val result = api.googleLogin(idToken, challengeId)) {
+            is ApiResult.Ok -> { state.value = state.value.copy(session = result.value, message = "Sessão ativa"); refreshRecommendations(reset = true) }
+            is ApiResult.Http -> state.value = state.value.copy(message = if (result.status == 401) "Autenticação recusada" else "Erro HTTP ${result.status}")
             ApiResult.Offline -> state.value = state.value.copy(message = "Sem conexão; tente novamente")
         }
     }

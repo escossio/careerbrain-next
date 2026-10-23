@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,20 +26,30 @@ class MainActivity : ComponentActivity() {
         if (bytes == null) viewModel.rejectOversizedPdf() else viewModel.upload(bytes)
     }
     override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState)
-        setContent { MaterialTheme { CareerBrainScreen(viewModel.state.value, viewModel) { pdf.launch(arrayOf("application/pdf")) } } }
+        setContent { MaterialTheme { CareerBrainScreen(viewModel.state.value, viewModel, onLogin = {
+            if (!viewModel.usesGoogleLogin()) viewModel.login()
+            else viewModel.beginGoogleLogin { challenge -> lifecycleScope.launch {
+                when (val token = GoogleIdentityProvider(this@MainActivity).idToken(BuildConfig.CAREERBRAIN_GOOGLE_WEB_CLIENT_ID, challenge.nonce)) {
+                    is ApiResult.Ok -> viewModel.completeGoogleLogin(token.value, challenge.id)
+                    is ApiResult.Http -> viewModel.state.value = viewModel.state.value.copy(message = "Autenticação recusada")
+                    ApiResult.Offline -> viewModel.state.value = viewModel.state.value.copy(message = "Login Google indisponível")
+                }
+            } }
+        }) { pdf.launch(arrayOf("application/pdf")) } } }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable private fun CareerBrainScreen(state: ScreenState, model: CareerBrainViewModel, choosePdf: () -> Unit) {
+@Composable private fun CareerBrainScreen(state: ScreenState, model: CareerBrainViewModel, onLogin: () -> Unit, choosePdf: () -> Unit) {
     var confirmDelete by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var confirmUpload by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     Scaffold(topBar = { TopAppBar(title = { Text("CareerBrain Next") }) }) { padding ->
         Column(Modifier.padding(padding).padding(16.dp).fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(state.message, modifier = Modifier.semantics { contentDescription = "Estado: ${state.message}" })
-            if (state.session == null) Button(onClick = model::login, modifier = Modifier.fillMaxWidth()) { Text("Entrar com identidade sintética") }
+            if (state.session == null) Button(onClick = onLogin, modifier = Modifier.fillMaxWidth()) { Text(if (model.usesGoogleLogin()) "Entrar com Google" else "Entrar com identidade sintética") }
             else {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = choosePdf) { Text("Selecionar PDF") }
+                    Button(onClick = { confirmUpload = true }) { Text("Selecionar PDF") }
                     OutlinedButton(onClick = model::synchronize) { Text("Sincronizar") }
                 }
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
@@ -53,6 +64,7 @@ class MainActivity : ComponentActivity() {
         }
     }
     if (confirmDelete) AlertDialog(onDismissRequest = { confirmDelete = false }, title = { Text("Excluir conta?") }, text = { Text("A sessão e os dados locais serão removidos. A exclusão no servidor pode ainda ter pendências de backup.") }, confirmButton = { Button(onClick = { confirmDelete = false; model.delete() }) { Text("Confirmar exclusão") } }, dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancelar") } })
+    if (confirmUpload) AlertDialog(onDismissRequest = { confirmUpload = false }, title = { Text("Enviar currículo?") }, text = { Text("O PDF será processado temporariamente para gerar o perfil. Prossiga somente se concordar com a política de privacidade aplicável.") }, confirmButton = { Button(onClick = { confirmUpload = false; choosePdf() }) { Text("Concordar e selecionar PDF") } }, dismissButton = { TextButton(onClick = { confirmUpload = false }) { Text("Cancelar") } })
 }
 
 @Composable private fun RecommendationCard(item: Recommendation, application: Application?, setApplication: (Recommendation, ApplicationState) -> Unit) {
