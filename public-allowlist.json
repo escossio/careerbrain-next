@@ -23,6 +23,11 @@
       "review_basis": "Governança/CI sem credenciais e sem topologia de implantação."
     },
     {
+      "path": ".github/workflows/android-debug.yml",
+      "category": "governance-ci",
+      "review_basis": "Build Android debug efêmero, sem release, credencial ou artefato permanente."
+    },
+    {
       "path": ".github/workflows/worker-readiness.yml",
       "category": "governance-ci",
       "review_basis": "Governança/CI sem credenciais e sem topologia de implantação."
@@ -592,6 +597,55 @@
       "path": "tests/test_repository.py",
       "category": "offline-tooling",
       "review_basis": "Validação local e casos adversariais sintéticos."
+    },
+    {
+      "path": "android/settings.gradle.kts",
+      "reason": "Passada 09: configuração pública do módulo Android sem segredo ou inventário operacional."
+    },
+    {
+      "path": "android/build.gradle.kts",
+      "reason": "Passada 09: configuração pública de build Android controlado."
+    },
+    {
+      "path": "android/gradle.properties",
+      "reason": "Passada 09: propriedades reprodutíveis sem credenciais."
+    },
+    {
+      "path": "android/app/build.gradle.kts",
+      "reason": "Passada 09: APK debug, pacote e dependências públicas do cliente Android."
+    },
+    {
+      "path": "android/app/src/main/AndroidManifest.xml",
+      "reason": "Passada 09: manifesto público do aplicativo Android debug."
+    },
+    {
+      "path": "android/app/src/main/res/values/themes.xml",
+      "reason": "Passada 09: tema público mínimo do aplicativo Android."
+    },
+    {
+      "path": "android/app/src/main/java/com/escossio/careerbrain/Contracts.kt",
+      "reason": "Passada 09: contratos de cliente e adaptador fake exclusivamente sintético."
+    },
+    {
+      "path": "android/app/src/main/java/com/escossio/careerbrain/AppState.kt",
+      "reason": "Passada 09: estado privado local e operações contratuais sem segredos."
+    },
+    {
+      "path": "android/app/src/main/java/com/escossio/careerbrain/MainActivity.kt",
+      "reason": "Passada 09: interface Android acessível sem dados reais."
+    },
+    {
+      "path": "android/app/src/test/java/com/escossio/careerbrain/FakeCareerBrainApiTest.kt",
+      "reason": "Passada 09: testes unitários com fixtures sintéticas."
+    },
+    {
+      "path": "android/app/src/androidTest/java/com/escossio/careerbrain/MainActivityInstrumentedTest.kt",
+      "reason": "Passada 09: instrumentação descartável de inicialização com identidade sintética."
+    },
+    {
+      "path": "docs/android-09.md",
+      "category": "public-documentation",
+      "review_basis": "Instruções controladas do APK debug sem inventário operacional."
     },
     {
       "path": "tools/__init__.py",
