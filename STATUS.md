@@ -26,17 +26,24 @@ opaco/capability e ledger. CI03 sem rede aprovou 18 SQL, restore/ledger, 12 de
 identidade, 12 de ingestão, 11 de classificação, 11 de currículo e 8 de matching
 (incluindo sync multi-dispositivo, CAS concorrente e exclusão). GitHub Actions
 run 39858487393 aprovou `contracts` e `repository-policy` no SHA revisado.
-Não houve dados reais, produção, deploy, credenciais ou tráfego pago. 09–10 não
-foram iniciadas.
+Não houve dados reais, produção, deploy, credenciais ou tráfego pago. À época,
+09–10 ainda não haviam sido iniciadas.
 
-## Passada 09 — implementação bloqueada no gate de APK
+## Passada 09 — implementação em validação final
 
-Branch `feat/passada-09-android` contém o cliente Android preparado com fake
-contratual e testes unitários. AGT01 tem SDK, mas não executará build pesado;
-CI03 não possui Android SDK. O pipeline Android isolado em GitHub Actions usa
-Ubuntu/API 35/Gradle 8.11 para produzir e registrar o APK debug. Instrumentação
-em emulador continua pendente de checagem de recursos no note-leo. A passada 10
-não foi iniciada.
+Branch `feat/passada-09-android` contém o cliente Android fake contratual com
+sincronização incremental/ACK, cursor opaco criptografado sem sessão persistida,
+remoção local `REMOVED`, paginação de recomendações e estados manuais de
+candidatura com tratamento de conflito/rede. A leitura de PDF é limitada a 5 MiB
+antes de reter o conteúdo. A suíte unitária cobre CAS/replay, high-watermark,
+reentrega/offline, cursor e remoção; a instrumentação sintética cobre entrada,
+segunda página, salvar, sincronizar e limpeza.
+
+O workflow Android agora compila o APK debug e o APK AndroidTest, registra SHA256
+dos dois e os publica juntos no artefato privado por um dia. Nenhum build pesado
+foi executado no AGT; o novo SHA aguarda o GitHub Actions e a instrumentação
+externa no AVD descartável. Não há backend real, credencial, sessão produtiva ou
+dados reais. A passada 10 não foi iniciada.
 
 ## Histórico das passadas 01–06
 
@@ -64,7 +71,7 @@ PR #9, após testes isolados e os checks obrigatórios.
   produtivo continua externa.
 - 07 certificada e merged; PR #11 e cinco testes de matching aprovados no CI03.
 - 08 certificada e merged; PR #13, CI03 e checks obrigatórios aprovados.
-- 09–10 não iniciadas nesta execução.
+- 09 está em validação final nesta execução; 10 não foi iniciada.
 
 Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md,
 docs/ingestion-04.md e docs/resume-06.md. Nenhum banco produtivo, deploy público,

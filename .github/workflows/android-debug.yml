@@ -28,15 +28,16 @@ jobs:
           gradle-version: '8.11'
       - name: Verify installed Android API 35
         run: test -d "$ANDROID_HOME/platforms/android-35"
-      - name: Unit tests, lint and debug APK
-        run: gradle --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
-      - name: Record artifact digest
-        run: sha256sum app/build/outputs/apk/debug/app-debug.apk | tee apk-sha256.txt
+      - name: Unit tests, lint and debug APKs
+        run: gradle --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest
+      - name: Record artifact digests
+        run: sha256sum app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk | tee apk-sha256.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: careerbrain-debug-apk
           path: |
             android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
             android/apk-sha256.txt
           retention-days: 1
           if-no-files-found: error
