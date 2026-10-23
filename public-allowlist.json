@@ -752,6 +752,11 @@
       "path": "docs/runtime-10.md",
       "category": "public-documentation",
       "review_basis": "Procedimento operacional sem inventário, endereço, segredo ou evidência privada."
+    },
+    {
+      "path": "careerbrain/worker.py",
+      "category": "runtime-template",
+      "review_basis": "Consumidor determinístico de filas sintéticas, sem provedor externo ou segredo."
     }
   ]
 }
