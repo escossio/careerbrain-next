@@ -15,7 +15,7 @@ ingestão 12, classificação 11, currículo 11 e matching 5: todos PASS.
 GitHub Actions run 39849211014: 51 testes offline, checks contracts
 e repository-policy SUCCESS no mesmo SHA. Nenhum artefato dos jobs,
 credencial, dado real, deploy ou chamada paga. Main protegida.
-08–10 não iniciadas nesta execução.
+À época, 08–10 não haviam sido iniciadas.
 
 ## Passada 08 — certificada e integrada
 
@@ -29,28 +29,26 @@ run 39858487393 aprovou `contracts` e `repository-policy` no SHA revisado.
 Não houve dados reais, produção, deploy, credenciais ou tráfego pago. À época,
 09–10 ainda não haviam sido iniciadas.
 
-## Passada 09 — implementação em validação final
+## Passada 09 — CERTIFICADA E MERGED
 
-Branch `feat/passada-09-android` contém o cliente Android fake contratual com
-sincronização incremental/ACK, cursor opaco criptografado sem sessão persistida,
-remoção local `REMOVED`, paginação de recomendações e estados manuais de
-candidatura com tratamento de conflito/rede. A leitura de PDF é limitada a 5 MiB
-antes de reter o conteúdo. A suíte unitária cobre CAS/replay, high-watermark,
-reentrega/offline, cursor e remoção; a instrumentação sintética cobre entrada,
-segunda página, salvar, sincronizar e limpeza.
+PR #15 foi integrado por squash em 02f148078cb74ce6933db5e4d6cdd05efc91b207.
+Head de código certificado: 4dc86b39805e3f5a1be4e7189da41e4b1eb21bcb.
+Kotlin/Jetpack Compose: identidade sintética, paginação, sincronização de
+mudanças/ACK, cursor opaco cifrado, candidaturas manuais, PDF limitado,
+remoção local e tratamento de erros. Nenhum backend real foi acessado.
 
-O workflow Android agora compila o APK debug e o APK AndroidTest, registra SHA256
-dos dois e os publica juntos no artefato privado por um dia. GitHub Actions
-`39984692113` aprovou unitários, lint e os dois APKs no SHA `f5e53ca`; os digests
-são `70d2da759a0ba040c5ad8b6beca1eee9f4fdc070b0db8ff712121ca12c73ecb9`
-(debug) e `e8775f63769b511a31e20a7f807480c54b267d277156dfadd4eecb3f7484010c`
-(AndroidTest). Nenhum build pesado foi executado no AGT; a instrumentação externa
-no AVD descartável permanece pendente. Não há backend real, credencial, sessão
-produtiva ou dados reais. A passada 10 não foi iniciada.
+GitHub Actions run 39986129643: contracts e repository-policy PASS.
+Run 39986129839: testes unitários Android, lint e build dos APKs
+debug e AndroidTest PASS. No emulador chatgpt Android 14 do note-leo,
+AndroidJUnitRunner + Compose UI Test: OK (2 tests), cobrindo inicialização,
+login sintético, segunda página, salvar, sincronizar e excluir dados locais.
+Hashes e logs privados em execution-evidence/09/CERTIFICACAO-09.md.
+Sem dados reais, chamadas pagas, contas Google reais ou deploy.
+Passada 10 não iniciada. Total 9/10 certificadas.
 
 ## Histórico das passadas 01–06
 
-**8/10 certificadas e incorporadas à main.** A passada 06 foi integrada pelo
+**9/10 certificadas e incorporadas à main.** A passada 06 foi integrada pelo
 PR #9, após testes isolados e os checks obrigatórios.
 
 - 01 certificada e merged; fundação, contratos V1 e CI offline aprovados.
@@ -74,7 +72,8 @@ PR #9, após testes isolados e os checks obrigatórios.
   produtivo continua externa.
 - 07 certificada e merged; PR #11 e cinco testes de matching aprovados no CI03.
 - 08 certificada e merged; PR #13, CI03 e checks obrigatórios aprovados.
-- 09 está em validação final nesta execução; 10 não foi iniciada.
+- 09 certificada e merged; PR #15, Android CI e instrumentação PASS.
+- 10 não iniciada nesta execução.
 
 Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md,
 docs/ingestion-04.md e docs/resume-06.md. Nenhum banco produtivo, deploy público,
