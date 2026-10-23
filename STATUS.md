@@ -99,6 +99,9 @@ listener do banco não aceita a interface de identificação externa. Configura�
 secrets, topologia, hashes de backup e logs permanecem privados. O importador CSV,
 fontes autorizadas, identidade real, Android em rede móvel e demais gates continuam
 pendentes; esta evidência não certifica a passada 10.
+O CI03 aprovou no SHA `1237028` banco, restore/ledger, autenticação, ingestão,
+classificação, currículo, matching e smoke HTTP isolado; o worker confirmou rede
+isolada e preservação dos containers preexistentes.
 
 ## Passada 10 — preparação de homologação HTTP isolada
 

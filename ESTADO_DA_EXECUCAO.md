@@ -30,6 +30,8 @@ Na continuação local, PostgreSQL persistente e API Gunicorn foram implantados 
 migrações, papéis mínimos, SCRAM, healthchecks e backup/restore privados. A prova
 confirma somente a malha local isolada; não autoriza fontes, identidade, Android em
 rede móvel, DNS, proxy ou certificação da passada 10.
+No SHA `1237028`, CI03 aprovou as regressões de banco/restore, autenticação,
+ingestão, classificação, currículo, matching e homologação HTTP isolada.
 O smoke da homologação isolada usa somente fonte commitada, banco `cbn_test_*`, socket
 UNIX e HTTP loopback dentro do cliente do worker; não foi executado no control plane
 nem certificado até retorno da execução externa. Não autoriza URL Android local,
