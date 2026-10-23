@@ -707,6 +707,41 @@
       "path": "tools/verify.py",
       "category": "offline-tooling",
       "review_basis": "Validação local e casos adversariais sintéticos."
+    },
+    {
+      "path": "careerbrain/admin.py",
+      "category": "runtime-template",
+      "review_basis": "Comando administrativo com guarda explícita de destino, sem topologia ou segredo."
+    },
+    {
+      "path": "careerbrain/runtime.py",
+      "category": "runtime-template",
+      "review_basis": "Construção WSGI configurada exclusivamente por ambiente de runtime."
+    },
+    {
+      "path": "requirements-runtime.txt",
+      "category": "runtime-template",
+      "review_basis": "Dependências imutáveis e verificadas por hash do runtime Python."
+    },
+    {
+      "path": "ops/Dockerfile.api",
+      "category": "runtime-template",
+      "review_basis": "Imagem do runtime sem configuração operacional ou segredos."
+    },
+    {
+      "path": "ops/compose.runtime.yaml",
+      "category": "runtime-template",
+      "review_basis": "Template declarativo parametrizado; valores operacionais permanecem privados."
+    },
+    {
+      "path": "ops/postgres/init-roles.sh",
+      "category": "runtime-template",
+      "review_basis": "Inicialização de papéis usando somente Docker secrets em runtime."
+    },
+    {
+      "path": "ops/postgres/pg_hba.conf.template",
+      "category": "runtime-template",
+      "review_basis": "Template de ACL a ser renderizado fora do Git com sub-redes privadas."
     }
   ]
 }
