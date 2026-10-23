@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,13 +18,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
-    private val viewModel: CareerBrainViewModel by viewModels()
+    private val viewModel: CareerBrainViewModel by viewModels { CareerBrainViewModel.factory(applicationContext) }
     private val pdf = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@registerForActivityResult
-        contentResolver.openInputStream(uri)?.use { viewModel.upload(it.readBytes()) }
+        val bytes = contentResolver.openInputStream(uri)?.use(::readPdfAtMost)
+        if (bytes == null) viewModel.rejectOversizedPdf() else viewModel.upload(bytes)
     }
     override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState)
-        setContent { MaterialTheme { CareerBrainScreen(viewModel.state.value, viewModel, { pdf.launch(arrayOf("application/pdf")) }) } }
+        setContent { MaterialTheme { CareerBrainScreen(viewModel.state.value, viewModel) { pdf.launch(arrayOf("application/pdf")) } } }
     }
 }
 
@@ -37,8 +37,16 @@ class MainActivity : ComponentActivity() {
             Text(state.message, modifier = Modifier.semantics { contentDescription = "Estado: ${state.message}" })
             if (state.session == null) Button(onClick = model::login, modifier = Modifier.fillMaxWidth()) { Text("Entrar com identidade sintética") }
             else {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { Button(onClick = choosePdf) { Text("Selecionar PDF") }; OutlinedButton(onClick = model::refresh) { Text("Sincronizar") } }
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) { items(state.items, key = { it.id }) { item -> RecommendationCard(item, { model.save(item) }) } }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = choosePdf) { Text("Selecionar PDF") }
+                    OutlinedButton(onClick = model::synchronize) { Text("Sincronizar") }
+                }
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
+                    items(state.items, key = { it.id }) { item -> RecommendationCard(item, state.applications[item.id], model::setApplication) }
+                    state.recommendationCursor?.let { item {
+                        OutlinedButton(onClick = { model.refreshRecommendations() }, modifier = Modifier.fillMaxWidth()) { Text("Carregar próxima oportunidade") }
+                    } }
+                }
                 OutlinedButton(onClick = { confirmDelete = true }, modifier = Modifier.fillMaxWidth()) { Text("Excluir conta") }
             }
             state.deleting?.let { Text("Exclusão: ${it.state}. Backup pendente até ${it.backupDeadline}") }
@@ -47,4 +55,22 @@ class MainActivity : ComponentActivity() {
     if (confirmDelete) AlertDialog(onDismissRequest = { confirmDelete = false }, title = { Text("Excluir conta?") }, text = { Text("A sessão e os dados locais serão removidos. A exclusão no servidor pode ainda ter pendências de backup.") }, confirmButton = { Button(onClick = { confirmDelete = false; model.delete() }) { Text("Confirmar exclusão") } }, dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancelar") } })
 }
 
-@Composable private fun RecommendationCard(item: Recommendation, save: () -> Unit) = Card(Modifier.fillMaxWidth().semantics { contentDescription = "Oportunidade ${item.title}" }) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) { Text(item.title, style = MaterialTheme.typography.titleMedium); Text(item.organization); Text(item.access); Text(if (item.uncertain) "Compatibilidade incerta: ${item.reason}" else "Justificativa comprovada: ${item.reason}"); Button(onClick = save) { Text("Salvar oportunidade") } } }
+@Composable private fun RecommendationCard(item: Recommendation, application: Application?, setApplication: (Recommendation, ApplicationState) -> Unit) {
+    var statesOpen by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    Card(Modifier.fillMaxWidth().semantics { contentDescription = "Oportunidade ${item.title}" }) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(item.title, style = MaterialTheme.typography.titleMedium)
+            Text(item.organization)
+            Text(item.access)
+            Text(if (item.uncertain) "Compatibilidade incerta: ${item.reason}" else "Justificativa comprovada: ${item.reason}")
+            application?.let { Text("Estado atual: ${it.state} (${it.version})") }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = { setApplication(item, ApplicationState.SAVED) }) { Text("Salvar oportunidade") }
+                OutlinedButton(onClick = { statesOpen = true }) { Text("Definir estado") }
+                DropdownMenu(expanded = statesOpen, onDismissRequest = { statesOpen = false }) {
+                    ApplicationState.values().forEach { next -> DropdownMenuItem(text = { Text(next.name) }, onClick = { statesOpen = false; setApplication(item, next) }) }
+                }
+            }
+        }
+    }
+}
