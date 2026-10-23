@@ -8,6 +8,7 @@ import re
 import resource
 from uuid import UUID, uuid4
 
+import psycopg
 from psycopg.types.json import Jsonb
 
 from tools.contracts import ContractError, validate, validate_evidence
@@ -257,7 +258,12 @@ class ResumeService:
         """Profile completion queues every classified event under tenant RLS."""
         with self.worker_pool.connection() as conn, conn.transaction():
             conn.execute("SELECT set_config('careerbrain.tenant_id',%s,true)", (str(tenant_id),))
-            events = conn.execute('SELECT event_id FROM catalog.current_classifications').fetchall()
+            try:
+                with conn.transaction():
+                    events = conn.execute('SELECT event_id FROM catalog.current_classifications').fetchall()
+            except psycopg.errors.InsufficientPrivilege:
+                # Pre-011 disposable schemas have no matching projection yet.
+                return
             for (event_id,) in events:
                 conn.execute('SELECT private.create_match_job(%s)', (event_id,))
 

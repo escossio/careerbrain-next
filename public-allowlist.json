@@ -470,6 +470,10 @@
       "reason": "Passada 08 autorizada: sync privado, candidaturas com CAS e exclusão com ledger em banco descartável."
     },
     {
+      "path": "db/migrations/011_private_worker_catalog_usage.sql",
+      "reason": "Passada 10 autorizada: permissão mínima para agendamento privado após currículo processado."
+    },
+    {
       "path": "docs/acceptance.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
