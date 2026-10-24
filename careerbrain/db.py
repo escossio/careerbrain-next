@@ -58,8 +58,7 @@ def migrations(directory: Path | None = None) -> list[Migration]:
     return result
 
 
-def migrate(connection, target: int | None = None):
-    require_disposable(connection)
+def _migrate(connection, target: int | None = None):
     known = {m.version: m for m in migrations()}
     target = max(known) if target is None else target
     if target not in known:
@@ -85,6 +84,21 @@ def migrate(connection, target: int | None = None):
                 connection.execute(migration.up, prepare=False)
                 connection.execute('INSERT INTO ops.schema_migrations(version,checksum) VALUES(%s,%s)',
                                    (version, migration.checksum))
+
+
+def migrate(connection, target: int | None = None):
+    """Apply migrations to a disposable CI database only."""
+    require_disposable(connection)
+    _migrate(connection, target)
+
+
+def migrate_persistent(connection, *, expected_database: str, target: int | None = None):
+    """Administrative-only persistent migration path with an explicit destination guard."""
+    if not expected_database or connection.info.dbname != expected_database:
+        raise MigrationError('Persistent migration destination mismatch')
+    if connection.execute('SELECT current_user').fetchone()[0] != 'cb_migrator':
+        raise MigrationError('Persistent migration requires cb_migrator')
+    _migrate(connection, target)
 
 
 def reset_connection(connection):

@@ -1,0 +1,11 @@
+FROM python:3.13.11-slim
+WORKDIR /app
+RUN groupadd --gid 10001 careerbrain && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin careerbrain
+COPY requirements-db.txt requirements-ci.txt requirements-runtime.txt ./
+RUN pip install --no-cache-dir --require-hashes -r requirements-runtime.txt
+COPY careerbrain ./careerbrain
+COPY db ./db
+COPY tools ./tools
+COPY contracts ./contracts
+USER 10001:10001
+CMD ["sh", "-c", "exec gunicorn --bind \"$CBN_API_LISTEN\" --workers=2 --threads=2 --timeout=20 --graceful-timeout=20 --error-logfile=- --log-level=warning --certfile=\"$CBN_TLS_CERT\" --keyfile=\"$CBN_TLS_KEY\" careerbrain.runtime:application"]

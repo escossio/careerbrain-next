@@ -1,0 +1,121 @@
+name: careerbrain-next
+services:
+  postgres:
+    image: postgres:16.11-alpine
+    user: "70:70"
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "${CBN_DATABASE}"
+      POSTGRES_USER: "${CBN_POSTGRES_ADMIN_USER}"
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_admin_password
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=peer
+    command: ["postgres", "-c", "listen_addresses=${CBN_DB_LISTEN_ADDRESS}", "-c", "hba_file=/etc/postgresql/pg_hba.conf", "-c", "password_encryption=scram-sha-256"]
+    volumes:
+      - "${CBN_POSTGRES_DATA}:/var/lib/postgresql/data"
+      - "${CBN_POSTGRES_HBA_FILE}:/etc/postgresql/pg_hba.conf:ro"
+      - ./postgres/init-roles.sh:/docker-entrypoint-initdb.d/10-init-roles.sh:ro
+      - ../db/bootstrap.sql:/bootstrap.sql:ro
+      - ./postgres/runtime-permissions.sql:/runtime-permissions.sql:ro
+    secrets: [postgres_admin_password, cb_migrator_password, cb_auth_password, cb_api_password, cb_ingest_password, cb_global_worker_password, cb_private_worker_password, cb_privacy_password]
+    networks:
+      internal: {ipv4_address: "${CBN_DB_INTERNAL_ADDRESS}"}
+      vlan: {ipv4_address: "${CBN_DB_VLAN_ADDRESS}"}
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+      - /var/run/postgresql:uid=70,gid=70,mode=3775
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 768m
+    cpus: 1.0
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+  api:
+    build: {context: .., dockerfile: ops/Dockerfile.api}
+    restart: unless-stopped
+    env_file: ["${CBN_API_ENV_FILE}"]
+    environment: {CBN_RESUME_DIRECTORY: /run/careerbrain/resumes}
+    volumes:
+      - "${CBN_TLS_CERT_FILE}:/run/careerbrain/tls/server.crt:ro"
+      - "${CBN_TLS_KEY_FILE}:/run/careerbrain/tls/server.key:ro"
+      - "${CBN_TLS_CA_FILE}:/run/careerbrain/tls/ca.crt:ro"
+      - resume_ephemeral:/run/careerbrain/resumes
+    networks:
+      internal: {ipv4_address: "${CBN_API_INTERNAL_ADDRESS}"}
+      vlan: {ipv4_address: "${CBN_API_VLAN_ADDRESS}"}
+    depends_on: {migrate: {condition: service_completed_successfully}}
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 512m
+    cpus: 1.0
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import os,ssl,urllib.request; c=ssl.create_default_context(cafile=os.environ[\"CBN_TLS_CA\"]); assert urllib.request.urlopen(os.environ[\"CBN_API_HEALTH_URL\"], context=c, timeout=3).status == 200'"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+  migrate:
+    build: {context: .., dockerfile: ops/Dockerfile.api}
+    restart: "no"
+    env_file: ["${CBN_MIGRATOR_ENV_FILE}"]
+    command: ["python", "-m", "careerbrain.admin", "migrate"]
+    networks:
+      internal: {ipv4_address: "${CBN_MIGRATOR_INTERNAL_ADDRESS}"}
+    depends_on: {postgres: {condition: service_healthy}}
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 0.5
+  worker:
+    build: {context: .., dockerfile: ops/Dockerfile.api}
+    restart: unless-stopped
+    env_file: ["${CBN_WORKER_ENV_FILE}"]
+    command: ["python", "-m", "careerbrain.worker"]
+    environment: {CBN_RESUME_DIRECTORY: /run/careerbrain/resumes}
+    volumes:
+      - resume_ephemeral:/run/careerbrain/resumes
+    networks:
+      internal: {ipv4_address: "${CBN_WORKER_INTERNAL_ADDRESS}"}
+    depends_on: {migrate: {condition: service_completed_successfully}}
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 96
+    mem_limit: 384m
+    cpus: 0.75
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import os; assert os.path.exists(\"/proc/1\")'"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+networks:
+  internal:
+    name: "${CBN_INTERNAL_NETWORK}"
+    internal: true
+    ipam: {config: [{subnet: "${CBN_INTERNAL_SUBNET}"}]}
+  vlan: {name: "${CBN_VLAN_NETWORK}", external: true}
+volumes:
+  resume_ephemeral:
+    driver: local
+    driver_opts: {type: tmpfs, device: tmpfs, o: "size=32m,uid=10001,gid=10001,mode=0700"}
+secrets:
+  postgres_admin_password: {file: "${CBN_SECRETS_DIR}/postgres_admin_password"}
+  cb_migrator_password: {file: "${CBN_SECRETS_DIR}/cb_migrator_password"}
+  cb_auth_password: {file: "${CBN_SECRETS_DIR}/cb_auth_password"}
+  cb_api_password: {file: "${CBN_SECRETS_DIR}/cb_api_password"}
+  cb_ingest_password: {file: "${CBN_SECRETS_DIR}/cb_ingest_password"}
+  cb_global_worker_password: {file: "${CBN_SECRETS_DIR}/cb_global_worker_password"}
+  cb_private_worker_password: {file: "${CBN_SECRETS_DIR}/cb_private_worker_password"}
+  cb_privacy_password: {file: "${CBN_SECRETS_DIR}/cb_privacy_password"}

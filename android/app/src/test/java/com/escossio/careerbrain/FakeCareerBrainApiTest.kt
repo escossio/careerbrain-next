@@ -36,7 +36,7 @@ class FakeCareerBrainApiTest {
         val offline = coordinator.synchronize(recommendations(api))
         assertTrue(offline.message.startsWith("Sem conexão")); assertNull(cursors.load())
         val recovered = coordinator.synchronize(offline.items)
-        assertEquals("2:2", cursors.load()); assertTrue(recovered.message.startsWith("Sincronização concluída"))
+        assertEquals("2:2", cursors.load()); assertEquals("Atualização concluída", recovered.message)
     }
 
     @Test fun offlineChangesDoNotAdvanceCursorAndCanBeRetried() = runBlocking {
@@ -58,6 +58,36 @@ class FakeCareerBrainApiTest {
         assertEquals(422, (FakeCareerBrainApi().uploadPdf("text".encodeToByteArray()) as ApiResult.Http).status)
         assertNull(readPdfAtMost(ByteArrayInputStream(ByteArray(MAX_PDF_BYTES + 1))))
         assertEquals(MAX_PDF_BYTES, readPdfAtMost(ByteArrayInputStream(ByteArray(MAX_PDF_BYTES)))!!.size)
+    }
+
+    @Test fun resumeProgressShowsActualStagesAndSlowStateWithoutFictitiousPercentage() {
+        val job = ResumeJobStatus("00000000-0000-4000-8000-000000000001", "PENDING")
+        assertTrue(resumeProgressText(job, 3).contains("aguardando"))
+        assertTrue(resumeProgressText(job, 47).contains("demorando"))
+        assertTrue(resumeProgressText(job.copy(status = "PROCESSING"), 8).contains("processamento"))
+        assertTrue(resumeProgressText(job.copy(status = "READY"), 90).contains("concluído"))
+        assertTrue(resumeProgressText(job.copy(status = "FAILED"), 90).contains("Falha"))
+        assertFalse(resumeProgressText(job, 47).contains("%"))
+    }
+
+    @Test fun fakeResumeCanBeRecheckedWithoutResendingPdf() = runBlocking {
+        val api = FakeCareerBrainApi()
+        assertEquals(410, (api.latestResumeStatus() as ApiResult.Http).status)
+        val uploaded = api.uploadPdf("%PDF-1.4".encodeToByteArray()) as ApiResult.Ok
+        assertEquals("READY", uploaded.value.status)
+        assertEquals(uploaded.value, (api.resumeStatus(uploaded.value.jobId) as ApiResult.Ok).value)
+        assertEquals(uploaded.value, (api.latestResumeStatus() as ApiResult.Ok).value)
+        assertEquals(410, (api.resumeStatus("00000000-0000-4000-8000-000000000099") as ApiResult.Http).status)
+    }
+
+    @Test fun emptySynchronizationDoesNotExposeInternalWatermark() = runBlocking {
+        val delegate = FakeCareerBrainApi()
+        val api = object : CareerBrainApi by delegate {
+            override suspend fun changes(cursor: String?) =
+                ApiResult.Ok(SyncPage(emptyList(), "0:0", 0L, false))
+        }
+        val result = SyncCoordinator(api, InMemorySyncCursorStore()).synchronize(emptyList())
+        assertEquals("Nenhuma nova oportunidade encontrada", result.message)
     }
 
     @Test fun clearingCursorRepresentsControlledReinstallBootstrapWithoutPersistingSession() {

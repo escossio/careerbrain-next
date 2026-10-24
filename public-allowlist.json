@@ -18,14 +18,14 @@
       "review_basis": "Governança/CI sem credenciais e sem topologia de implantação."
     },
     {
-      "path": ".github/workflows/foundation.yml",
-      "category": "governance-ci",
-      "review_basis": "Governança/CI sem credenciais e sem topologia de implantação."
-    },
-    {
       "path": ".github/workflows/android-debug.yml",
       "category": "governance-ci",
       "review_basis": "Build Android debug efêmero, sem release, credencial ou artefato permanente."
+    },
+    {
+      "path": ".github/workflows/foundation.yml",
+      "category": "governance-ci",
+      "review_basis": "Governança/CI sem credenciais e sem topologia de implantação."
     },
     {
       "path": ".github/workflows/worker-readiness.yml",
@@ -73,8 +73,62 @@
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
     },
     {
+      "path": "android/app/build.gradle.kts",
+      "reason": "Passada 09: APK debug, pacote e dependências públicas do cliente Android."
+    },
+    {
+      "path": "android/app/src/androidTest/java/com/escossio/careerbrain/MainActivityInstrumentedTest.kt",
+      "reason": "Passada 09: instrumentação descartável de inicialização com identidade sintética."
+    },
+    {
+      "path": "android/app/src/debug/AndroidManifest.xml",
+      "category": "runtime-template",
+      "review_basis": "Configuração de segurança exclusiva do build debug; a CA é gerada localmente e não entra no Git."
+    },
+    {
+      "path": "android/app/src/main/AndroidManifest.xml",
+      "reason": "Passada 09: manifesto público do aplicativo Android debug."
+    },
+    {
+      "path": "android/app/src/main/java/com/escossio/careerbrain/AppState.kt",
+      "reason": "Passada 09: estado privado local e operações contratuais sem segredos."
+    },
+    {
+      "path": "android/app/src/main/java/com/escossio/careerbrain/Contracts.kt",
+      "reason": "Passada 09: contratos de cliente e adaptador fake exclusivamente sintético."
+    },
+    {
+      "path": "android/app/src/main/java/com/escossio/careerbrain/MainActivity.kt",
+      "reason": "Passada 09: interface Android acessível sem dados reais."
+    },
+    {
+      "path": "android/app/src/main/res/values/themes.xml",
+      "reason": "Passada 09: tema público mínimo do aplicativo Android."
+    },
+    {
+      "path": "android/app/src/test/java/com/escossio/careerbrain/FakeCareerBrainApiTest.kt",
+      "reason": "Passada 09: testes unitários com fixtures sintéticas."
+    },
+    {
+      "path": "android/build.gradle.kts",
+      "reason": "Passada 09: configuração pública de build Android controlado."
+    },
+    {
+      "path": "android/gradle.properties",
+      "reason": "Passada 09: propriedades reprodutíveis sem credenciais."
+    },
+    {
+      "path": "android/settings.gradle.kts",
+      "reason": "Passada 09: configuração pública do módulo Android sem segredo ou inventário operacional."
+    },
+    {
       "path": "careerbrain/__init__.py",
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
+    },
+    {
+      "path": "careerbrain/admin.py",
+      "category": "runtime-template",
+      "review_basis": "Comando administrativo com guarda explícita de destino, sem topologia ou segredo."
     },
     {
       "path": "careerbrain/api.py",
@@ -93,12 +147,22 @@
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
     },
     {
-      "path": "careerbrain/ingestion.py",
-      "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
+      "path": "careerbrain/homolog.py",
+      "reason": "Passada 10: harness WSGI descartável e limitado a loopback para smoke HTTP no worker isolado, sem implantação."
     },
     {
-      "path": "careerbrain/resume.py",
-      "reason": "Passada 06 autorizada: currículo efêmero, perfil privado e testes sintéticos em worker isolado."
+      "path": "careerbrain/homolog_admin.py",
+      "category": "runtime-template",
+      "review_basis": "Provisionador idempotente exclusivo da massa sintética, sem segredo ou topologia operacional."
+    },
+    {
+      "path": "careerbrain/homolog_producer.py",
+      "category": "runtime-template",
+      "review_basis": "Gerador e produtor HTTPS determinístico exclusivo da massa SYNTHETIC/HOMOLOG."
+    },
+    {
+      "path": "careerbrain/ingestion.py",
+      "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
     },
     {
       "path": "careerbrain/matching.py",
@@ -109,8 +173,30 @@
       "reason": "Passada 08 autorizada: APIs móveis privadas, sync idempotente, candidaturas manuais e exclusão testados com fixtures sintéticas."
     },
     {
+      "path": "careerbrain/pdf_text.py",
+      "reason": "Extração local de PDFs com recursos limitados, sem credenciais, rede ou conteúdo de currículos; revisão de segurança pendente do proprietário."
+    },
+    {
+      "path": "careerbrain/resume.py",
+      "reason": "Passada 06 autorizada: currículo efêmero, perfil privado e testes sintéticos em worker isolado."
+    },
+    {
+      "path": "careerbrain/runtime.py",
+      "category": "runtime-template",
+      "review_basis": "Construção WSGI configurada exclusivamente por ambiente de runtime."
+    },
+    {
       "path": "careerbrain/server.py",
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
+    },
+    {
+      "path": "careerbrain/tts.py",
+      "reason": "Passada 10: fronteira TTS dedicada, fail-closed e sem credencial, rota ou serviço compartilhado."
+    },
+    {
+      "path": "careerbrain/worker.py",
+      "category": "runtime-template",
+      "review_basis": "Consumidor determinístico de filas sintéticas, sem provedor externo ou segredo."
     },
     {
       "path": "ci/Dockerfile.database",
@@ -189,17 +275,12 @@
       "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
     },
     {
-      "path": "contracts/examples/match.json",
-      "category": "synthetic-example",
-      "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
-    },
-    {
       "path": "contracts/examples/match-v2.json",
       "category": "synthetic-example",
       "review_basis": "Par de requisito/atestado inteiramente sintético, sem perfil real."
     },
     {
-      "path": "contracts/examples/private-profile.json",
+      "path": "contracts/examples/match.json",
       "category": "synthetic-example",
       "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
     },
@@ -212,6 +293,11 @@
       "path": "contracts/examples/private-profile-v3.json",
       "category": "synthetic-example",
       "review_basis": "Atestado negativo explícito inteiramente sintético, sem perfil real."
+    },
+    {
+      "path": "contracts/examples/private-profile.json",
+      "category": "synthetic-example",
+      "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
     },
     {
       "path": "contracts/examples/recommendation-page.json",
@@ -249,14 +335,14 @@
       "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
     },
     {
-      "path": "contracts/examples/vacancy-semantics.json",
-      "category": "synthetic-example",
-      "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
-    },
-    {
       "path": "contracts/examples/vacancy-semantics-v2.json",
       "category": "synthetic-example",
       "review_basis": "Requisito obrigatório e evidência inteiramente sintéticos."
+    },
+    {
+      "path": "contracts/examples/vacancy-semantics.json",
+      "category": "synthetic-example",
+      "review_basis": "Exemplo inventado revisado; nenhum dado de usuário real."
     },
     {
       "path": "contracts/identity.md",
@@ -344,17 +430,12 @@
       "review_basis": "Contrato estrutural V1; sem valores de ambiente."
     },
     {
-      "path": "contracts/v1/match.schema.json",
-      "category": "schema",
-      "review_basis": "Contrato estrutural V1; sem valores de ambiente."
-    },
-    {
       "path": "contracts/v1/match-v2.schema.json",
       "category": "schema",
       "review_basis": "Extensão versionada para par verificável de requisito e atestado negativo."
     },
     {
-      "path": "contracts/v1/private-profile.schema.json",
+      "path": "contracts/v1/match.schema.json",
       "category": "schema",
       "review_basis": "Contrato estrutural V1; sem valores de ambiente."
     },
@@ -367,6 +448,11 @@
       "path": "contracts/v1/private-profile-v3.schema.json",
       "category": "schema",
       "review_basis": "Extensão de perfil para atestado negativo explícito e versionado."
+    },
+    {
+      "path": "contracts/v1/private-profile.schema.json",
+      "category": "schema",
+      "review_basis": "Contrato estrutural V1; sem valores de ambiente."
     },
     {
       "path": "contracts/v1/recommendation-page.schema.json",
@@ -404,14 +490,14 @@
       "review_basis": "Contrato estrutural V1; sem valores de ambiente."
     },
     {
-      "path": "contracts/v1/vacancy-semantics.schema.json",
-      "category": "schema",
-      "review_basis": "Contrato estrutural V1; sem valores de ambiente."
-    },
-    {
       "path": "contracts/v1/vacancy-semantics-v2.schema.json",
       "category": "schema",
       "review_basis": "Extensão de semântica para requisito obrigatório com prova versionada."
+    },
+    {
+      "path": "contracts/v1/vacancy-semantics.schema.json",
+      "category": "schema",
+      "review_basis": "Contrato estrutural V1; sem valores de ambiente."
     },
     {
       "path": "db/bootstrap.sql",
@@ -462,9 +548,27 @@
       "reason": "Passada 08 autorizada: sync privado, candidaturas com CAS e exclusão com ledger em banco descartável."
     },
     {
+      "path": "db/migrations/011_private_worker_catalog_usage.sql",
+      "reason": "Passada 10 autorizada: permissão mínima para agendamento privado após currículo processado."
+    },
+    {
       "path": "docs/acceptance.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
+    },
+    {
+      "path": "docs/android-09.md",
+      "category": "public-documentation",
+      "review_basis": "Instruções controladas do APK debug sem inventário operacional."
+    },
+    {
+      "path": "docs/android-10.md",
+      "category": "public-documentation",
+      "review_basis": "Configuração pública do cliente HTTP/Google sem IDs, topologia, credenciais ou evidência operacional."
+    },
+    {
+      "path": "docs/android-release-hub.md",
+      "reason": "Arquitetura pública sanitizada da central compartilhada de releases Android."
     },
     {
       "path": "docs/architecture.md",
@@ -515,6 +619,11 @@
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
     },
     {
+      "path": "docs/homolog-10.md",
+      "category": "public-documentation",
+      "review_basis": "Checklist de smoke HTTP isolado e fronteiras explícitas, sem topologia, credencial ou dado operacional."
+    },
+    {
       "path": "docs/identity-03.md",
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
@@ -532,13 +641,43 @@
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
     },
     {
+      "path": "docs/publication.md",
+      "category": "public-documentation",
+      "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
+    },
+    {
       "path": "docs/resume-06.md",
       "reason": "Passada 06 autorizada: limites de currículo efêmero e gates de privacidade."
     },
     {
-      "path": "docs/publication.md",
+      "path": "docs/runtime-10.md",
       "category": "public-documentation",
-      "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
+      "review_basis": "Procedimento operacional sem inventário, endereço, segredo ou evidência privada."
+    },
+    {
+      "path": "ops/Dockerfile.api",
+      "category": "runtime-template",
+      "review_basis": "Imagem do runtime sem configuração operacional ou segredos."
+    },
+    {
+      "path": "ops/compose.runtime.yaml",
+      "category": "runtime-template",
+      "review_basis": "Template declarativo parametrizado; valores operacionais permanecem privados."
+    },
+    {
+      "path": "ops/postgres/init-roles.sh",
+      "category": "runtime-template",
+      "review_basis": "Inicialização de papéis usando somente Docker secrets em runtime."
+    },
+    {
+      "path": "ops/postgres/pg_hba.conf.template",
+      "category": "runtime-template",
+      "review_basis": "Template de ACL a ser renderizado fora do Git com sub-redes privadas."
+    },
+    {
+      "path": "ops/postgres/runtime-permissions.sql",
+      "category": "runtime-template",
+      "review_basis": "Privilégios SQL mínimos e parametrizados pelo banco conectado, sem dado ou segredo."
     },
     {
       "path": "public-allowlist.json",
@@ -555,6 +694,11 @@
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
     },
     {
+      "path": "requirements-runtime.txt",
+      "category": "runtime-template",
+      "review_basis": "Dependências imutáveis e verificadas por hash do runtime Python."
+    },
+    {
       "path": "tests/integration/auth_cases.py",
       "reason": "Passada 03 autorizada: identidade e sessão com testes sintéticos em banco descartável; conteúdo revisado."
     },
@@ -567,16 +711,24 @@
       "reason": "Passada 02 autorizada: persistência descartável, testes sintéticos e fluxo isolado de CI; conteúdo revisado."
     },
     {
+      "path": "tests/integration/homolog_cases.py",
+      "reason": "Passada 10: smoke HTTP real por loopback no worker, com banco descartável e identificadores sintéticos."
+    },
+    {
       "path": "tests/integration/ingestion_cases.py",
       "reason": "Passada 04 autorizada: ingestão contratual com dados sintéticos, testes isolados e documentação saneada."
     },
     {
-      "path": "tests/integration/resume_cases.py",
-      "reason": "Passada 06 autorizada: testes de currículo sintético e isolamento de perfil."
-    },
-    {
       "path": "tests/integration/matching_cases.py",
       "reason": "Passadas 07–08: corte temporal, incerteza, fencing, sync multi-dispositivo, CAS e exclusão com fixtures sintéticas."
+    },
+    {
+      "path": "tests/integration/pdf_reader_cases.py",
+      "reason": "Testes isolados de extração de PDF sintético; exigem runtime de processamento e não fazem parte da suíte de contratos sem dependências."
+    },
+    {
+      "path": "tests/integration/resume_cases.py",
+      "reason": "Passada 06 autorizada: testes de currículo sintético e isolamento de perfil."
     },
     {
       "path": "tests/synthetic-source.txt",
@@ -599,53 +751,9 @@
       "review_basis": "Validação local e casos adversariais sintéticos."
     },
     {
-      "path": "android/settings.gradle.kts",
-      "reason": "Passada 09: configuração pública do módulo Android sem segredo ou inventário operacional."
-    },
-    {
-      "path": "android/build.gradle.kts",
-      "reason": "Passada 09: configuração pública de build Android controlado."
-    },
-    {
-      "path": "android/gradle.properties",
-      "reason": "Passada 09: propriedades reprodutíveis sem credenciais."
-    },
-    {
-      "path": "android/app/build.gradle.kts",
-      "reason": "Passada 09: APK debug, pacote e dependências públicas do cliente Android."
-    },
-    {
-      "path": "android/app/src/main/AndroidManifest.xml",
-      "reason": "Passada 09: manifesto público do aplicativo Android debug."
-    },
-    {
-      "path": "android/app/src/main/res/values/themes.xml",
-      "reason": "Passada 09: tema público mínimo do aplicativo Android."
-    },
-    {
-      "path": "android/app/src/main/java/com/escossio/careerbrain/Contracts.kt",
-      "reason": "Passada 09: contratos de cliente e adaptador fake exclusivamente sintético."
-    },
-    {
-      "path": "android/app/src/main/java/com/escossio/careerbrain/AppState.kt",
-      "reason": "Passada 09: estado privado local e operações contratuais sem segredos."
-    },
-    {
-      "path": "android/app/src/main/java/com/escossio/careerbrain/MainActivity.kt",
-      "reason": "Passada 09: interface Android acessível sem dados reais."
-    },
-    {
-      "path": "android/app/src/test/java/com/escossio/careerbrain/FakeCareerBrainApiTest.kt",
-      "reason": "Passada 09: testes unitários com fixtures sintéticas."
-    },
-    {
-      "path": "android/app/src/androidTest/java/com/escossio/careerbrain/MainActivityInstrumentedTest.kt",
-      "reason": "Passada 09: instrumentação descartável de inicialização com identidade sintética."
-    },
-    {
-      "path": "docs/android-09.md",
-      "category": "public-documentation",
-      "review_basis": "Instruções controladas do APK debug sem inventário operacional."
+      "path": "tests/test_tts.py",
+      "category": "offline-tooling",
+      "review_basis": "Passada 10: teste sintético da minimização e falha fechada do adaptador TTS."
     },
     {
       "path": "tools/__init__.py",

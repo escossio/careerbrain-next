@@ -1,0 +1,6 @@
+# Render this template privately with only the dedicated internal API subnet allowed.
+local   all             all                                     peer
+host    all             all             ${CBN_API_CIDR}         scram-sha-256
+host    all             all             ${CBN_MIGRATOR_CIDR}    scram-sha-256
+host    all             all             ${CBN_WORKER_CIDR}      scram-sha-256
+host    all             all             ${CBN_DENY_CIDR}         reject

@@ -1,5 +1,61 @@
 # STATUS — CareerBrain Next
 
+## Marco de homologação ponta a ponta — 24/10/2026
+
+**Comprovado no runtime de homologação e na tela Android; não é certificação
+de produção.** O código está registrado na branch
+`feat/passada-10-integracao` da PR #17. A observação foi realizada com o
+aplicativo CareerBrain Next no POCO X6, após consentimento/login Google e
+envio voluntário de currículo em PDF. O usuário visualizou recomendações
+privadas com títulos de engenharia de redes, SRE e DevOps e
+`EVIDENCED_AFFINITY`, todas explicitamente
+`SYNTHETIC/HOMOLOG` e com URLs `homolog.invalid`.
+
+A consulta operacional **sem conteúdo de currículo, identidades nem segredos**
+ao PostgreSQL dedicado confirmou, para o tenant do currículo mais recente:
+
+- Currículo: job `DONE`, perfil `READY`, 12 atributos explícitos.
+- Catálogo: 141 vagas sintéticas; 141 eventos de republicação de homologação.
+- Correlação privada: 141 jobs `MATCH` em `DONE`, 0 pendentes.
+- Feed privado: **61 recomendações com afinidade e confiança preenchidas**.
+- API, worker e PostgreSQL: containers `healthy` na verificação.
+
+Os commits da PR incluem extrator textual PDF com limites, taxonomia técnica
+de redes/telecom/infraestrutura, matching evidenciado, correções de SQL,
+API/HTTPS e apresentação/estado no cliente Android. O head técnico
+`4203784a599f624a95bc08ad9aefaef436f9c97e` passou aos workflows
+`foundation` e `android-debug` do GitHub.
+
+**Fronteiras do resultado:** as 141 vagas são inteiramente fictícias; não
+representam ofertas existentes e não se destinam a candidaturas. Os registros
+e os artefatos privados permanecem no runtime, fora do GitHub. A coleta real
+da Estácio e a autorização/validação de fontes, a qualificação de dados,
+testes completos de rede móvel, observabilidade, gates restantes e o merge
+protegido da PR #17 **ainda não estão certificados por este marco**.
+A correspondência demonstrada utiliza evidências textuais e regras
+determinísticas de homologação; este checkpoint não afirma a execução de
+dois modelos de IA em produção.
+
+
+## Passada 10 — homologação integrada em andamento
+
+Marco A comprovado no runtime local isolado: massa determinística SYNTHETIC/HOMOLOG
+com 141 registros, artefatos privados e lotes `synthetic-141-a` (100) e
+`synthetic-141-b` (41) foi provisionada por função administrativa restrita e
+enviada à API HTTPS com CA privada validada. PostgreSQL registrou 141 vagas,
+141 eventos e 141 classificações: 121 `READY` e 20 `UNCERTAIN`. O replay
+autenticado não duplicou registros. Dois recibos rejeitados anteriores foram
+preservados como prova dos controles de token/envelope; a credencial inicial
+incompatível foi revogada e o produtor foi rotacionado.
+
+O runtime agora copia contratos para a imagem, usa tmpfs compartilhado entre API
+e worker somente para PDF transitório, consome jobs de currículo e agenda matching
+por tenant. Um currículo PDF sintético produziu perfil `READY`, concluiu 142 jobs
+(um currículo e 141 matches), gerou 61 afinidades evidenciadas e manteve 80 casos
+incertos fora da API de recomendações. O multipart Android passou a emitir CRLF
+real. Ainda não há certificação da Passada 10: faltam regressão distribuída, build
+Android de integração, OAuth Google legítimo e a interação voluntária no POCO X6.
+
 ## Passada 07 — certificada e integrada
 
 A execução 07 foi concluída pelo PR #11, merge squash
@@ -73,9 +129,45 @@ PR #9, após testes isolados e os checks obrigatórios.
 - 07 certificada e merged; PR #11 e cinco testes de matching aprovados no CI03.
 - 08 certificada e merged; PR #13, CI03 e checks obrigatórios aprovados.
 - 09 certificada e merged; PR #15, Android CI e instrumentação PASS.
-- 10 não iniciada nesta execução.
+- 10 iniciada em branch isolada `feat/passada-10-integracao`, ainda não certificada.
+  O primeiro checkpoint implementou o cliente HTTP Android opt-in por configuração
+  de build (HTTPS, timeouts, refresh, operações idempotentes e cursors), o caminho
+  Credential Manager/Google Identity com challenge/nonce e uma fronteira TTS
+  dedicada fail-closed. O fake da 09 foi preservado para testes. Validação leve no
+  AGT: 53 testes offline (contratos, política e TTS), `py_compile` e `diff --check`
+  PASS. Build/lint/instrumentação Android e PostgreSQL não foram executados no
+  control plane. Não houve chamada Google/TTS/IA, PDF pessoal, credencial, deploy,
+  alteração de DNS ou produção. G-OIDC, G-PRIVACY, G-TTS, G-DEPLOY e a prova 4G/5G
+  continuam pendentes; G-WORKERS será requerido para as suítes pesadas.
 
 Ver docs/database.md, docs/evidence-02.md, docs/evidence-03.md,
 docs/ingestion-04.md e docs/resume-06.md. Nenhum banco produtivo, deploy público,
 chamada de IA ou mudança de credenciais/permissões de integrações.
 Auditoria geral de GitHub Apps permanece atividade de segurança independente.
+
+## Passada 10 — runtime local persistente (não certificada)
+
+Foi implantado um PostgreSQL dedicado persistente e uma API Gunicorn no ambiente
+local isolado, com migrações 1–10, papéis SQL, SCRAM, healthchecks separados e
+conexão interna confirmada. Backup custom e restauração em banco temporário
+confirmaram as 10 migrações. A API respondeu readiness e erro HTTP sanitizado; o
+listener do banco não aceita a interface de identificação externa. Configuração,
+secrets, topologia, hashes de backup e logs permanecem privados. O importador CSV,
+fontes autorizadas, identidade real, Android em rede móvel e demais gates continuam
+pendentes; esta evidência não certifica a passada 10.
+O CI03 aprovou no SHA `1237028` banco, restore/ledger, autenticação, ingestão,
+classificação, currículo, matching e smoke HTTP isolado; o worker confirmou rede
+isolada e preservação dos containers preexistentes.
+
+## Passada 10 — preparação de homologação HTTP isolada
+
+Na branch isolada `feat/passada-10-homologacao-isolada`, foi preparado um harness
+WSGI descartável, limitado a loopback, sem logs de requisição e com health mínimo.
+O smoke automatizado usa `create_app(...)`, banco `cbn_test_*` e HTTP real somente
+dentro do cliente isolado do worker; ele verifica resposta sanitizada de autenticação
+e fecha os pools. A expansão do CI03 é pendente de execução externa autorizada; a
+regressão anterior `ci03-pr17-regression-01` não foi repetida. Sem deploy, DNS,
+Cloudflare, proxy, TLS público, segredo, dado real ou URL Android local. G-DEPLOY e
+os demais gates de uso real continuam pendentes; total permanece 9/10 certificadas.
+Checks leves desta preparação: compilação Python, 54 testes offline, política pública
+e `diff --check` passaram no control plane; isso não valida o smoke do worker.

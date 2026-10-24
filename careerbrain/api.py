@@ -13,6 +13,7 @@ from .ingestion import IngestionFailure
 from .resume import MAX_BYTES, ResumeRejected
 from tools.contracts import ContractError, strict_load
 from .mobile import Conflict
+from .tts import TtsUnavailable
 
 
 class PayloadTooLarge(ValueError):
@@ -129,6 +130,11 @@ class ResumeAPI:
                     raise ResumeRejected('invalid idempotency key')
                 output = self.service.upload(principal['tenant_id'], metadata, document, key)
                 status = '202 Accepted'
+            elif method == 'GET' and path == '/v1/me/jobs/latest':
+                output = self.service.latest_status(principal['tenant_id'])
+                if output is None:
+                    return self._respond(start_response, '410 Gone', IdentityAPI._error('410 Gone', 'RESOURCE_GONE')[1])
+                status = '200 OK'
             elif method == 'GET' and path.startswith('/v1/me/jobs/'):
                 output = self.service.status(principal['tenant_id'], path.removeprefix('/v1/me/jobs/'))
                 if output is None:
@@ -193,10 +199,10 @@ class ResumeAPI:
 class CareerBrainAPI:
     """Route producer traffic separately from user identity traffic."""
 
-    def __init__(self, identity: IdentityAPI, ingestion, resume=None, mobile=None):
+    def __init__(self, identity: IdentityAPI, ingestion, resume=None, mobile=None, tts=None):
         self.identity, self.ingestion = identity, ingestion
         self.resume = None if resume is None else ResumeAPI(identity, resume)
-        self.mobile = mobile
+        self.mobile, self.tts = mobile, tts
 
     def close(self):
         self.ingestion.pool.close()
@@ -209,7 +215,7 @@ class CareerBrainAPI:
     def __call__(self, environ, start_response):
         method, path = environ.get('REQUEST_METHOD'), environ.get('PATH_INFO', '')
         if self.mobile is not None and (path == '/v1/recommendations' or path.startswith('/v1/recommendations/')
-                                       or path == '/v1/applications' or path == '/v1/me' or path.startswith('/v1/deletions/')):
+                                       or path == '/v1/applications' or path == '/v1/notifications/tts' or path.startswith('/v1/deletions/')):
             return self._mobile(environ, start_response)
         if path == '/v1/me/resume' or path.startswith('/v1/me/jobs/'):
             if self.resume is None:
@@ -296,6 +302,12 @@ class CareerBrainAPI:
                 elif method == 'GET' and path == '/v1/recommendations/changes': output, status = self.mobile.changes(principal['tenant_id'], query.get('cursor'), limit), '200 OK'
                 elif method == 'POST' and path == '/v1/recommendations/ack': self.mobile.ack(principal['tenant_id'], strict_load(self._raw(environ))); output, status = None, '204 No Content'
                 elif method == 'PUT' and path == '/v1/applications': self.mobile.application(principal['tenant_id'], strict_load(self._raw(environ))); output, status = None, '204 No Content'
+                elif method == 'POST' and path == '/v1/notifications/tts':
+                    if self.tts is None:
+                        raise TtsUnavailable()
+                    audio = self.tts.speak(principal['tenant_id'], strict_load(self._raw(environ)))
+                    start_response('200 OK', [('Content-Type', 'audio/mpeg'), ('Content-Length', str(len(audio))), ('Cache-Control', 'no-store')])
+                    return [audio]
                 elif method == 'DELETE' and path == '/v1/me':
                     request_id = environ.get('HTTP_IDEMPOTENCY_KEY', '')
                     output, status = self.mobile.delete(principal['tenant_id'], request_id), '202 Accepted'
@@ -304,6 +316,7 @@ class CareerBrainAPI:
         except Denied: return self._respond(start_response, '401 Unauthorized', IdentityAPI._error('401 Unauthorized', 'UNAUTHENTICATED')[1])
         except LookupError: return self._respond(start_response, '410 Gone', IdentityAPI._error('410 Gone', 'RESOURCE_GONE')[1])
         except Conflict: return self._respond(start_response, '409 Conflict', IdentityAPI._error('409 Conflict', 'IDEMPOTENCY_CONFLICT')[1])
+        except TtsUnavailable: return self._respond(start_response, '503 Service Unavailable', IdentityAPI._error('503 Service Unavailable', 'UNAVAILABLE')[1])
         except (ContractError, ValueError, KeyError, TypeError): return self._respond(start_response, '422 Unprocessable Content', IdentityAPI._error('422 Unprocessable Content', 'SCHEMA_INVALID')[1])
         except psycopg.Error: return self._respond(start_response, '503 Service Unavailable', IdentityAPI._error('503 Service Unavailable', 'UNAVAILABLE')[1])
         if output is None:

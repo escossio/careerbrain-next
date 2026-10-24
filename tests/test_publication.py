@@ -43,6 +43,14 @@ class PublicationTests(unittest.TestCase):
         self.assertIn("private-address", content_findings(address, "README.md"))
         self.assertEqual(content_findings(address, "tests/test_contracts.py"), [])
 
+    def test_loopback_only_allowed_in_the_reviewed_homolog_harness(self):
+        address = "127." + "0.0.1"
+        self.assertEqual(content_findings(address, "careerbrain/homolog.py"), [])
+        self.assertIn("private-address", content_findings(address, "docs/homolog-10.md"))
+        wildcard = "0." + "0.0.0"
+        self.assertEqual(content_findings(wildcard, "tests/integration/homolog_cases.py"), [])
+        self.assertIn("private-address", content_findings(wildcard, "careerbrain/homolog.py"))
+
     def test_operational_host_rejected_in_docs(self):
         self.assertEqual(content_findings("https://api.example.org/v1", "README.md"), [])
         self.assertIn("unapproved-url-host", content_findings("https://" + "runtime.example.net/v1", "README.md"))

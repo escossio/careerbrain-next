@@ -63,6 +63,39 @@ class MatchingTests(unittest.TestCase):
         self.admin.execute('INSERT INTO catalog.event_classifications(event_id,cache_id) VALUES(%s,%s)',(event,cache))
         return event
 
+    def test_portuguese_english_skill_aliases_require_both_explicit_evidences(self):
+        from careerbrain.matching import evaluate
+        personal={'status':'READY','attributes':[
+            {'name':'skill','value':'observabilidade','basis':'explicit','confidence':1,
+             'evidence':[{'field':'resume','quote':'observabilidade','start':0,'end':14}]},
+            {'name':'skill','value':'telecomunicações','basis':'explicit','confidence':1,
+             'evidence':[{'field':'resume','quote':'telecomunicações','start':22,'end':39}]}]}
+        public={'status':'READY','result':{'attributes':[
+            {'name':'skill','value':'observability','basis':'explicit','confidence':1,
+             'evidence':[{'field':'description','quote':'observability','start':0,'end':13}]},
+            {'name':'skill','value':'telecom','basis':'explicit','confidence':1,
+             'evidence':[{'field':'description','quote':'telecom','start':20,'end':27}]}]}}
+        score,confidence,reasons,_=evaluate(personal,public)
+        self.assertEqual(score,1)
+        self.assertEqual(confidence,1)
+        self.assertEqual(reasons,['EVIDENCED_AFFINITY'])
+        personal['attributes'][0]['basis']='unknown'
+        public['result']['attributes'][1]['evidence']=[]
+        self.assertEqual(evaluate(personal,public)[0],None)
+
+    def test_mobile_recommendations_sql_join_returns_published_matches(self):
+        """Guards against selecting available_at from the wrong projection view."""
+        initial=self.mobile.recommendations(str(self.tenant[1]))
+        self.assertEqual(initial['items'],[])
+        event=self.event(self.tenant[2])
+        self.assertIsNotNone(self.service.schedule(str(self.tenant[1]),str(event)))
+        self.assertEqual(self.service.process_once(),'READY')
+        result=self.mobile.recommendations(str(self.tenant[1]))
+        self.assertEqual(len(result['items']),1)
+        self.assertEqual(result['items'][0]['title'],'Synthetic Python role')
+        self.assertEqual(result['items'][0]['match']['affinity'],1.0)
+        self.assertEqual(self.mobile.recommendations(str(self.other[1]))['items'],[])
+
     def test_cutoff_equal_after_late_observation_and_evidenced_affinity(self):
         created=self.tenant[2]
         before=self.event(created-timedelta(microseconds=1),observed=created+timedelta(microseconds=1))

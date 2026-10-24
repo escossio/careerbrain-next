@@ -59,6 +59,14 @@ class DeterministicClassifier:
         ('description', 'instalações elétricas', 'activity'),
         ('description', 'atendimento ao cliente', 'activity'),
         ('description', 'Python', 'skill'),
+        ('description', 'telecom', 'skill'),
+        ('description', 'infrastructure', 'skill'),
+        ('description', 'observability', 'skill'),
+        ('description', 'automation', 'skill'),
+        ('description', 'routing', 'skill'),
+        ('description', 'cloud', 'skill'),
+        ('title', 'Network', 'skill'),
+        ('title', 'DevOps', 'skill'),
     )
 
     def classify(self, content: dict, envelope: dict, *, timeout_seconds: int) -> dict:
