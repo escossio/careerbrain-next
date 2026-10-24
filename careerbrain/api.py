@@ -130,6 +130,11 @@ class ResumeAPI:
                     raise ResumeRejected('invalid idempotency key')
                 output = self.service.upload(principal['tenant_id'], metadata, document, key)
                 status = '202 Accepted'
+            elif method == 'GET' and path == '/v1/me/jobs/latest':
+                output = self.service.latest_status(principal['tenant_id'])
+                if output is None:
+                    return self._respond(start_response, '410 Gone', IdentityAPI._error('410 Gone', 'RESOURCE_GONE')[1])
+                status = '200 OK'
             elif method == 'GET' and path.startswith('/v1/me/jobs/'):
                 output = self.service.status(principal['tenant_id'], path.removeprefix('/v1/me/jobs/'))
                 if output is None:

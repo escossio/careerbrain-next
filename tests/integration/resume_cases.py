@@ -89,6 +89,17 @@ class ResumeTests(unittest.TestCase):
         validate('private-profile-v2', value)
         self.assertEqual(self.admin.execute('SELECT account_created_at FROM identity.accounts WHERE id=%s',(self.tenant[0],)).fetchone()[0], original)
 
+    def test_latest_resume_status_is_tenant_scoped_and_tracks_completion(self):
+        self.assertIsNone(self.service.latest_status(str(self.tenant[1])))
+        first = self.upload(pdf('Python'))
+        self.assertEqual(self.service.latest_status(str(self.tenant[1])), first)
+        self.assertIsNone(self.service.latest_status(str(self.other[1])))
+        self.assertEqual(self.service.process_once(), 'READY')
+        self.assertEqual(self.service.latest_status(str(self.tenant[1]))['status'], 'READY')
+        second = self.upload(pdf('enfermagem'))
+        self.assertEqual(self.service.latest_status(str(self.tenant[1])), second)
+        self.assertIsNone(self.service.latest_status(str(self.other[1])))
+
     def test_uncertain_is_versioned_empty_attributes_not_a_fictitious_unknown(self):
         job = self.upload(pdf('Texto profissional sem frase reconhecida'))
         self.assertEqual(self.service.process_once(), 'UNCERTAIN')

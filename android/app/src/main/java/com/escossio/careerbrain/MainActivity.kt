@@ -53,6 +53,28 @@ class MainActivity : ComponentActivity() {
                     Button(onClick = { confirmUpload = true }) { Text("Selecionar PDF") }
                     OutlinedButton(onClick = model::synchronize) { Text("Sincronizar") }
                 }
+                state.resume?.let { progress ->
+                    Card(Modifier.fillMaxWidth().semantics { contentDescription =
+                        "Andamento do currículo: ${resumeProgressText(progress, state.resumeElapsedSeconds)}" }) {
+                        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text("Andamento do currículo", style = MaterialTheme.typography.titleMedium)
+                            Text(resumeProgressText(progress, state.resumeElapsedSeconds))
+                            if (progress.status in setOf("PENDING", "PROCESSING")) {
+                                if (state.resumePolling) {
+                                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                                    Text("Consultando o servidor automaticamente a cada 3 segundos",
+                                         style = MaterialTheme.typography.bodySmall)
+                                } else Text("Acompanhamento pausado; o processamento pode continuar",
+                                            style = MaterialTheme.typography.bodySmall)
+                            }
+                            state.resumeCheckError?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                            OutlinedButton(onClick = model::checkResumeProgress) { Text("Verificar andamento") }
+                        }
+                    }
+                } ?: run {
+                    state.resumeCheckError?.let { Text(it) }
+                    OutlinedButton(onClick = model::checkResumeProgress) { Text("Consultar último currículo") }
+                }
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
                     items(state.items, key = { it.id }) { item -> RecommendationCard(item, state.applications[item.id], model::setApplication) }
                     state.recommendationCursor?.let { item {

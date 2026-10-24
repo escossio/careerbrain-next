@@ -22,6 +22,7 @@ const val MAX_PDF_BYTES = 5_242_880
 enum class ApplicationState { SAVED, APPLIED, INTERVIEW, OFFER, REJECTED, WITHDRAWN }
 data class Session(val accessToken: String, val refreshToken: String)
 data class LoginChallenge(val id: String, val nonce: String)
+data class ResumeJobStatus(val jobId: String, val status: String)
 data class Recommendation(val id: String, val title: String, val organization: String, val access: String, val reason: String, val uncertain: Boolean, val version: Long = 0)
 data class SyncChange(val sequence: Long, val recommendationId: String, val kind: String)
 data class SyncPage(val items: List<SyncChange>, val nextCursor: String, val snapshotHighWatermark: Long, val hasMore: Boolean)
@@ -34,7 +35,9 @@ interface CareerBrainApi {
     suspend fun challenge(): ApiResult<LoginChallenge>
     suspend fun googleLogin(idToken: String, challengeId: String): ApiResult<Session>
     suspend fun refresh(session: Session): ApiResult<Session>
-    suspend fun uploadPdf(bytes: ByteArray): ApiResult<String>
+    suspend fun uploadPdf(bytes: ByteArray): ApiResult<ResumeJobStatus>
+    suspend fun resumeStatus(jobId: String): ApiResult<ResumeJobStatus>
+    suspend fun latestResumeStatus(): ApiResult<ResumeJobStatus>
     suspend fun recommendations(cursor: String?): ApiResult<Pair<List<Recommendation>, String?>>
     suspend fun changes(cursor: String?): ApiResult<SyncPage>
     suspend fun acknowledge(ids: List<String>, requestId: String): ApiResult<Unit>
@@ -80,14 +83,19 @@ class HttpCareerBrainApi(baseUrl: String) : CareerBrainApi {
     override suspend fun challenge(): ApiResult<LoginChallenge> = json("POST", "/v1/auth/challenges", null).map { LoginChallenge(it.getString("challenge_id"), it.getString("nonce")) }
     override suspend fun googleLogin(idToken: String, challengeId: String): ApiResult<Session> = json("POST", "/v1/auth/google", JSONObject().put("id_token", idToken).put("challenge_id", challengeId)).mapSession()
     override suspend fun refresh(session: Session): ApiResult<Session> = json("POST", "/v1/auth/refresh", JSONObject().put("refresh_token", session.refreshToken)).mapSession()
-    override suspend fun uploadPdf(bytes: ByteArray): ApiResult<String> {
+    override suspend fun uploadPdf(bytes: ByteArray): ApiResult<ResumeJobStatus> {
         val boundary = "careerbrain-${System.nanoTime()}"
         val metadata = JSONObject().put("schema_version", "careerbrain.resume-upload.v1").put("request_id", "resume-${System.nanoTime()}")
             .put("content_type", "application/pdf").put("content_length", bytes.size).put("consent_version", "privacy-v1")
         val prefix = "--$boundary\r\nContent-Disposition: form-data; name=\"metadata\"\r\n\r\n$metadata\r\n--$boundary\r\nContent-Disposition: form-data; name=\"file\"\r\n\r\n".encodeToByteArray()
         val suffix = "\r\n--$boundary--\r\n".encodeToByteArray()
-        return request("POST", "/v1/me/resume", prefix + bytes + suffix, "multipart/form-data; boundary=$boundary", idempotency = metadata.getString("request_id")).map { JSONObject(it.decodeToString()).getString("status") }
+        return request("POST", "/v1/me/resume", prefix + bytes + suffix, "multipart/form-data; boundary=$boundary", idempotency = metadata.getString("request_id")).map { JSONObject(it.decodeToString()).toResumeJobStatus() }
     }
+    override suspend fun resumeStatus(jobId: String): ApiResult<ResumeJobStatus> =
+        if (!Regex("[0-9a-fA-F-]{36}").matches(jobId)) ApiResult.Http(422)
+        else json("GET", "/v1/me/jobs/$jobId", null).map { it.toResumeJobStatus() }
+    override suspend fun latestResumeStatus(): ApiResult<ResumeJobStatus> =
+        json("GET", "/v1/me/jobs/latest", null).map { it.toResumeJobStatus() }
     override suspend fun recommendations(cursor: String?): ApiResult<Pair<List<Recommendation>, String?>> = json("GET", "/v1/recommendations" + cursor.query("cursor"), null).map { page ->
         page.getJSONArray("items").toRecommendations() to page.optString("next_cursor").ifBlank { null }
     }
@@ -126,6 +134,7 @@ class HttpCareerBrainApi(baseUrl: String) : CareerBrainApi {
 }
 
 private fun String?.query(name: String) = this?.let { "?${name}=${java.net.URLEncoder.encode(it, "UTF-8")}" } ?: ""
+private fun JSONObject.toResumeJobStatus() = ResumeJobStatus(getString("job_id"), getString("status"))
 private fun JSONArray.toRecommendations(): List<Recommendation> = (0 until length()).map { index -> getJSONObject(index).let { item ->
     val match = item.getJSONObject("match"); val access = item.opt("access")
     Recommendation(item.getString("recommendation_id"), item.getString("title"), item.optString("organization"), if (access is JSONObject) access.optString("value") else "", match.optJSONArray("reasons")?.join(", ") ?: "", match.isNull("affinity"), 0)
@@ -171,7 +180,17 @@ class FakeCareerBrainApi : CareerBrainApi {
     override suspend fun challenge() = ApiResult.Ok(LoginChallenge("synthetic-challenge", "synthetic-nonce"))
     override suspend fun googleLogin(idToken: String, challengeId: String) = if (idToken == "synthetic-token" && challengeId == "synthetic-challenge") syntheticLogin() else ApiResult.Http(401)
     override suspend fun refresh(session: Session) = if (session.refreshToken == "synthetic-refresh") ApiResult.Ok(session) else ApiResult.Http(401)
-    override suspend fun uploadPdf(bytes: ByteArray) = if (bytes.size in 1..MAX_PDF_BYTES && bytes.take(4).toByteArray().decodeToString() == "%PDF") ApiResult.Ok("READY") else ApiResult.Http(422)
+        private var fakeResume: ResumeJobStatus? = null
+    override suspend fun uploadPdf(bytes: ByteArray): ApiResult<ResumeJobStatus> =
+        if (bytes.size in 1..MAX_PDF_BYTES && bytes.take(4).toByteArray().decodeToString() == "%PDF") {
+            val job = ResumeJobStatus("00000000-0000-4000-8000-000000000001", "READY")
+            fakeResume = job
+            ApiResult.Ok(job)
+        } else ApiResult.Http(422)
+    override suspend fun resumeStatus(jobId: String): ApiResult<ResumeJobStatus> =
+        fakeResume?.takeIf { it.jobId == jobId }?.let { ApiResult.Ok(it) } ?: ApiResult.Http(410)
+    override suspend fun latestResumeStatus(): ApiResult<ResumeJobStatus> =
+        fakeResume?.let { ApiResult.Ok(it) } ?: ApiResult.Http(410)
     override suspend fun recommendations(cursor: String?): ApiResult<Pair<List<Recommendation>, String?>> {
         val start = cursor?.toIntOrNull() ?: 0
         val page = recommendations.values.drop(start).take(1)

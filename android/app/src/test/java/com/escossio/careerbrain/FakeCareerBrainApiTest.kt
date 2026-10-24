@@ -60,6 +60,26 @@ class FakeCareerBrainApiTest {
         assertEquals(MAX_PDF_BYTES, readPdfAtMost(ByteArrayInputStream(ByteArray(MAX_PDF_BYTES)))!!.size)
     }
 
+    @Test fun resumeProgressShowsActualStagesAndSlowStateWithoutFictitiousPercentage() {
+        val job = ResumeJobStatus("00000000-0000-4000-8000-000000000001", "PENDING")
+        assertTrue(resumeProgressText(job, 3).contains("aguardando"))
+        assertTrue(resumeProgressText(job, 47).contains("demorando"))
+        assertTrue(resumeProgressText(job.copy(status = "PROCESSING"), 8).contains("processamento"))
+        assertTrue(resumeProgressText(job.copy(status = "READY"), 90).contains("concluído"))
+        assertTrue(resumeProgressText(job.copy(status = "FAILED"), 90).contains("Falha"))
+        assertFalse(resumeProgressText(job, 47).contains("%"))
+    }
+
+    @Test fun fakeResumeCanBeRecheckedWithoutResendingPdf() = runBlocking {
+        val api = FakeCareerBrainApi()
+        assertEquals(410, (api.latestResumeStatus() as ApiResult.Http).status)
+        val uploaded = api.uploadPdf("%PDF-1.4".encodeToByteArray()) as ApiResult.Ok
+        assertEquals("READY", uploaded.value.status)
+        assertEquals(uploaded.value, (api.resumeStatus(uploaded.value.jobId) as ApiResult.Ok).value)
+        assertEquals(uploaded.value, (api.latestResumeStatus() as ApiResult.Ok).value)
+        assertEquals(410, (api.resumeStatus("00000000-0000-4000-8000-000000000099") as ApiResult.Http).status)
+    }
+
     @Test fun clearingCursorRepresentsControlledReinstallBootstrapWithoutPersistingSession() {
         val cursors = InMemorySyncCursorStore(); cursors.save("2:2"); cursors.clear()
         assertNull(cursors.load())

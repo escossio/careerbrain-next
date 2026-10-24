@@ -312,6 +312,21 @@ class ResumeService:
         self.store.delete(handle)
         return True
 
+    def latest_status(self, tenant_id: str) -> dict | None:
+        """Return only the authenticated tenant's most recent resume job."""
+        if self.api_pool is None: raise RuntimeError('status unavailable in worker')
+        with self.api_pool.connection() as conn, conn.transaction():
+            conn.execute("SELECT set_config('careerbrain.tenant_id',%s,true)", (str(UUID(tenant_id)),))
+            row = conn.execute(
+                "SELECT id FROM queue.private_jobs WHERE tenant_id=%s AND kind='RESUME' "
+                "ORDER BY created_at DESC,id DESC LIMIT 1",
+                (UUID(tenant_id),)
+            ).fetchone()
+            if row is None:
+                return None
+            state = conn.execute('SELECT private.resume_job_status(%s)', (row[0],)).fetchone()[0]
+        return None if state is None else {'job_id': str(row[0]), 'status': state}
+
     def status(self, tenant_id: str, job_id: str) -> dict | None:
         if self.api_pool is None: raise RuntimeError('status unavailable in worker')
         with self.api_pool.connection() as conn, conn.transaction():
