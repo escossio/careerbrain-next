@@ -65,6 +65,20 @@ def _unmet_requirement_proofs(profile: dict, classification: dict) -> list[dict]
     return proofs
 
 
+def _matching_key(attribute: dict) -> tuple[str, str]:
+    # Explicit, auditable PT-BR/EN synonym dictionary. Both sides retain raw
+    # text quotes/offsets; we never invent qualifications from job titles.
+    term = attribute['value'].casefold().strip()
+    normalized = {
+        'telecomunicações': 'telecom', 'telecomunicacoes': 'telecom',
+        'observabilidade': 'observability', 'infraestrutura': 'infrastructure',
+        'automação': 'automation', 'automacao': 'automation',
+        'redes de computadores': 'network', 'redes': 'network',
+        'roteamento': 'routing', 'monitoramento': 'observability',
+    }
+    return attribute['name'], normalized.get(term, term)
+
+
 def evaluate(profile: dict, classification: dict) -> tuple[Decimal | None, Decimal | None, list[str], list[dict]]:
     """Return only reproducible overlap or a complete, versioned negative pair."""
     if profile['status'] != 'READY' or classification['status'] != 'READY':
@@ -73,16 +87,16 @@ def evaluate(profile: dict, classification: dict) -> tuple[Decimal | None, Decim
     if unmet:
         return None, None, ['REQUIREMENT_UNMET'], unmet
     global_attributes = [a for a in classification['result']['attributes'] if a['basis'] == 'explicit' and a['evidence']]
-    private_attributes = {(a['name'], a['value'].casefold()) for a in profile['attributes']
+    private_attributes = {_matching_key(a) for a in profile['attributes']
                           if a['basis'] == 'explicit' and a['evidence']}
     if not global_attributes or not private_attributes:
         return None, None, ['REQUIREMENT_UNKNOWN'], []
-    matched = {(a['name'], a['value'].casefold()) for a in global_attributes} & private_attributes
+    matched = {_matching_key(a) for a in global_attributes} & private_attributes
     if not matched:
         return None, None, ['REQUIREMENT_UNKNOWN'], []
-    affinity = Decimal(len(matched)) / Decimal(len({(a['name'], a['value'].casefold()) for a in global_attributes}))
+    affinity = Decimal(len(matched)) / Decimal(len({_matching_key(a) for a in global_attributes}))
     confidence = min((Decimal(str(a['confidence'])) for a in global_attributes
-                      if (a['name'], a['value'].casefold()) in matched), default=Decimal(0))
+                      if _matching_key(a) in matched), default=Decimal(0))
     return affinity, confidence, ['EVIDENCED_AFFINITY'], []
 
 

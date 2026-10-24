@@ -17,7 +17,7 @@ def main():
     signal.signal(signal.SIGTERM,_stop); signal.signal(signal.SIGINT,_stop)
     global_pool=tenant_pool(_need('CBN_GLOBAL_WORKER_CONNINFO'))
     private_pool=tenant_pool(_need('CBN_PRIVATE_WORKER_CONNINFO'))
-    classifier=GlobalClassifier(global_pool, ClassificationConfig('professional-v1','deterministic-v1','synthetic-homolog-v1'), DeterministicClassifier())
+    classifier=GlobalClassifier(global_pool, ClassificationConfig('professional-v1','deterministic-v2','synthetic-homolog-v1'), DeterministicClassifier())
     matcher=MatchService(private_pool, private_pool)
     resume=ResumeService(None, private_pool, FilesystemResumeStore(_need('CBN_RESUME_DIRECTORY')), extractor=BoundedPdfExtractor())
     try:

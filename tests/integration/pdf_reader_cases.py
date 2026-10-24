@@ -37,6 +37,17 @@ class OrdinaryPdfTests(unittest.TestCase):
         self.assertEqual(status, 'READY')
         self.assertTrue(any(attribute['value'] == 'Python' for attribute in attributes))
 
+    def test_brazilian_infrastructure_resume_is_not_uncertain(self):
+        # Synthetic text only; no real user resume persisted in tests.
+        resume = standard_pdf('Telecom Linux redes Python SRE Docker cloud')
+        status, attributes = BoundedPdfExtractor().profile(resume)
+        self.assertEqual(status, 'READY')
+        values = {a['value'].casefold() for a in attributes}
+        self.assertIn('linux', values)
+        self.assertIn('telecom', values)
+        self.assertIn('redes', values)
+        self.assertTrue(all(a['evidence'][0]['quote'] == a['value'] for a in attributes))
+
     def test_active_pdf_rejected(self):
         with self.assertRaises(ResumeRejected):
             BoundedPdfExtractor().extract(b'%PDF-1.4\n/JavaScript\n%%EOF')

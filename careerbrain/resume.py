@@ -144,8 +144,14 @@ def assert_ephemeral_runtime() -> None:
 class DeterministicPdfExtractor:
     """Constrained parser for synthetic fixtures, never a general-purpose PDF renderer."""
     forbidden = (b'/Encrypt', b'/JavaScript', b'/JS', b'/OpenAction', b'/Launch', b'/RichMedia', b'/EmbeddedFile')
+    # Evidence-only offline homologation vocabulary; no inferred qualifications.
     patterns = (('skill', 'instalações elétricas'), ('skill', 'Python'), ('activity', 'enfermagem'),
-                ('activity', 'atendimento ao cliente'))
+                ('activity', 'atendimento ao cliente'), ('skill', 'telecomunicações'),
+                ('skill', 'telecom'), ('skill', 'redes de computadores'), ('skill', 'redes'),
+                ('skill', 'infraestrutura'), ('skill', 'Linux'), ('skill', 'observabilidade'),
+                ('skill', 'automação'), ('skill', 'SRE'), ('skill', 'DevOps'),
+                ('skill', 'backbone'), ('skill', 'Docker'), ('skill', 'cloud'),
+                ('skill', 'roteamento'), ('skill', 'monitoramento'))
 
     def extract(self, document: bytes) -> str:
         if not isinstance(document, bytes) or not 1 <= len(document) <= MAX_BYTES:
@@ -185,7 +191,7 @@ class BoundedPdfExtractor(DeterministicPdfExtractor):
     The strict synthetic fixture parser remains available only when explicitly
     passed to ResumeService in disposable tests.
     """
-    version = 'pypdf-text-bounded-v1'
+    version = 'pypdf-text-bounded-v2'
 
     def extract(self, document: bytes) -> str:
         if not isinstance(document, bytes) or not 1 <= len(document) <= MAX_BYTES:

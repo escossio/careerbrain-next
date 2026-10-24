@@ -63,6 +63,26 @@ class MatchingTests(unittest.TestCase):
         self.admin.execute('INSERT INTO catalog.event_classifications(event_id,cache_id) VALUES(%s,%s)',(event,cache))
         return event
 
+    def test_portuguese_english_skill_aliases_require_both_explicit_evidences(self):
+        from careerbrain.matching import evaluate
+        personal={'status':'READY','attributes':[
+            {'name':'skill','value':'observabilidade','basis':'explicit','confidence':1,
+             'evidence':[{'field':'resume','quote':'observabilidade','start':0,'end':14}]},
+            {'name':'skill','value':'telecomunicações','basis':'explicit','confidence':1,
+             'evidence':[{'field':'resume','quote':'telecomunicações','start':22,'end':39}]}]}
+        public={'status':'READY','result':{'attributes':[
+            {'name':'skill','value':'observability','basis':'explicit','confidence':1,
+             'evidence':[{'field':'description','quote':'observability','start':0,'end':13}]},
+            {'name':'skill','value':'telecom','basis':'explicit','confidence':1,
+             'evidence':[{'field':'description','quote':'telecom','start':20,'end':27}]}]}}
+        score,confidence,reasons,_=evaluate(personal,public)
+        self.assertEqual(score,1)
+        self.assertEqual(confidence,1)
+        self.assertEqual(reasons,['EVIDENCED_AFFINITY'])
+        personal['attributes'][0]['basis']='unknown'
+        public['result']['attributes'][1]['evidence']=[]
+        self.assertEqual(evaluate(personal,public)[0],None)
+
     def test_mobile_recommendations_sql_join_returns_published_matches(self):
         """Guards against selecting available_at from the wrong projection view."""
         initial=self.mobile.recommendations(str(self.tenant[1]))
