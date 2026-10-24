@@ -6,7 +6,6 @@ android { namespace = "com.escossio.careerbrain"; compileSdk = 35
     buildFeatures { compose = true; buildConfig = true }
     val apiBaseUrl = providers.gradleProperty("careerbrainApiBaseUrl").orElse("").get()
     val googleWebClientId = providers.gradleProperty("careerbrainGoogleWebClientId").orElse("").get()
-    val debugCaFile = providers.gradleProperty("careerbrainDebugCaFile").orElse("").get()
     val debugSecurityResources = layout.buildDirectory.dir("generated/res/careerbrainDebugSecurity")
     defaultConfig {
         buildConfigField("String", "CAREERBRAIN_API_BASE_URL", "\"${apiBaseUrl.replace("\\", "\\\\").replace("\"", "\\\"")}\"")
@@ -24,7 +23,6 @@ val generateCareerBrainDebugSecurity by tasks.registering {
         xml.parentFile.mkdirs()
         val apiUrl = providers.gradleProperty("careerbrainApiBaseUrl").orElse("").get()
         val caPath = providers.gradleProperty("careerbrainDebugCaFile").orElse("").get()
-        if (apiUrl.isNotBlank() && caPath.isBlank()) throw GradleException("careerbrainDebugCaFile is required for a real debug endpoint")
         val extraAnchor = if (caPath.isBlank()) "" else {
             val ca = file(caPath)
             if (!ca.isFile) throw GradleException("careerbrainDebugCaFile is not a readable file")
@@ -36,7 +34,7 @@ val generateCareerBrainDebugSecurity by tasks.registering {
     }
 }
 
-tasks.named("preDebugBuild").configure { dependsOn(generateCareerBrainDebugSecurity) }
+tasks.matching { it.name == "preDebugBuild" }.configureEach { dependsOn(generateCareerBrainDebugSecurity) }
 
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
 
