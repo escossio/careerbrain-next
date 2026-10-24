@@ -39,7 +39,7 @@ class MobileService:
             if profile is None:
                 return {'schema_version': 'careerbrain.recommendation-page.v1', 'profile_version': 1, 'items': [], 'next_cursor': None}
             rows = c.execute('''SELECT r.recommendation_id,r.event_id,r.profile_version,r.policy_version,
-                r.affinity::float8,r.confidence::float8,r.reasons,r.available_at,e.vacancy_id,v.content->>'title',v.content->'access'
+                r.affinity::float8,r.confidence::float8,r.reasons,base.available_at,e.vacancy_id,v.content->>'title',v.content->'access'
                 FROM private.current_recommendations r JOIN private.recommendations base ON base.recommendation_id=r.recommendation_id
                 JOIN catalog.publication_events e ON e.id=r.event_id JOIN catalog.vacancies v ON v.id=e.vacancy_id
                 WHERE r.affinity IS NOT NULL AND r.confidence IS NOT NULL

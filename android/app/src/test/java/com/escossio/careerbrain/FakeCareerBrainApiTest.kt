@@ -36,7 +36,7 @@ class FakeCareerBrainApiTest {
         val offline = coordinator.synchronize(recommendations(api))
         assertTrue(offline.message.startsWith("Sem conexão")); assertNull(cursors.load())
         val recovered = coordinator.synchronize(offline.items)
-        assertEquals("2:2", cursors.load()); assertTrue(recovered.message.startsWith("Sincronização concluída"))
+        assertEquals("2:2", cursors.load()); assertEquals("Atualização concluída", recovered.message)
     }
 
     @Test fun offlineChangesDoNotAdvanceCursorAndCanBeRetried() = runBlocking {
@@ -78,6 +78,16 @@ class FakeCareerBrainApiTest {
         assertEquals(uploaded.value, (api.resumeStatus(uploaded.value.jobId) as ApiResult.Ok).value)
         assertEquals(uploaded.value, (api.latestResumeStatus() as ApiResult.Ok).value)
         assertEquals(410, (api.resumeStatus("00000000-0000-4000-8000-000000000099") as ApiResult.Http).status)
+    }
+
+    @Test fun emptySynchronizationDoesNotExposeInternalWatermark() = runBlocking {
+        val delegate = FakeCareerBrainApi()
+        val api = object : CareerBrainApi by delegate {
+            override suspend fun changes(cursor: String?) =
+                ApiResult.Ok(SyncPage(emptyList(), "0:0", 0L, false))
+        }
+        val result = SyncCoordinator(api, InMemorySyncCursorStore()).synchronize(emptyList())
+        assertEquals("Nenhuma nova oportunidade encontrada", result.message)
     }
 
     @Test fun clearingCursorRepresentsControlledReinstallBootstrapWithoutPersistingSession() {

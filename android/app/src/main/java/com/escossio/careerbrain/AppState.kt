@@ -41,19 +41,21 @@ class SyncCoordinator(private val api: CareerBrainApi, private val cursors: Sync
         repeat(100) {
             val page = when (val result = api.changes(cursor)) {
                 is ApiResult.Ok -> result.value
-                is ApiResult.Http -> return SyncOutcome(local.values.toList(), "Erro HTTP ${result.status}; tente sincronizar novamente")
+                is ApiResult.Http -> return SyncOutcome(local.values.toList(), "Não foi possível atualizar as oportunidades. Tente novamente.")
                 ApiResult.Offline -> return SyncOutcome(local.values.toList(), "Sem conexão; tente sincronizar novamente")
             }
             page.items.forEach { change -> if (change.kind == "REMOVED") local.remove(change.recommendationId) }
             val acknowledgementIds = page.items.map { it.recommendationId }.distinct()
             if (acknowledgementIds.isNotEmpty()) when (val acknowledgement = api.acknowledge(acknowledgementIds, "ack-${page.nextCursor}")) {
-                is ApiResult.Http -> return SyncOutcome(local.values.toList(), "Erro HTTP ${acknowledgement.status}; tente sincronizar novamente")
+                is ApiResult.Http -> return SyncOutcome(local.values.toList(), "Não foi possível confirmar a atualização. Tente novamente.")
                 ApiResult.Offline -> return SyncOutcome(local.values.toList(), "Sem conexão; tente sincronizar novamente")
                 is ApiResult.Ok -> Unit
             }
             cursors.save(page.nextCursor)
             cursor = page.nextCursor
-            if (!page.hasMore) return SyncOutcome(local.values.toList(), "Sincronização concluída até ${page.snapshotHighWatermark}")
+            if (!page.hasMore) return SyncOutcome(local.values.toList(),
+                if (page.snapshotHighWatermark == 0L && local.isEmpty()) "Nenhuma nova oportunidade encontrada"
+                else "Atualização concluída")
         }
         return SyncOutcome(local.values.toList(), "Sincronização interrompida; tente novamente")
     }
@@ -100,14 +102,14 @@ class CareerBrainViewModel(
     fun login() = viewModelScope.launch {
         when (val result = api.syntheticLogin()) {
             is ApiResult.Ok -> { state.value = state.value.copy(session = result.value, message = "Sessão sintética ativa"); refreshRecommendations(reset = true); checkResumeProgress() }
-            is ApiResult.Http -> state.value = state.value.copy(message = "Erro HTTP ${result.status}")
+            is ApiResult.Http -> state.value = state.value.copy(message = "Serviço temporariamente indisponível. Tente novamente.")
             ApiResult.Offline -> state.value = state.value.copy(message = "Sem conexão; tente novamente")
         }
     }
     fun beginGoogleLogin(onChallenge: (LoginChallenge) -> Unit) = viewModelScope.launch {
         when (val result = api.challenge()) {
             is ApiResult.Ok -> onChallenge(result.value)
-            is ApiResult.Http -> state.value = state.value.copy(message = "Erro HTTP ${result.status}")
+            is ApiResult.Http -> state.value = state.value.copy(message = "Serviço temporariamente indisponível. Tente novamente.")
             ApiResult.Offline -> state.value = state.value.copy(message = "Sem conexão; tente novamente")
         }
     }
@@ -125,7 +127,9 @@ class CareerBrainViewModel(
                 val items = if (reset) result.value.first else state.value.items + result.value.first.filter { candidate -> state.value.items.none { it.id == candidate.id } }
                 state.value = state.value.copy(items = items, recommendationCursor = result.value.second, message = "Recomendações atualizadas")
             }
-            is ApiResult.Http -> state.value = state.value.copy(message = "Erro HTTP ${result.status}")
+            is ApiResult.Http -> state.value = state.value.copy(message =
+                if (result.status == 503) "Não foi possível carregar as oportunidades. Tente novamente."
+                else "Não foi possível consultar as oportunidades.")
             ApiResult.Offline -> state.value = state.value.copy(message = "Sem conexão; tente novamente")
         }
     }
@@ -219,7 +223,7 @@ class CareerBrainViewModel(
         resumePollingJob?.cancel()
         when (val result = api.deleteAccount("delete-local")) {
             is ApiResult.Ok -> { cursors.clear(); state.value = ScreenState(message = "Dados locais removidos", deleting = result.value) }
-            is ApiResult.Http -> state.value = state.value.copy(message = "Erro HTTP ${result.status}")
+            is ApiResult.Http -> state.value = state.value.copy(message = "Serviço temporariamente indisponível. Tente novamente.")
             ApiResult.Offline -> state.value = state.value.copy(message = "Exclusão não confirmada; sem conexão")
         }
     }

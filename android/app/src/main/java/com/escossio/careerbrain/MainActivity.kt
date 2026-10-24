@@ -68,7 +68,9 @@ class MainActivity : ComponentActivity() {
                                             style = MaterialTheme.typography.bodySmall)
                             }
                             state.resumeCheckError?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-                            OutlinedButton(onClick = model::checkResumeProgress) { Text("Verificar andamento") }
+                            if (progress.status in setOf("PENDING", "PROCESSING")) {
+                                OutlinedButton(onClick = model::checkResumeProgress) { Text("Verificar andamento") }
+                            }
                         }
                     }
                 } ?: run {
@@ -76,6 +78,13 @@ class MainActivity : ComponentActivity() {
                     OutlinedButton(onClick = model::checkResumeProgress) { Text("Consultar último currículo") }
                 }
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
+                    if (state.items.isEmpty()) {
+                        item {
+                            Text(if (state.resume?.status == "UNCERTAIN")
+                                "Ainda não há recomendações: a análise do currículo não identificou qualificações suficientes."
+                                else "Nenhuma oportunidade disponível nesta consulta.")
+                        }
+                    }
                     items(state.items, key = { it.id }) { item -> RecommendationCard(item, state.applications[item.id], model::setApplication) }
                     state.recommendationCursor?.let { item {
                         OutlinedButton(onClick = { model.refreshRecommendations() }, modifier = Modifier.fillMaxWidth()) { Text("Carregar próxima oportunidade") }
