@@ -13,6 +13,8 @@ import java.net.URI
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -77,7 +79,8 @@ class HttpCareerBrainApi(baseUrl: String) : CareerBrainApi {
     private val base = URI(baseUrl).normalize().also {
         require(it.scheme == "https" && it.host != null && it.userInfo == null && it.query == null && it.fragment == null)
     }.toString().trimEnd('/')
-    private var session: Session? = null
+    @Volatile private var session: Session? = null
+    private val refreshMutex = Mutex()
 
     override suspend fun syntheticLogin(): ApiResult<Session> = ApiResult.Http(401)
     override suspend fun challenge(): ApiResult<LoginChallenge> = json("POST", "/v1/auth/challenges", null).map { LoginChallenge(it.getString("challenge_id"), it.getString("nonce")) }
@@ -122,12 +125,26 @@ class HttpCareerBrainApi(baseUrl: String) : CareerBrainApi {
             val response = stream?.use { it.readBytes() } ?: ByteArray(0)
             connection.disconnect(); if (status in 200..299) ApiResult.Ok(response) else ApiResult.Http(status)
         } catch (_: Exception) { ApiResult.Offline }
-        val first = execute(session?.accessToken)
-        if (first !is ApiResult.Http || first.status != 401 || session == null || (method != "GET" && idempotency == null)) first
-        else when (val renewed = refresh(session!!)) {
-            is ApiResult.Ok -> execute(renewed.value.accessToken)
-            is ApiResult.Http -> ApiResult.Http(renewed.status)
-            ApiResult.Offline -> ApiResult.Offline
+        val usedSession = session
+        val first = execute(usedSession?.accessToken)
+        if (first !is ApiResult.Http || first.status != 401 || usedSession == null ||
+            (method != "GET" && idempotency == null)) first
+        else {
+            // Refresh tokens rotate. Two concurrent GETs must never spend the
+            // same refresh token: hold one mutex and reuse the rotated session.
+            val renewed = refreshMutex.withLock {
+                val current = session
+                when {
+                    current == null -> ApiResult.Http(401)
+                    current.accessToken != usedSession.accessToken -> ApiResult.Ok(current)
+                    else -> refresh(current)
+                }
+            }
+            when (renewed) {
+                is ApiResult.Ok -> execute(renewed.value.accessToken)
+                is ApiResult.Http -> ApiResult.Http(renewed.status)
+                ApiResult.Offline -> ApiResult.Offline
+            }
         }
     }
     private fun ApiResult<JSONObject>.mapSession(): ApiResult<Session> = map { Session(it.getString("access_token"), it.getString("refresh_token")).also { next -> session = next } }

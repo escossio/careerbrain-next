@@ -127,9 +127,14 @@ class CareerBrainViewModel(
                 val items = if (reset) result.value.first else state.value.items + result.value.first.filter { candidate -> state.value.items.none { it.id == candidate.id } }
                 state.value = state.value.copy(items = items, recommendationCursor = result.value.second, message = "Recomendações atualizadas")
             }
-            is ApiResult.Http -> state.value = state.value.copy(message =
-                if (result.status == 503) "Não foi possível carregar as oportunidades. Tente novamente."
-                else "Não foi possível consultar as oportunidades.")
+            is ApiResult.Http -> state.value = state.value.copy(
+                message = when (result.status) {
+                    401 -> "Sessão Google expirada. Entre novamente para carregar as vagas."
+                    503 -> "Servidor de vagas indisponível. Tente novamente."
+                    else -> "Não foi possível consultar as oportunidades."
+                },
+                session = if (result.status == 401) null else state.value.session
+            )
             ApiResult.Offline -> state.value = state.value.copy(message = "Sem conexão; tente novamente")
         }
     }
