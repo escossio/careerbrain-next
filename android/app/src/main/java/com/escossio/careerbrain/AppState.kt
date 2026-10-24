@@ -119,7 +119,7 @@ class CareerBrainViewModel(
     fun upload(bytes: ByteArray) = viewModelScope.launch {
         if (bytes.size > MAX_PDF_BYTES) { state.value = state.value.copy(message = "PDF excede 5 MiB"); return@launch }
         when (val result = api.uploadPdf(bytes)) {
-            is ApiResult.Ok -> state.value = state.value.copy(message = "Perfil ${result.value}")
+            is ApiResult.Ok -> state.value = state.value.copy(message = "Currículo recebido; processamento ${result.value}")
             is ApiResult.Http -> state.value = state.value.copy(message = "PDF inválido ou processamento indisponível (${result.status})")
             ApiResult.Offline -> state.value = state.value.copy(message = "Sem conexão; tente novamente")
         }

@@ -86,7 +86,7 @@ class HttpCareerBrainApi(baseUrl: String) : CareerBrainApi {
             .put("content_type", "application/pdf").put("content_length", bytes.size).put("consent_version", "privacy-v1")
         val prefix = "--$boundary\r\nContent-Disposition: form-data; name=\"metadata\"\r\n\r\n$metadata\r\n--$boundary\r\nContent-Disposition: form-data; name=\"file\"\r\n\r\n".encodeToByteArray()
         val suffix = "\r\n--$boundary--\r\n".encodeToByteArray()
-        return request("POST", "/v1/me/resume", prefix + bytes + suffix, "multipart/form-data; boundary=$boundary", idempotency = metadata.getString("request_id")).map { JSONObject(it.decodeToString()).getString("state") }
+        return request("POST", "/v1/me/resume", prefix + bytes + suffix, "multipart/form-data; boundary=$boundary", idempotency = metadata.getString("request_id")).map { JSONObject(it.decodeToString()).getString("status") }
     }
     override suspend fun recommendations(cursor: String?): ApiResult<Pair<List<Recommendation>, String?>> = json("GET", "/v1/recommendations" + cursor.query("cursor"), null).map { page ->
         page.getJSONArray("items").toRecommendations() to page.optString("next_cursor").ifBlank { null }

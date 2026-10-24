@@ -4,7 +4,7 @@ import json, logging, os, signal, time
 from .classification import ClassificationConfig, DeterministicClassifier, GlobalClassifier
 from .db import tenant_pool
 from .matching import MatchService
-from .resume import FilesystemResumeStore, ResumeService
+from .resume import FilesystemResumeStore, BoundedPdfExtractor, ResumeService
 
 STOP=False
 def _stop(*_):
@@ -19,7 +19,7 @@ def main():
     private_pool=tenant_pool(_need('CBN_PRIVATE_WORKER_CONNINFO'))
     classifier=GlobalClassifier(global_pool, ClassificationConfig('professional-v1','deterministic-v1','synthetic-homolog-v1'), DeterministicClassifier())
     matcher=MatchService(private_pool, private_pool)
-    resume=ResumeService(None, private_pool, FilesystemResumeStore(_need('CBN_RESUME_DIRECTORY')))
+    resume=ResumeService(None, private_pool, FilesystemResumeStore(_need('CBN_RESUME_DIRECTORY')), extractor=BoundedPdfExtractor())
     try:
         while not STOP:
             classified=classifier.run_once()

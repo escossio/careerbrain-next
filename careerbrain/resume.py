@@ -6,6 +6,8 @@ from datetime import datetime, timedelta, timezone
 import os
 import re
 import resource
+import subprocess
+import sys
 from uuid import UUID, uuid4
 
 import psycopg
@@ -176,6 +178,38 @@ class DeterministicPdfExtractor:
         return ('READY', attributes) if attributes else ('UNCERTAIN', [])
 
 
+
+class BoundedPdfExtractor(DeterministicPdfExtractor):
+    """Extract ordinary PDF text in a time- and memory-bounded child process.
+
+    The strict synthetic fixture parser remains available only when explicitly
+    passed to ResumeService in disposable tests.
+    """
+    version = 'pypdf-text-bounded-v1'
+
+    def extract(self, document: bytes) -> str:
+        if not isinstance(document, bytes) or not 1 <= len(document) <= MAX_BYTES:
+            raise ResumeRejected('invalid size')
+        if not document.startswith(b'%PDF-') or b'%%EOF' not in document[-2048:]:
+            raise ResumeRejected('invalid pdf')
+        if any(token in document for token in self.forbidden):
+            raise ResumeRejected('active or encrypted pdf')
+        try:
+            result = subprocess.run(
+                [sys.executable, '-m', 'careerbrain.pdf_text'],
+                input=document, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                timeout=12, check=False)
+            if result.returncode != 0 or len(result.stdout) > MAX_TEXT * 4:
+                raise ResumeRejected('unsupported pdf or extraction limit')
+            text = result.stdout.decode('utf-8', 'strict')
+            if len(text) > MAX_TEXT:
+                raise ResumeRejected('too much text')
+            return text
+        except (subprocess.TimeoutExpired, UnicodeDecodeError, OSError) as error:
+            raise ResumeRejected('unsupported pdf or extraction limit') from error
+
+
+
 class ResumeService:
     extractor_version = 'deterministic-pdf-v1'
     taxonomy_version = 'professional-v1'
@@ -183,6 +217,7 @@ class ResumeService:
     def __init__(self, api_pool, worker_pool, store: EphemeralResumeStore | FilesystemResumeStore, extractor=None):
         self.api_pool, self.worker_pool, self.store = api_pool, worker_pool, store
         self.extractor = extractor or DeterministicPdfExtractor()
+        self.extractor_version = getattr(self.extractor, 'version', self.extractor_version)
         for pool, role in ((api_pool, 'cb_api'), (worker_pool, 'cb_private_worker')):
             if pool is None: continue
             with pool.connection() as conn:
