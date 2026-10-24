@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -53,14 +53,20 @@ object CareerBrainApiFactory {
 /** Credential Manager obtains a Google proof only after the backend issued its one-use nonce. */
 class GoogleIdentityProvider(private val context: Context) {
     suspend fun idToken(webClientId: String, nonce: String): ApiResult<String> = try {
-        val option = GetGoogleIdOption.Builder().setServerClientId(webClientId).setNonce(nonce)
-            .setFilterByAuthorizedAccounts(false).build()
+        val option = GetSignInWithGoogleOption.Builder(webClientId).setNonce(nonce).build()
         val request = GetCredentialRequest.Builder().addCredentialOption(option).build()
         val credential = CredentialManager.create(context).getCredential(context, request).credential
         if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL)
             ApiResult.Ok(GoogleIdTokenCredential.createFrom(credential.data).idToken)
         else ApiResult.Http(401)
-    } catch (_: Exception) { ApiResult.Offline }
+    } catch (error: Exception) {
+        if (BuildConfig.DEBUG) {
+            val category = error.javaClass.simpleName
+            val type = (error as? androidx.credentials.exceptions.GetCredentialException)?.type ?: "not_credential_exception"
+            android.util.Log.w("CareerBrainAuth", "credential_failure category=$category type=$type")
+        }
+        ApiResult.Offline
+    }
 }
 
 /** HTTPS-only client. It never accepts tenant/user fields and retries only a request that has an idempotency key. */
