@@ -1,5 +1,42 @@
 # CareerBrain Next — estado da execução
 
+## Marco de homologação ponta a ponta — 24/10/2026
+
+**Comprovado no runtime de homologação e na tela Android; não é certificação
+de produção.** O código está registrado na branch
+`feat/passada-10-integracao` da PR #17. A observação foi realizada com o
+aplicativo CareerBrain Next no POCO X6, após consentimento/login Google e
+envio voluntário de currículo em PDF. O usuário visualizou recomendações
+privadas com títulos de engenharia de redes, SRE e DevOps e
+`EVIDENCED_AFFINITY`, todas explicitamente
+`SYNTHETIC/HOMOLOG` e com URLs `homolog.invalid`.
+
+A consulta operacional **sem conteúdo de currículo, identidades nem segredos**
+ao PostgreSQL dedicado confirmou, para o tenant do currículo mais recente:
+
+- Currículo: job `DONE`, perfil `READY`, 12 atributos explícitos.
+- Catálogo: 141 vagas sintéticas; 141 eventos de republicação de homologação.
+- Correlação privada: 141 jobs `MATCH` em `DONE`, 0 pendentes.
+- Feed privado: **61 recomendações com afinidade e confiança preenchidas**.
+- API, worker e PostgreSQL: containers `healthy` na verificação.
+
+Os commits da PR incluem extrator textual PDF com limites, taxonomia técnica
+de redes/telecom/infraestrutura, matching evidenciado, correções de SQL,
+API/HTTPS e apresentação/estado no cliente Android. O head técnico
+`4203784a599f624a95bc08ad9aefaef436f9c97e` passou aos workflows
+`foundation` e `android-debug` do GitHub.
+
+**Fronteiras do resultado:** as 141 vagas são inteiramente fictícias; não
+representam ofertas existentes e não se destinam a candidaturas. Os registros
+e os artefatos privados permanecem no runtime, fora do GitHub. A coleta real
+da Estácio e a autorização/validação de fontes, a qualificação de dados,
+testes completos de rede móvel, observabilidade, gates restantes e o merge
+protegido da PR #17 **ainda não estão certificados por este marco**.
+A correspondência demonstrada utiliza evidências textuais e regras
+determinísticas de homologação; este checkpoint não afirma a execução de
+dois modelos de IA em produção.
+
+
 ## Atualização de homologação integrada — 23/10/2026
 
 Marco A está comprovado no ambiente local isolado: 141 vagas inteiramente
