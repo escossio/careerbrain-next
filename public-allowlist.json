@@ -567,6 +567,10 @@
       "review_basis": "Configuração pública do cliente HTTP/Google sem IDs, topologia, credenciais ou evidência operacional."
     },
     {
+      "path": "docs/android-release-hub.md",
+      "reason": "Arquitetura pública sanitizada da central compartilhada de releases Android."
+    },
+    {
       "path": "docs/architecture.md",
       "category": "public-documentation",
       "review_basis": "Especificação pública sem inventário ou histórico operacional privado."
