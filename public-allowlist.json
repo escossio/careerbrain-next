@@ -719,6 +719,10 @@
       "reason": "Passadas 07–08: corte temporal, incerteza, fencing, sync multi-dispositivo, CAS e exclusão com fixtures sintéticas."
     },
     {
+      "path": "tests/integration/pdf_reader_cases.py",
+      "reason": "Testes isolados de extração de PDF sintético; exigem runtime de processamento e não fazem parte da suíte de contratos sem dependências."
+    },
+    {
       "path": "tests/integration/resume_cases.py",
       "reason": "Passada 06 autorizada: testes de currículo sintético e isolamento de perfil."
     },
@@ -731,10 +735,6 @@
       "path": "tests/test_contracts.py",
       "category": "offline-tooling",
       "review_basis": "Validação local e casos adversariais sintéticos."
-    },
-    {
-      "path": "tests/test_pdf_reader.py",
-      "reason": "Testes de PDF sintético e limites do extrator local, sem dados pessoais ou credenciais."
     },
     {
       "path": "tests/test_publication.py",
